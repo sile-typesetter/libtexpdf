@@ -31,9 +31,9 @@
 
 #include "dpxfile.h"
 /* pdfdev... */
-#include "pdfdev.h"
 
-#include "tfm.h"
+#include "libtexpdf/libtexpdf.h"
+
 #include "dvi.h"
 #include "vf.h"
 #include "dvipdfmx.h"

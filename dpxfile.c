@@ -34,11 +34,10 @@
 #include "error.h"
 #include "mem.h"
 
-#include "dpxutil.h"
 #include "mfileio.h"
 
-#include "dpxfile.h"
-#include "dpxcrypt.h"
+#include "libtexpdf/libtexpdf.h"
+
 #define MAX_KEY_LEN 16
 
 #include <kpathsea/lib.h>

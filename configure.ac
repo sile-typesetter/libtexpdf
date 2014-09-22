@@ -8,7 +8,7 @@ dnl   with or without modifications, as long as this notice is preserved.
 dnl
 AC_INIT([dvipdfm-x (TeX Live)], [20140317], [tex-k@tug.org])
 AC_PREREQ([2.65])
-AC_CONFIG_SRCDIR([agl.c])
+AC_CONFIG_SRCDIR([dvi.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -95,6 +95,6 @@ AM_CONDITIONAL([XDVIPDFMX], [test "x$enable_xdvipdfmx" != xno])
 
 KPSE_WIN32_CALL
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile libtexpdf/Makefile])
 
 AC_OUTPUT

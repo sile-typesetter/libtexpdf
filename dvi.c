@@ -42,17 +42,9 @@
 #include "mfileio.h"
 #include "numbers.h"
 
-#include "pdfdev.h"
-#include "pdfdoc.h"
-#include "pdfparse.h"
-#include "pdfencrypt.h"
-
-#include "fontmap.h"
-
+#include "libtexpdf/libtexpdf.h"
 #include "dvicodes.h"
-#include "tfm.h"
 #include "vf.h"
-#include "subfont.h"
 
 #include "spc_util.h"
 #include "specials.h"
@@ -61,7 +53,6 @@
 #include "dvipdfmx.h"
 
 #ifdef XETEX
-#include "pdfximage.h"
 #include FT_ADVANCES_H
 #endif
 
@@ -1923,7 +1914,6 @@ dvi_vf_finish (void)
 
 
 /* Scan various specials */
-#include "dpxutil.h"
 
 /* This need to allow 'true' prefix for unit and
  * length value must be divided by current magnification.

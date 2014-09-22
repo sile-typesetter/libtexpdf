@@ -27,13 +27,8 @@
 #include "system.h"
 #include "mem.h"
 #include "error.h"
-#include "dpxutil.h"
 
-#include "pdfdraw.h"
-#include "pdfdev.h"
-#include "pdfximage.h"
-
-#include "pdfdoc.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 #include "spc_util.h"

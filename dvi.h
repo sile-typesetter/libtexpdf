@@ -26,7 +26,7 @@
 #include "error.h"
 #include "numbers.h"
 /* spt_t */
-#include "pdfdev.h"
+#include "libtexpdf/libtexpdf.h"
 
 /* instantiated in dvipdfmx.c */
 extern double paper_width, paper_height;

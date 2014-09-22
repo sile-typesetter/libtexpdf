@@ -29,12 +29,7 @@
 #include "error.h"
 
 #include "numbers.h"
-#include "dpxutil.h"
-
-#include "pdfdoc.h"
-
-#include "pdfdraw.h"
-#include "pdfdev.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 #include "spc_tpic.h"
@@ -844,7 +839,6 @@ spc_tpic_at_end_document (void)
 
 
 #if  DEBUG
-#include "pdfparse.h" /* parse_val_ident :( */
 
 static pdf_obj *
 spc_parse_kvpairs (struct spc_arg *ap)

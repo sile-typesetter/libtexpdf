@@ -35,16 +35,7 @@
 #include "dvi.h"
 #include "dvicodes.h"
 
-#include "pdfparse.h"
-
-#include "pdfdoc.h"
-
-#include "mpost.h"
-
-#include "pdfximage.h"
-#include "pdfdraw.h"
-#include "pdfcolor.h"
-#include "pdfdev.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 #include "spc_util.h"
@@ -52,7 +43,6 @@
 
 #include "mfileio.h"
 #include "spc_xtx.h"
-#include "epdf.h"
 
 static int    block_pending = 0;
 static double pending_x     = 0.0;

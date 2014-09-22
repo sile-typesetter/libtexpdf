@@ -23,8 +23,7 @@
 #ifndef _SPC_UTIL_H_
 #define _SPC_UTIL_H_
 
-#include "pdfcolor.h"
-#include "pdfdev.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 

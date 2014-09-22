@@ -29,17 +29,9 @@
 #include "mem.h"
 #include "error.h"
 #include "mfileio.h"
-#include "pdfobj.h"
-#include "pdfdoc.h"
-#include "pdfparse.h"
-
-#include "bmpimage.h"
-#include "jpegimage.h"
-#include "jp2image.h"
-#include "pngimage.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "dvipdfmx.h"
-#include "pdflimits.h"
 
 #define XBB_PROGRAM "extractbb"
 

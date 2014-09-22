@@ -33,19 +33,7 @@
 
 #include "numbers.h"
 
-#include "fontmap.h"
-#include "dpxfile.h"
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-#include "pdfparse.h"
-
-#include "pdfdoc.h"
-
-#include "pdfximage.h"
-#include "pdfdraw.h"
-#include "pdfcolor.h"
-#include "pdfdev.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 
@@ -364,7 +352,6 @@ spc_handler_pdfm_put (struct spc_env *spe, struct spc_arg *ap)
  * This feature is provided for convenience. TeX can't do
  * input encoding conversion.
  */
-#include "cmap.h"
 
 static int
 reencodestring (CMap *cmap, pdf_obj *instring)

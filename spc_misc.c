@@ -32,15 +32,7 @@
 
 #include "mfileio.h"
 
-#include "pdfparse.h"
-#include "pdfobj.h"
-
-#include "pdfcolor.h"
-#include "pdfdraw.h"
-#include "pdfximage.h"
-#include "pdfdev.h"
-
-#include "mpost.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 

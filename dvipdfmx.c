@@ -36,30 +36,16 @@
 #include "system.h"
 #include "mem.h"
 
-#include "dpxconf.h"
+#include "libtexpdf/libtexpdf.h"
 #include "dpxfile.h"
-#include "dpxutil.h"
 
 #include "dvi.h"
-
-#include "pdflimits.h"
-#include "pdfdoc.h"
-#include "pdfdev.h"
-#include "pdfparse.h"
-#include "pdfencrypt.h"
 
 #include "spc_tpic.h"
 #include "specials.h"
 
-#include "mpost.h"
-
-#include "fontmap.h"
-#include "pdffont.h"
-#include "pdfximage.h"
-#include "cid.h"
-
 #include "dvipdfmx.h"
-#include "tt_aux.h"
+#include <paper.h>
 
 #include "error.h"
 

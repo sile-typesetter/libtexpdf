@@ -27,10 +27,7 @@
 #include "system.h"
 #include "mem.h"
 #include "error.h"
-#include "dpxutil.h"
-
-#include "pdfdev.h"
-#include "pdfcolor.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 
@@ -87,7 +84,6 @@ spc_handler_color_default (struct spc_env *spe, struct spc_arg *args)
 
 
 /* This is from color special? */
-#include "pdfdoc.h"
 
 static int
 spc_handler_background (struct spc_env *spe, struct spc_arg *args)

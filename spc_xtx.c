@@ -40,18 +40,8 @@
 #include "mfileio.h"
 
 #include "numbers.h"
-
-#include "fontmap.h"
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-#include "pdfparse.h"
-
-#include "pdfdoc.h"
-
-#include "pdfdraw.h"
-#include "pdfcolor.h"
-#include "pdfdev.h"
+    
+#include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
 

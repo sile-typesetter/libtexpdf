@@ -32,14 +32,7 @@
 #include "numbers.h"
 
 #include "dvi.h"
-
-#include "pdfobj.h"
-#include "pdfparse.h"
-#include "pdfdoc.h"
-#include "pdfnames.h"
-
-#include "pdfdraw.h"
-#include "pdfdev.h"
+#include "libtexpdf/libtexpdf.h"
 
 #include "spc_pdfm.h"
 #include "spc_tpic.h"

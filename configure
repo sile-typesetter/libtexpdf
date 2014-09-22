@@ -595,7 +595,7 @@ PACKAGE_STRING='dvipdfm-x (TeX Live) 20140317'
 PACKAGE_BUGREPORT='tex-k@tug.org'
 PACKAGE_URL=''
 
-ac_unique_file="agl.c"
+ac_unique_file="dvi.c"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -14151,7 +14151,7 @@ if test "x$with_libpaper_libdir" != x && test "x$with_libpaper_libdir" != xyes; 
 fi
 
 
-$as_echo "#define HAVE_LIBPAPER 0" >>confdefs.h
+$as_echo "#define HAVE_LIBPAPER 1" >>confdefs.h
 
 
 kpse_save_CPPFLAGS=$CPPFLAGS
@@ -14321,7 +14321,7 @@ if test -z "$WIN32_TRUE"; then :
 fi
 
 
-ac_config_files="$ac_config_files Makefile"
+ac_config_files="$ac_config_files Makefile libtexpdf/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -15358,6 +15358,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "callexe.c") CONFIG_LINKS="$CONFIG_LINKS callexe.c:w32_wrapper/callexe.c" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "libtexpdf/Makefile") CONFIG_FILES="$CONFIG_FILES libtexpdf/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
