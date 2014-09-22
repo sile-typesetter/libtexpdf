@@ -195,7 +195,7 @@ endif DVIPDFMX
 call_dvipdfmx_CPPFLAGS = -DEXEPROG=\"dvipdfmx.exe\"
 nodist_call_dvipdfmx_SOURCES = callexe.c
 
-include $(top_srcdir)/../../am/bin_links.am
+include $(top_srcdir)/am/bin_links.am
 
 ## Manpages
 
@@ -213,7 +213,7 @@ if XDVIPDFMX
 man1_links += dvipdfmx:xdvipdfmx
 endif XDVIPDFMX
 
-include $(top_srcdir)/../../am/man1_links.am
+include $(top_srcdir)/am/man1_links.am
 
 ## Data
 ##
