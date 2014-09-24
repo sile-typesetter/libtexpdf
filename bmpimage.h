@@ -44,7 +44,8 @@ extern int texpdf_check_for_bmp     (FILE *file);
 * Retrieve the bounding box of the BMP file.
 * Examines the file pointer for the size and density of the BMP file.
 */
-extern int texpdf_bmp_get_bbox      (FILE *file, long *width, long *height,
+extern int texpdf_bmp_get_bbox      (FILE *file, int *width, int *height,
+extern int bmp_get_bbox      (FILE *file, int *width, int *height,
                               double *xdensity, double *ydensity);
 
 #endif /* _BMPIMAGE_H_ */
