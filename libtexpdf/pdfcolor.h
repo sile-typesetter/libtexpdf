@@ -24,6 +24,7 @@
 #define _PDF_COLOR_H_
 
 #include "pdfobj.h"
+#include "pdftypes.h"
 
 #define PDF_COLORSPACE_TYPE_DEVICECMYK -4
 #define PDF_COLORSPACE_TYPE_DEVICERGB  -3
@@ -38,14 +39,7 @@
 #define PDF_COLORSPACE_TYPE_RGB   PDF_COLORSPACE_TYPE_DEVICERGB
 #define PDF_COLORSPACE_TYPE_GRAY  PDF_COLORSPACE_TYPE_DEVICEGRAY
 
-
-#define PDF_COLOR_COMPONENT_MAX 4
-
-typedef struct
-{
-  int    num_components;
-  double values[PDF_COLOR_COMPONENT_MAX];
-} pdf_color;
+#include "pdfdoc.h"
 
 extern void       pdf_color_set_verbose   (void);
 
@@ -93,10 +87,10 @@ extern int      pdf_colorspace_load_ICCBased      (const char *ident,
 /* Color special
  * See remark in spc_color.c.
  */
-extern void     pdf_color_set   (pdf_color *sc, pdf_color *fc);
+extern void     pdf_color_set   (pdf_doc *p, pdf_color *sc, pdf_color *fc);
 extern void     pdf_color_set_default (const pdf_color *color);
-extern void     pdf_color_push  (pdf_color *sc, pdf_color *fc);
-extern void     pdf_color_pop   (void);
+extern void     pdf_color_push  (pdf_doc *p, pdf_color *sc, pdf_color *fc);
+extern void     pdf_color_pop   (pdf_doc *p);
 
 /* Color stack
  */

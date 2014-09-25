@@ -509,7 +509,7 @@ static int num_phys_fonts  = 0;
 
 
 static void
-dev_set_text_matrix (spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
+dev_set_text_matrix (pdf_doc *p, spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
 {
   pdf_tmatrix tm;
   int         len = 0;
@@ -557,7 +557,7 @@ dev_set_text_matrix (spt_t xpos, spt_t ypos, double slant, double extend, int ro
   format_buffer[len++] = 'T';
   format_buffer[len++] = 'm';
 
-  pdf_doc_add_page_content(format_buffer, len);  /* op: Tm */
+  texpdf_doc_add_page_content(p, format_buffer, len);  /* op: Tm */
 
   text_state.ref_x = xpos;
   text_state.ref_y = ypos;
@@ -572,12 +572,12 @@ dev_set_text_matrix (spt_t xpos, spt_t ypos, double slant, double extend, int ro
  */
 
 static void
-reset_text_state (void)
+reset_text_state (pdf_doc *p)
 {
   /*
    * We need to reset the line matrix to handle slanted fonts.
    */
-  pdf_doc_add_page_content(" BT", 3);  /* op: BT */
+  texpdf_doc_add_page_content(p, " BT", 3);  /* op: BT */
   /*
    * text_state.matrix is identity at top of page.
    * This sometimes write unnecessary "Tm"s when transition from
@@ -587,7 +587,7 @@ reset_text_state (void)
       text_state.matrix.slant  != 0.0 ||
       text_state.matrix.extend != 1.0 ||
       ROTATE_TEXT(text_state.matrix.rotate)) {
-    dev_set_text_matrix(0, 0,
+    dev_set_text_matrix(p, 0, 0,
                         text_state.matrix.slant,
                         text_state.matrix.extend,
                         text_state.matrix.rotate);
@@ -599,16 +599,16 @@ reset_text_state (void)
 }
 
 static void
-text_mode (void)
+text_mode (pdf_doc *p)
 {
   switch (motion_state) {
   case TEXT_MODE:
     break;
   case STRING_MODE:
-    pdf_doc_add_page_content(text_state.is_mb ? ">]TJ" : ")]TJ", 4);  /* op: TJ */
+    texpdf_doc_add_page_content(p, text_state.is_mb ? ">]TJ" : ")]TJ", 4);  /* op: TJ */
     break;
   case GRAPHICS_MODE:
-    reset_text_state();
+    reset_text_state(p);
     break;
   }
   motion_state      = TEXT_MODE;
@@ -616,16 +616,16 @@ text_mode (void)
 }
 
 void
-graphics_mode (void)
+graphics_mode (pdf_doc *p)
 {
   switch (motion_state) {
   case GRAPHICS_MODE:
     break;
   case STRING_MODE:
-    pdf_doc_add_page_content(text_state.is_mb ? ">]TJ" : ")]TJ", 4);  /* op: TJ */
+    texpdf_doc_add_page_content(p, text_state.is_mb ? ">]TJ" : ")]TJ", 4);  /* op: TJ */
     /* continue */
   case TEXT_MODE:
-    pdf_doc_add_page_content(" ET", 3);  /* op: ET */
+    texpdf_doc_add_page_content(p, " ET", 3);  /* op: ET */
     text_state.force_reset =  0;
     text_state.font_id     = -1;
     break;
@@ -634,7 +634,7 @@ graphics_mode (void)
 }
 
 static void
-start_string (spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
+start_string (pdf_doc *p, spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
 {
   spt_t delx, dely, error_delx, error_dely;
   spt_t desired_delx, desired_dely;
@@ -785,12 +785,12 @@ start_string (spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
     error_dely = -error_dely;
     break;
   }
-  pdf_doc_add_page_content(format_buffer, len);  /* op: */
+  texpdf_doc_add_page_content(p, format_buffer, len);  /* op: */
   /*
    * dvipdfm wrongly using "TD" in place of "Td".
    * The TD operator set leading, but we are not using T* etc.
    */
-  pdf_doc_add_page_content(text_state.is_mb ? " Td[<" : " Td[(", 5);  /* op: Td */
+  texpdf_doc_add_page_content(p, text_state.is_mb ? " Td[<" : " Td[(", 5);  /* op: Td */
 
   /* Error correction */
   text_state.ref_x = xpos - error_delx;
@@ -800,21 +800,21 @@ start_string (spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
 }
 
 static void
-string_mode (spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
+string_mode (pdf_doc *p, spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
 {
   switch (motion_state) {
   case STRING_MODE:
     break;
   case GRAPHICS_MODE:
-    reset_text_state();
+    reset_text_state(p);
     /* continue */
   case TEXT_MODE:
     if (text_state.force_reset) {
-      dev_set_text_matrix(xpos, ypos, slant, extend, rotate);
-      pdf_doc_add_page_content(text_state.is_mb ? "[<" : "[(", 2);  /* op: */
+      dev_set_text_matrix(p, xpos, ypos, slant, extend, rotate);
+      texpdf_doc_add_page_content(p, text_state.is_mb ? "[<" : "[(", 2);  /* op: */
       text_state.force_reset = 0;
     } else {
-      start_string(xpos, ypos, slant, extend, rotate);
+      start_string(p, xpos, ypos, slant, extend, rotate);
     }
     break;
   }
@@ -834,7 +834,7 @@ string_mode (spt_t xpos, spt_t ypos, double slant, double extend, int rotate)
  */
 
 static int
-dev_set_font (int font_id)
+dev_set_font (pdf_doc *doc, int font_id)
 {
   struct dev_font *font;
   struct dev_font *real_font;
@@ -844,7 +844,7 @@ dev_set_font (int font_id)
   int    vert_dir, vert_font;
 
   /* text_mode() must come before text_state.is_mb is changed. */
-  text_mode();
+  text_mode(doc);
 
   font = GET_FONT(font_id);
   ASSERT(font); /* Caller should check font_id. */
@@ -879,7 +879,7 @@ dev_set_font (int font_id)
   }
 
   if (!real_font->used_on_this_page) { 
-    pdf_doc_add_page_resource("Font",
+    texpdf_doc_add_page_resource(doc, "Font",
                               real_font->short_name,
                               pdf_link_obj(real_font->resource));
     real_font->used_on_this_page = 1;
@@ -892,14 +892,14 @@ dev_set_font (int font_id)
   format_buffer[len++] = ' ';
   format_buffer[len++] = 'T';
   format_buffer[len++] = 'f';
-  pdf_doc_add_page_content(format_buffer, len);  /* op: Tf */
+  texpdf_doc_add_page_content(doc, format_buffer, len);  /* op: Tf */
 
   if (font->bold > 0.0 || font->bold != text_state.bold_param) {
     if (font->bold <= 0.0)
       len = sprintf(format_buffer, " 0 Tr");
     else
       len = sprintf(format_buffer, " 2 Tr %.6f w", font->bold); /* _FIXME_ */
-    pdf_doc_add_page_content(format_buffer, len);  /* op: Tr w */
+    texpdf_doc_add_page_content(doc, format_buffer, len);  /* op: Tr w */
   }
   text_state.bold_param = font->bold;
 
@@ -1116,7 +1116,7 @@ void pdf_dev_pop_coord(void)
  * selectfont(font_name, point_size) and show_string(pos, string)
  */
 void
-pdf_dev_set_string (spt_t xpos, spt_t ypos,
+pdf_dev_set_string (pdf_doc *p, spt_t xpos, spt_t ypos,
                     const void *instr_ptr, int instr_len,
                     spt_t width,
                     int   font_id, int ctype)
@@ -1134,7 +1134,7 @@ pdf_dev_set_string (spt_t xpos, spt_t ypos,
     return;
   }
   if (font_id != text_state.font_id) {
-    dev_set_font(font_id);
+    dev_set_font(p, font_id);
   }
 
   font = CURRENTFONT();
@@ -1219,7 +1219,7 @@ pdf_dev_set_string (spt_t xpos, spt_t ypos,
   if (text_state.force_reset ||
       labs(delv) > dev_unit.min_bp_val ||
       labs(delh) > WORD_SPACE_MAX(font)) {
-    text_mode();
+    text_mode(p);
     kern = 0;
   } else {
     kern = (spt_t) (1000.0 / font->extend * delh / font->sptsize);
@@ -1230,7 +1230,7 @@ pdf_dev_set_string (spt_t xpos, spt_t ypos,
    * If you really care about accuracy, you should compensate this here too.
    */
   if (motion_state != STRING_MODE)
-    string_mode(xpos, ypos,
+    string_mode(p, xpos, ypos,
                 font->slant, font->extend, text_state.matrix.rotate);
   else if (kern != 0) {
     /*
@@ -1246,7 +1246,7 @@ pdf_dev_set_string (spt_t xpos, spt_t ypos,
       len += p_itoa( kern, format_buffer + len);
     }
     format_buffer[len++] = text_state.is_mb ? '<' : '(';
-    pdf_doc_add_page_content(format_buffer, len);  /* op: */
+    texpdf_doc_add_page_content(p, format_buffer, len);  /* op: */
     len = 0;
   }
 
@@ -1266,13 +1266,13 @@ pdf_dev_set_string (spt_t xpos, spt_t ypos,
                              FORMAT_BUF_SIZE - len, str_ptr, length);
   }
   /* I think if you really care about speed, you should avoid memcopy here. */
-  pdf_doc_add_page_content(format_buffer, len);  /* op: */
+  texpdf_doc_add_page_content(p, format_buffer, len);  /* op: */
 
   text_state.offset += width;
 }
 
 void
-pdf_init_device (double dvi2pts, int precision, int black_and_white)
+pdf_init_device (pdf_doc *p, double dvi2pts, int precision, int black_and_white)
 {
   if (precision < 0 ||
       precision > DEV_PRECISION_MAX)
@@ -1293,7 +1293,7 @@ pdf_init_device (double dvi2pts, int precision, int black_and_white)
 
   dev_param.colormode = (black_and_white ? 0 : 1);
 
-  graphics_mode();
+  graphics_mode(p);
   pdf_color_clear_stack();
   pdf_dev_init_gstates();
 
@@ -1350,13 +1350,13 @@ pdf_dev_reset_fonts (void)
 }
 
 void
-pdf_dev_reset_color (int force)
+pdf_dev_reset_color (pdf_doc *p, int force)
 {
   pdf_color *sc, *fc;
 
   pdf_color_get_current(&sc, &fc);
-  pdf_dev_set_color(sc,    0, force);
-  pdf_dev_set_color(fc, 0x20, force);
+  pdf_dev_set_color(p, sc,    0, force);
+  pdf_dev_set_color(p, fc, 0x20, force);
 }
 
 #if 0
@@ -1377,32 +1377,32 @@ pdf_dev_set_origin (double phys_x, double phys_y)
 #endif
 
 void
-pdf_dev_bop (const pdf_tmatrix *M)
+pdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M)
 {
-  graphics_mode();
+  graphics_mode(p);
 
   text_state.force_reset  = 0;
 
-  pdf_dev_gsave();
-  pdf_dev_concat(M);
+  pdf_dev_gsave(p);
+  pdf_dev_concat(p, M);
 
   pdf_dev_reset_fonts();
-  pdf_dev_reset_color(0);
+  pdf_dev_reset_color(p, 0);
 }
 
 void
-pdf_dev_eop (void)
+pdf_dev_eop (pdf_doc *p)
 {
   int  depth;
 
-  graphics_mode();
+  graphics_mode(p);
 
   depth = pdf_dev_current_depth();
   if (depth != 1) {
     WARN("Unbalenced q/Q nesting...: %d", depth);
-    pdf_dev_grestore_to(0);
+    pdf_dev_grestore_to(p, 0);
   } else {
-    pdf_dev_grestore();
+    pdf_dev_grestore(p);
   }
 }
 
@@ -1607,7 +1607,7 @@ dev_sprint_line (char *buf, spt_t width,
 /* Not optimized. */
 #define PDF_LINE_THICKNESS_MAX 5.0
 void
-pdf_dev_set_rule (spt_t xpos, spt_t ypos, spt_t width, spt_t height)
+pdf_dev_set_rule (pdf_doc *p, spt_t xpos, spt_t ypos, spt_t width, spt_t height)
 {
   int    len = 0;
   double width_in_bp;
@@ -1617,7 +1617,7 @@ pdf_dev_set_rule (spt_t xpos, spt_t ypos, spt_t width, spt_t height)
     ypos -= bpt2spt(dev_coords[num_dev_coords-1].y);
   }
 
-  graphics_mode();
+  graphics_mode(p);
 
   format_buffer[len++] = ' ';
   format_buffer[len++] = 'q';
@@ -1670,7 +1670,7 @@ pdf_dev_set_rule (spt_t xpos, spt_t ypos, spt_t width, spt_t height)
   }
   format_buffer[len++] = ' ';
   format_buffer[len++] = 'Q';
-  pdf_doc_add_page_content(format_buffer, len);  /* op: q re f Q */
+  texpdf_doc_add_page_content(p, format_buffer, len);  /* op: q re f Q */
 }
 
 /* Rectangle in device space coordinate. */
@@ -1827,7 +1827,8 @@ pdf_dev_set_param (int param_type, int value)
 
 
 int
-pdf_dev_put_image (int             id,
+pdf_dev_put_image (pdf_doc *doc,
+                   int             id,
                    transform_info *p,
                    double          ref_x,
                    double          ref_y)
@@ -1852,12 +1853,12 @@ pdf_dev_put_image (int             id,
     tmp = -M.c; M.c = M.d; M.d = tmp;
   }
 
-  graphics_mode();
-  pdf_dev_gsave();
+  graphics_mode(doc);
+  pdf_dev_gsave(doc);
 
   pdf_ximage_scale_image(id, &M1, &r, p);
   pdf_concatmatrix(&M, &M1);
-  pdf_dev_concat(&M);
+  pdf_dev_concat(doc, &M);
 
   /* Clip */
   if (p->flags & INFO_DO_CLIP) {
@@ -1871,17 +1872,17 @@ pdf_dev_put_image (int             id,
     pdf_dev_clip();
     pdf_dev_newpath();
 #else
-    pdf_dev_rectclip(r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
+    pdf_dev_rectclip(doc, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
 #endif
   }
 
   res_name = pdf_ximage_get_resname(id);
   len = sprintf(work_buffer, " /%s Do", res_name);
-  pdf_doc_add_page_content(work_buffer, len);  /* op: Do */
+  texpdf_doc_add_page_content(doc, work_buffer, len);  /* op: Do */
 
-  pdf_dev_grestore();
+  pdf_dev_grestore(doc);
 
-  pdf_doc_add_page_resource("XObject",
+  texpdf_doc_add_page_resource(doc, "XObject",
                             res_name,
                             pdf_ximage_get_reference(id));
 
@@ -1924,7 +1925,7 @@ pdf_dev_put_image (int             id,
 	rect.ury = corner[i].y;
     }
 
-    pdf_doc_expand_box(&rect);
+    texpdf_doc_expand_box(doc, &rect);
   }
 #endif
 

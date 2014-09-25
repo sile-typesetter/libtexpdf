@@ -20,21 +20,16 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifndef _EPDF_H_
-#define _EPDF_H_
+#ifndef _MEM_H_
+#define _MEM_H_
 
-#include "mfileio.h"
-#include "pdfximage.h"
+#include <stdlib.h>
 
-#define pdfbox_crop  1
-#define pdfbox_media 2
-#define pdfbox_bleed 3
-#define pdfbox_trim  4
-#define pdfbox_art   5
+extern void *new (size_t size);
+extern void *renew (void *p, size_t size);
 
-extern int pdf_copy_clip (pdf_doc *p, FILE *image_file, int page_index, double x_user, double y_user);
+#define NEW(n,type)     (type *) new(((size_t)(n))*sizeof(type))
+#define RENEW(p,n,type) (type *) renew(p,(n)*sizeof(type))
+#define RELEASE(p)      free(p)
 
-extern int pdf_include_page (pdf_ximage *ximage, FILE *file,
-			     const char *filename);
-
-#endif /* _EPDF_H_ */
+#endif /* _MEM_H_ */

@@ -60,7 +60,7 @@ extern char    *pdf_ximage_get_resname    (int xobj_id);
 extern pdf_obj *pdf_ximage_get_reference  (int xobj_id);
 
 
-extern int      pdf_ximage_findresource   (const char *ident, long page_no,
+extern int      pdf_ximage_findresource   (pdf_doc *p, const char *ident, long page_no,
                                            pdf_obj *dict);
 extern int      pdf_ximage_defineresource (const char *ident, int subtype,
                                            void *cdata, pdf_obj *resource);

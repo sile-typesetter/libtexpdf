@@ -416,7 +416,7 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
   if (page_no == 0)
     page_no = 1;
 
-  page = pdf_doc_get_page(pf, page_no, NULL, &info.bbox, &resources);
+  page = texpdf_doc_get_page(pf, page_no, NULL, &info.bbox, &resources);
   if(!page)
     goto error_silent;
 
@@ -621,7 +621,7 @@ static struct operator
 
 
 int
-pdf_copy_clip (FILE *image_file, int pageNo, double x_user, double y_user)
+pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y_user)
 {
   pdf_obj *page_tree, *contents;
   int depth = 0, top = -1;
@@ -651,7 +651,7 @@ pdf_copy_clip (FILE *image_file, int pageNo, double x_user, double y_user)
     return -1;
   }
 
-  pdf_doc_add_page_content(" ", 1);
+  texpdf_doc_add_page_content(p, " ", 1);
 
   save_path = malloc(pdf_stream_length(contents) + 1);
   strncpy(save_path, (const char *) pdf_stream_dataptr(contents),  pdf_stream_length(contents));
@@ -743,7 +743,7 @@ pdf_copy_clip (FILE *image_file, int pageNo, double x_user, double y_user)
 #if 0
 	  pdf_dev_clip();
 #else
-	  pdf_dev_flushpath('W', PDF_FILL_RULE_NONZERO);
+	  pdf_dev_flushpath(p, 'W', PDF_FILL_RULE_NONZERO);
 #endif
 	  break;
 	case OP_CONCATMATRIX:
@@ -773,7 +773,7 @@ pdf_copy_clip (FILE *image_file, int pageNo, double x_user, double y_user)
 	    M0.e = 0; M0.f = 0;
 	    pdf_dev_transform(&p0, &M);
 	    pdf_dev_transform(&p1, &M0);
-	    pdf_dev_rectadd(p0.x, p0.y, p1.x, p1.y);
+	    pdf_dev_rectadd(p, p0.x, p0.y, p1.x, p1.y);
 	  } else {
 	    p2.x = p0.x + p1.x; p2.y = p0.y + p1.y;
 	    p3.x = p0.x; p3.y = p0.y + p1.y;
@@ -823,7 +823,7 @@ pdf_copy_clip (FILE *image_file, int pageNo, double x_user, double y_user)
 	  pdf_dev_moveto(p0.x, p0.y);
 	  break;
 	case OP_NOOP:
-	  pdf_doc_add_page_content(" n", 2);
+	  texpdf_doc_add_page_content(p, " n", 2);
 	  break;
 	case OP_GSAVE:
 	  depth++;

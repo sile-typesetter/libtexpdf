@@ -348,12 +348,12 @@ load_image (const char *ident, const char *fullname, int format, FILE  *fp,
 }
 
 
-#define dpx_find_file(n,d,s) (kpse_find_pict((n)))
+#define dpx_find_file(n,d,s) (char*)n /* De-kpathsea */
 #define dpx_fopen(n,m) (MFOPEN((n),(m)))
 #define dpx_fclose(f)  (MFCLOSE((f)))
 
 int
-pdf_ximage_findresource (const char *ident, long page_no, pdf_obj *dict)
+pdf_ximage_findresource (pdf_doc *p, const char *ident, long page_no, pdf_obj *dict)
 {
   struct ic_ *ic = &_ic;
   int         id = -1;
@@ -403,7 +403,7 @@ pdf_ximage_findresource (const char *ident, long page_no, pdf_obj *dict)
   case IMAGE_TYPE_MPS:
     if (_opts.verbose)
       MESG("[MPS]");
-    id = mps_include_page(ident, fp);
+    id = mps_include_page(p,  ident, fp);
     if (id < 0) {
       WARN("Try again with the distiller.");
       format = IMAGE_TYPE_EPS;

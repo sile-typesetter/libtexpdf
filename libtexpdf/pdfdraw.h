@@ -62,11 +62,11 @@ typedef struct pdf_path_ pdf_path;
 extern int    pdf_dev_currentmatrix (pdf_tmatrix *M);
 extern int    pdf_dev_currentpoint  (pdf_coord *cp);
 
-extern int    pdf_dev_setlinewidth  (double  width);
-extern int    pdf_dev_setmiterlimit (double  mlimit);
-extern int    pdf_dev_setlinecap    (int     style);
-extern int    pdf_dev_setlinejoin   (int     style);
-extern int    pdf_dev_setdash       (int     count,
+extern int    pdf_dev_setlinewidth  (pdf_doc *p, double  width);
+extern int    pdf_dev_setmiterlimit (pdf_doc *p, double  mlimit);
+extern int    pdf_dev_setlinecap    (pdf_doc *p, int     style);
+extern int    pdf_dev_setlinejoin   (pdf_doc *p, int     style);
+extern int    pdf_dev_setdash       (pdf_doc *p, int     count,
                                      double *pattern,
                                      double  offset);
 #if 0
@@ -98,11 +98,11 @@ extern int    pdf_dev_arcn          (double c_x, double c_y, double r,
 #define PDF_FILL_RULE_NONZERO 0
 #define PDF_FILL_RULE_EVENODD 1
 
-extern int    pdf_dev_newpath       (void);
+extern int    pdf_dev_newpath       (pdf_doc *doc);
 
 /* Path Painting */
-extern int    pdf_dev_clip          (void);
-extern int    pdf_dev_eoclip        (void);
+extern int    pdf_dev_clip          (pdf_doc *p);
+extern int    pdf_dev_eoclip        (pdf_doc *p);
 
 #if 0
 extern int    pdf_dev_rectstroke    (double x, double y,
@@ -111,18 +111,18 @@ extern int    pdf_dev_rectstroke    (double x, double y,
                                     );
 #endif
 
-extern int    pdf_dev_rectfill      (double x, double y, double w, double h);
-extern int    pdf_dev_rectclip      (double x, double y, double w, double h);
-extern int    pdf_dev_rectadd       (double x, double y, double w, double h);
+extern int    pdf_dev_rectfill      (pdf_doc *p, double x, double y, double w, double h);
+extern int    pdf_dev_rectclip      (pdf_doc *p, double x, double y, double w, double h);
+extern int    pdf_dev_rectadd       (pdf_doc *p, double x, double y, double w, double h);
  
-extern int    pdf_dev_flushpath     (char p_op, int fill_rule);
+extern int    pdf_dev_flushpath     (pdf_doc *p, char p_op, int fill_rule);
 
-#define pdf_dev_fill()       pdf_dev_flushpath('f', PDF_FILL_RULE_NONZERO)
-#define pdf_dev_eofill()     pdf_dev_flushpath('f', PDF_FILL_RULE_EVENODD)
-#define pdf_dev_stroke()     pdf_dev_flushpath('S', PDF_FILL_RULE_NONZERO)
-#define pdf_dev_fillstroke() pdf_dev_flushpath('B', PDF_FILL_RULE_NONZERO)
+#define pdf_dev_fill(p)       pdf_dev_flushpath(p, 'f', PDF_FILL_RULE_NONZERO)
+#define pdf_dev_eofill(p)     pdf_dev_flushpath(p, 'f', PDF_FILL_RULE_EVENODD)
+#define pdf_dev_stroke(p)     pdf_dev_flushpath(p, 'S', PDF_FILL_RULE_NONZERO)
+#define pdf_dev_fillstroke(p) pdf_dev_flushpath(p, 'B', PDF_FILL_RULE_NONZERO)
 
-extern int    pdf_dev_concat        (const pdf_tmatrix *M);
+extern int    pdf_dev_concat        (pdf_doc *p, const pdf_tmatrix *M);
 /* NULL pointer of M mean apply current transformation */
 extern void   pdf_dev_dtransform    (pdf_coord *p, const pdf_tmatrix *M);
 extern void   pdf_dev_idtransform   (pdf_coord *p, const pdf_tmatrix *M);
@@ -131,8 +131,8 @@ extern void   pdf_dev_transform     (pdf_coord *p, const pdf_tmatrix *M);
 extern void   pdf_dev_itransform    (pdf_coord *p, const pdf_tmatrix *M);
 #endif
 
-extern int    pdf_dev_gsave         (void);
-extern int    pdf_dev_grestore      (void);
+extern int    pdf_dev_gsave         (pdf_doc *p);
+extern int    pdf_dev_grestore      (pdf_doc *p);
 
 /* Requires from mpost.c because new MetaPost graphics must initialize
  * the current gstate. */
@@ -159,7 +159,7 @@ extern void   pdf_invertmatrix      (pdf_tmatrix *M);
  * and must recover until that depth at the end of page/xform.
  */
 extern int    pdf_dev_current_depth (void);
-extern void   pdf_dev_grestore_to   (int depth);
+extern void   pdf_dev_grestore_to   (pdf_doc *p, int depth);
 #define pdf_dev_grestoreall() pdf_dev_grestore_to(0);
 
 #if 0
@@ -169,8 +169,8 @@ extern int    pdf_dev_currentcolor  (pdf_color *color, int is_fill);
 extern void pdf_dev_set_fixed_point (double x, double y);
 extern void pdf_dev_get_fixed_point (pdf_coord *p);
 
-extern void   pdf_dev_set_color     (const pdf_color *color, char mask, int force);
-#define pdf_dev_set_strokingcolor(c)     pdf_dev_set_color(c,    0, 0);
-#define pdf_dev_set_nonstrokingcolor(c)  pdf_dev_set_color(c, 0x20, 0);
+extern void   pdf_dev_set_color     (pdf_doc *p, const pdf_color *color, char mask, int force);
+#define pdf_dev_set_strokingcolor(p, c)     pdf_dev_set_color(p, c,    0, 0);
+#define pdf_dev_set_nonstrokingcolor(p, c)  pdf_dev_set_color(p, c, 0x20, 0);
 
 #endif /* _PDF_DRAW_H_ */

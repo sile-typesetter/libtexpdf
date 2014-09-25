@@ -20,21 +20,30 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifndef _EPDF_H_
-#define _EPDF_H_
+#ifndef _ERROR_H_
+#define _ERROR_H_
 
-#include "mfileio.h"
-#include "pdfximage.h"
+#include "system.h"
 
-#define pdfbox_crop  1
-#define pdfbox_media 2
-#define pdfbox_bleed 3
-#define pdfbox_trim  4
-#define pdfbox_art   5
+extern void error_cleanup (void);
 
-extern int pdf_copy_clip (pdf_doc *p, FILE *image_file, int page_index, double x_user, double y_user);
+#define FATAL_ERROR -1
+#define NO_ERROR 0
 
-extern int pdf_include_page (pdf_ximage *ximage, FILE *file,
-			     const char *filename);
+#include <assert.h>
+#include <stdio.h>
 
-#endif /* _EPDF_H_ */
+extern void shut_up (int quietness);
+
+extern void ERROR (const char *fmt, ...);
+extern void MESG  (const char *fmt, ...);
+extern void WARN  (const char *fmt, ...);
+
+#define ASSERT(e) assert(e)
+
+#if defined(WIN32)
+#undef vfprintf
+#define vfprintf win32_vfprintf
+#endif
+
+#endif /* _ERROR_H_ */

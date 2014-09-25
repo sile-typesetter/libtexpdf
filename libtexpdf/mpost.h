@@ -32,14 +32,14 @@ extern int  check_for_mp     (FILE *fp);
 extern int  mps_scan_bbox    (const char **pp, const char *endptr, pdf_rect *bbox);
 
 /* returns xobj_id */
-extern int  mps_include_page (const char *ident, FILE *fp);
+extern int  mps_include_page (pdf_doc *doc, const char *ident, FILE *fp);
 
-extern int  mps_exec_inline  (const char **buffer, const char *endptr,
+extern int  mps_exec_inline  (pdf_doc *doc, const char **buffer, const char *endptr,
 			      double x_user, double y_user);
 extern int  mps_stack_depth  (void);
 
 extern void mps_eop_cleanup  (void);
 
-extern int  mps_do_page      (FILE *fp);
+extern int  mps_do_page      (pdf_doc *p, FILE *fp);
 
 #endif /* _MPOST_H_ */
