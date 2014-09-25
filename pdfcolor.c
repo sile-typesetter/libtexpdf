@@ -298,33 +298,33 @@ pdf_color_clear_stack (void)
 }
 
 void
-pdf_color_set (pdf_color *sc, pdf_color *fc)
+pdf_color_set (pdf_doc *p, pdf_color *sc, pdf_color *fc)
 {
   pdf_color_copycolor(&color_stack.stroke[color_stack.current], sc);
   pdf_color_copycolor(&color_stack.fill[color_stack.current], fc);
-  pdf_dev_reset_color(0);
+  pdf_dev_reset_color(p, 0);
 }
 
 void
-pdf_color_push (pdf_color *sc, pdf_color *fc)
+pdf_color_push (pdf_doc *p, pdf_color *sc, pdf_color *fc)
 {
   if (color_stack.current >= DEV_COLOR_STACK_MAX-1) {
     WARN("Color stack overflow. Just ignore.");
   } else {
     color_stack.current++;
-    pdf_color_set(sc, fc);
+    pdf_color_set(p, sc, fc);
   }
   return;
 }
 
 void
-pdf_color_pop (void)
+pdf_color_pop (pdf_doc *p)
 {
   if (color_stack.current <= 0) {
     WARN("Color stack underflow. Just ignore.");
   } else {
     color_stack.current--;
-    pdf_dev_reset_color(0);
+    pdf_dev_reset_color(p, 0);
   }
   return;
 }

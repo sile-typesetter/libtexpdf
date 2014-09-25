@@ -75,7 +75,7 @@ static double Xorigin, Yorigin;
  * immediately and forget about it but remember current path.
  */
 
-static int mp_parse_body (const char **start, const char *end, double x_user, double y_user);
+static int mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, double y_user);
 
 static struct mp_font
 {
@@ -753,7 +753,7 @@ do_currentfont (void)
 }
 
 static int
-do_show (void)
+do_show (pdf_doc *p)
 {
   struct mp_font *font;
   pdf_coord       cp;
@@ -807,7 +807,7 @@ do_show (void)
     }
     text_width *= font->pt_size;
 
-    pdf_dev_set_string((spt_t)(cp.x * dev_unit_dviunit()),
+    pdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
 		       (spt_t)(cp.y * dev_unit_dviunit()),
 		       ustr, length * 2,
 		       (spt_t)(text_width*dev_unit_dviunit()),
@@ -819,7 +819,7 @@ do_show (void)
       text_width = (double) tfm_string_width(font->tfm_id, strptr, length)/FWBASE;
       text_width *= font->pt_size;
     }
-    pdf_dev_set_string((spt_t)(cp.x * dev_unit_dviunit()),
+    pdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
 		       (spt_t)(cp.y * dev_unit_dviunit()),
 		       strptr, length,
 		       (spt_t)(text_width*dev_unit_dviunit()),
@@ -832,14 +832,14 @@ do_show (void)
     pdf_dev_rmoveto(text_width, 0.0);
   }
 
-  graphics_mode();
+  graphics_mode(p);
   pdf_release_obj(text_str);
 
   return 0;
 }
 
 static int
-do_mpost_bind_def (const char *ps_code, double x_user, double y_user)
+do_mpost_bind_def (pdf_doc *p, const char *ps_code, double x_user, double y_user)
 {
   int   error = 0;
   const char *start, *end;
@@ -847,13 +847,13 @@ do_mpost_bind_def (const char *ps_code, double x_user, double y_user)
   start = ps_code;
   end   = start + strlen(start);
 
-  error = mp_parse_body(&start, end, x_user, y_user);
+  error = mp_parse_body(p, &start, end, x_user, y_user);
 
   return error;
 }
 
 static int
-do_texfig_operator (int opcode, double x_user, double y_user)
+do_texfig_operator (pdf_doc *p, int opcode, double x_user, double y_user)
 {
   static transform_info fig_p;
   static int in_tfig = 0;
@@ -881,7 +881,7 @@ do_texfig_operator (int opcode, double x_user, double y_user)
       fig_p.flags   |= INFO_HAS_USER_BBOX;
 
       sprintf(resname, "__tf%d__", count);
-      xobj_id = pdf_doc_begin_grabbing(resname,
+      xobj_id = texpdf_doc_begin_grabbing(p, resname,
 				       fig_p.bbox.llx, fig_p.bbox.ury, &fig_p.bbox);
       
       in_tfig = 1;
@@ -892,8 +892,8 @@ do_texfig_operator (int opcode, double x_user, double y_user)
     if (!in_tfig)
       ERROR("endTexFig without valid startTexFig!.");
 
-    pdf_doc_end_grabbing(NULL);
-    pdf_dev_put_image(xobj_id, &fig_p, x_user, y_user);
+    texpdf_doc_end_grabbing(p, NULL);
+    pdf_dev_put_image(p, xobj_id, &fig_p, x_user, y_user);
     in_tfig = 0;
     break;
   default:
@@ -929,7 +929,7 @@ ps_dev_CTM (pdf_tmatrix *M)
  * that piece dealing with texfig.
  */
 static int
-do_operator (const char *token, double x_user, double y_user)
+do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 {
   int         error  = 0;
   int         opcode = 0;
@@ -1054,30 +1054,30 @@ do_operator (const char *token, double x_user, double y_user)
     break;
     
   case NEWPATH:
-    pdf_dev_newpath();
+    pdf_dev_newpath(p);
     break;
   case STROKE:
     /* fill rule not supported yet */
-    pdf_dev_flushpath('S', PDF_FILL_RULE_NONZERO);
+    pdf_dev_flushpath(p, 'S', PDF_FILL_RULE_NONZERO);
     break;
   case FILL:
-    pdf_dev_flushpath('f', PDF_FILL_RULE_NONZERO);
+    pdf_dev_flushpath(p, 'f', PDF_FILL_RULE_NONZERO);
     break;
 
   case CLIP:
-    error = pdf_dev_clip();
+    error = pdf_dev_clip(p);
     break;
   case EOCLIP:
-    error = pdf_dev_eoclip();
+    error = pdf_dev_eoclip(p);
     break;
 
     /* Graphics state operators: */
   case GSAVE:
-    error = pdf_dev_gsave();
+    error = pdf_dev_gsave(p);
     save_font();
     break;
   case GRESTORE:
-    error = pdf_dev_grestore();
+    error = pdf_dev_grestore(p);
     restore_font();
     break;
 
@@ -1092,7 +1092,7 @@ do_operator (const char *token, double x_user, double y_user)
 		    values[0], values[1],
 		    values[2], values[3],
 		    values[4], values[5]);
-      error = pdf_dev_concat(&matrix);
+      error = pdf_dev_concat(p, &matrix);
     }
     break;
   case SCALE:
@@ -1115,7 +1115,7 @@ do_operator (const char *token, double x_user, double y_user)
 	break;
       }
 
-      error = pdf_dev_concat(&matrix);
+      error = pdf_dev_concat(p, &matrix);
     }
     break;
     /* Positive angle means clock-wise direction in graphicx-dvips??? */
@@ -1142,7 +1142,7 @@ do_operator (const char *token, double x_user, double y_user)
 		      0.0,             0.0);
 	break;
       }
-      error = pdf_dev_concat(&matrix);
+      error = pdf_dev_concat(p, &matrix);
     }
     break;
   case TRANSLATE:
@@ -1152,7 +1152,7 @@ do_operator (const char *token, double x_user, double y_user)
 		    1.0,       0.0,
 		    0.0,       1.0,
 		    values[0], values[1]);
-      error = pdf_dev_concat(&matrix);
+      error = pdf_dev_concat(p, &matrix);
     }
     break;
 
@@ -1190,29 +1190,29 @@ do_operator (const char *token, double x_user, double y_user)
       }
       pdf_release_obj(pattern);
       if (!error) {
-	error = pdf_dev_setdash(num_dashes, dash_values, offset);
+	error = pdf_dev_setdash(p, num_dashes, dash_values, offset);
       }
     }
     break;
   case SETLINECAP:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setlinecap((int)values[0]);
+      error = pdf_dev_setlinecap(p, (int)values[0]);
     break;
   case SETLINEJOIN:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setlinejoin((int)values[0]);
+      error = pdf_dev_setlinejoin(p, (int)values[0]);
     break;
   case SETLINEWIDTH:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setlinewidth(values[0]);
+      error = pdf_dev_setlinewidth(p, values[0]);
     break;
   case SETMITERLIMIT:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setmiterlimit(values[0]);
+      error = pdf_dev_setmiterlimit(p, values[0]);
     break;
 
   case SETCMYKCOLOR:
@@ -1222,8 +1222,8 @@ do_operator (const char *token, double x_user, double y_user)
       pdf_color_cmykcolor(&color,
 			  values[0], values[1],
 			  values[2], values[3]);
-      pdf_dev_set_strokingcolor(&color);
-      pdf_dev_set_nonstrokingcolor(&color);
+      pdf_dev_set_strokingcolor(p, &color);
+      pdf_dev_set_nonstrokingcolor(p, &color);
     }
     break;
   case SETGRAY:
@@ -1231,8 +1231,8 @@ do_operator (const char *token, double x_user, double y_user)
     error = pop_get_numbers(values, 1);
     if (!error) {
       pdf_color_graycolor(&color, values[0]);
-      pdf_dev_set_strokingcolor(&color);
-      pdf_dev_set_nonstrokingcolor(&color);
+      pdf_dev_set_strokingcolor(p, &color);
+      pdf_dev_set_nonstrokingcolor(p, &color);
     }
     break;
   case SETRGBCOLOR:
@@ -1240,8 +1240,8 @@ do_operator (const char *token, double x_user, double y_user)
     if (!error) {
       pdf_color_rgbcolor(&color,
 			 values[0], values[1], values[2]);
-      pdf_dev_set_strokingcolor(&color);
-      pdf_dev_set_nonstrokingcolor(&color);
+      pdf_dev_set_strokingcolor(p, &color);
+      pdf_dev_set_nonstrokingcolor(p, &color);
     }
     break;
 
@@ -1354,7 +1354,7 @@ do_operator (const char *token, double x_user, double y_user)
     break;
 
   case SHOW:
-    error = do_show();
+    error = do_show(p);
     break;
 
   case STRINGWIDTH:
@@ -1363,23 +1363,23 @@ do_operator (const char *token, double x_user, double y_user)
 
     /* Extensions */
   case FSHOW:
-    error = do_mpost_bind_def("exch findfont exch scalefont setfont show", x_user, y_user);
+    error = do_mpost_bind_def(p, "exch findfont exch scalefont setfont show", x_user, y_user);
     break;
   case STEXFIG:
   case ETEXFIG:
-    error = do_texfig_operator(opcode, x_user, y_user);
+    error = do_texfig_operator(p, opcode, x_user, y_user);
     break;
   case HLW:
-    error = do_mpost_bind_def("0 dtransform exch truncate exch idtransform pop setlinewidth", x_user, y_user);
+    error = do_mpost_bind_def(p, "0 dtransform exch truncate exch idtransform pop setlinewidth", x_user, y_user);
     break;
   case VLW:
-    error = do_mpost_bind_def("0 exch dtransform truncate idtransform setlinewidth pop", x_user, y_user);
+    error = do_mpost_bind_def(p, "0 exch dtransform truncate idtransform setlinewidth pop", x_user, y_user);
     break;
   case RD:
-    error = do_mpost_bind_def("[] 0 setdash", x_user, y_user);
+    error = do_mpost_bind_def(p, "[] 0 setdash", x_user, y_user);
     break;
   case B:
-    error = do_mpost_bind_def("gsave fill grestore", x_user, y_user);
+    error = do_mpost_bind_def(p, "gsave fill grestore", x_user, y_user);
     break;
 
   case DEF:
@@ -1406,7 +1406,7 @@ do_operator (const char *token, double x_user, double y_user)
  * dealing with texfig.
  */
 static int
-mp_parse_body (const char **start, const char *end, double x_user, double y_user)
+mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, double y_user)
 {
   char    *token;
   pdf_obj *obj;
@@ -1452,7 +1452,7 @@ mp_parse_body (const char **start, const char *end, double x_user, double y_user
       if (!token)
 	error = 1;
       else {
-	error = do_operator(token, x_user, y_user);
+	error = do_operator(p, token, x_user, y_user);
 	RELEASE(token);
       }
     }
@@ -1476,7 +1476,7 @@ mps_stack_depth (void)
 }
 
 int
-mps_exec_inline (const char **p, const char *endptr,
+mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
 		 double x_user, double y_user)
 {
   int  error;
@@ -1498,7 +1498,7 @@ mps_exec_inline (const char **p, const char *endptr,
    * Remember that x_user and y_user are off by 0.02 %
    */
   pdf_dev_moveto(x_user, y_user);
-  error = mp_parse_body(p, endptr, x_user, y_user);
+  error = mp_parse_body(doc, p, endptr, x_user, y_user);
 
   //pdf_color_pop(); /* ... */
   pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, autorotate);
@@ -1522,7 +1522,7 @@ mps_exec_inline (const char **p, const char *endptr,
  
 /* Should implement save and restore. */
 int
-mps_include_page (const char *ident, FILE *fp)
+mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
 {
   int        form_id;
   xform_info info;
@@ -1568,7 +1568,7 @@ mps_include_page (const char *ident, FILE *fp)
   pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, 0);
   //pdf_color_push();
 
-  form_id  = pdf_doc_begin_grabbing(ident, Xorigin, Yorigin, &(info.bbox));
+  form_id  = texpdf_doc_begin_grabbing(doc, ident, Xorigin, Yorigin, &(info.bbox));
 
   mp_cmode = MP_CMODE_MPOST;
   gs_depth = pdf_dev_current_depth();
@@ -1577,7 +1577,7 @@ mps_include_page (const char *ident, FILE *fp)
    * XObject. Note that it increase gs_depth by 1. */
   pdf_dev_push_gstate();
 
-  error = mp_parse_body(&p, endptr, 0.0, 0.0);
+  error = mp_parse_body(doc, &p, endptr, 0.0, 0.0);
   RELEASE(buffer);
 
   if (error) {
@@ -1589,9 +1589,9 @@ mps_include_page (const char *ident, FILE *fp)
   /* It's time to pop the new gstate above. */
   pdf_dev_pop_gstate();
   mps_stack_clear_to (st_depth);
-  pdf_dev_grestore_to(gs_depth);
+  pdf_dev_grestore_to(doc, gs_depth);
 
-  pdf_doc_end_grabbing(NULL);
+  texpdf_doc_end_grabbing(doc,NULL);
 
   //pdf_color_pop();
   pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, autorotate);
@@ -1601,7 +1601,7 @@ mps_include_page (const char *ident, FILE *fp)
 }
 
 int
-mps_do_page (FILE *image_file)
+mps_do_page (pdf_doc *p, FILE *image_file)
 {
   int       error = 0;
   pdf_rect  bbox;
@@ -1631,15 +1631,15 @@ mps_do_page (FILE *image_file)
 
   mp_cmode = MP_CMODE_MPOST;
 
-  pdf_doc_begin_page  (1.0, -Xorigin, -Yorigin); /* scale, xorig, yorig */
-  pdf_doc_set_mediabox(pdf_doc_current_page_number(), &bbox);
+  texpdf_doc_begin_page  (p, 1.0, -Xorigin, -Yorigin); /* scale, xorig, yorig */
+  texpdf_doc_set_mediabox(p, texpdf_doc_current_page_number(p), &bbox);
 
   dir_mode = pdf_dev_get_dirmode();
   pdf_dev_set_autorotate(0);
 
   skip_prolog(&start, end);
 
-  error = mp_parse_body(&start, end, 0.0, 0.0);
+  error = mp_parse_body(p, &start, end, 0.0, 0.0);
 
   if (error) {
     WARN("Errors occured while interpreting MetaPost file.");
@@ -1648,7 +1648,7 @@ mps_do_page (FILE *image_file)
   pdf_dev_set_autorotate(1);
   pdf_dev_set_dirmode(dir_mode);
 
-  pdf_doc_end_page();
+  texpdf_doc_end_page(p);
 
   RELEASE(buffer);
 

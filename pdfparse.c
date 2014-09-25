@@ -65,9 +65,7 @@ static struct {
   0
 };
 
-static int xtoi (char ch);
-
-static const char *save = NULL;
+extern int xtoi (char ch);
 
 void
 dump (const char *start, const char *end)
@@ -581,18 +579,6 @@ parse_pdf_literal_string (const char **pp, const char *endptr)
 /*
  * PDF Hex String
  */
-static int
-xtoi (char ch)
-{
-  if (ch >= '0' && ch <= '9')
-    return ch - '0';
-  if (ch >= 'A' && ch <= 'F')
-    return (ch - 'A') + 10;
-  if (ch >= 'a' && ch <= 'f')
-    return (ch - 'a') + 10;
-
-  return -1;
-}
 
 static pdf_obj *
 parse_pdf_hex_string (const char **pp, const char *endptr)
@@ -880,38 +866,6 @@ parse_pdf_stream (const char **pp, const char *endptr, pdf_obj *dict)
   return  result;
 }
 
-#ifndef PDF_PARSE_STRICT
-
-/* PLEASE REMOVE THIS */
-#include "specials.h"
-
-/* This is not PDF indirect reference. */
-static pdf_obj *
-parse_pdf_reference (const char **start, const char *end)
-{
-  pdf_obj *result = NULL;
-  char    *name;
-
-  SAVE(*start, end);
-
-  skip_white(start, end);
-  name = parse_opt_ident(start, end);
-  if (name) {
-    result = spc_lookup_reference(name);
-    if (!result) {
-      WARN("Could not find the named reference (@%s).", name);
-      DUMP_RESTORE(*start, end);
-    }
-    RELEASE(name);
-  } else {
-    WARN("Could not find a reference name.");
-    DUMP_RESTORE(*start, end);
-    result = NULL;
-  }
-
-  return result;
-}
-#endif /* !PDF_PARSE_STRICT */
 
 static pdf_obj *
 try_pdf_reference (const char *start, const char *end, const char **endptr, pdf_file *pf)
@@ -1026,10 +980,6 @@ parse_pdf_object (const char **pp, const char *endptr, pdf_file *pf)
     break;
 
   case '@':
-
-#ifndef PDF_PARSE_STRICT
-    result = parse_pdf_reference(pp, endptr);
-#endif /* !PDF_PARSE_STRICT */
     break;
 
   default:

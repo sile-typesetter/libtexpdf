@@ -734,7 +734,7 @@ INVERTIBLE_MATRIX (const pdf_tmatrix *M)
  *  current graphcs state parameter.
  */ 
 static int
-pdf_dev__rectshape (const pdf_rect    *r,
+pdf_dev__rectshape (pdf_doc *doc, const pdf_rect    *r,
                     const pdf_tmatrix *M,
                     char               opchr
                    )
@@ -757,7 +757,7 @@ pdf_dev__rectshape (const pdf_rect    *r,
             !INVERTIBLE_MATRIX(M)))
     return -1;
 
-  graphics_mode();
+  graphics_mode(doc);
 
   buf[len++] = ' ';
   if (!isclip) {
@@ -792,7 +792,7 @@ pdf_dev__rectshape (const pdf_rect    *r,
     buf[len++] = isclip ? 'n' : 'Q';
   }
 
-  pdf_doc_add_page_content(buf, len);  /* op: q cm n re Q */
+  texpdf_doc_add_page_content(doc, buf, len);  /* op: q cm n re Q */
 
   return 0;
 }
@@ -801,7 +801,7 @@ static int path_added = 0;
 
 /* FIXME */
 static int
-pdf_dev__flushpath (pdf_path  *pa,
+pdf_dev__flushpath (pdf_doc *p, pdf_path  *pa,
                     char       opchr,
                     int        rule,
                     int        ignore_rule)
@@ -824,7 +824,7 @@ pdf_dev__flushpath (pdf_path  *pa,
     return 0;
 
   path_added = 0;
-  graphics_mode();
+  graphics_mode(p);
   isrect = pdf_path__isarect(pa, ignore_rule); 
   if (isrect) {
     pe  = &(pa->path[0]);
@@ -840,7 +840,7 @@ pdf_dev__flushpath (pdf_path  *pa,
     b[len++] = ' ';
     b[len++] = 'r';
     b[len++] = 'e';
-    pdf_doc_add_page_content(b, len);  /* op: re */
+    texpdf_doc_add_page_content(p, b, len);  /* op: re */
     len = 0;
   } else {
     n_seg = PA_LENGTH(pa);
@@ -855,12 +855,12 @@ pdf_dev__flushpath (pdf_path  *pa,
       b[len++] = ' ';
       b[len++] = PE_OPCHR(pe);
       if (len + 128 > b_len) {
-        pdf_doc_add_page_content(b, len);  /* op: m l c v y h */
+        texpdf_doc_add_page_content(p, b, len);  /* op: m l c v y h */
 	len = 0;
       }
     }
     if (len > 0) {
-      pdf_doc_add_page_content(b, len);  /* op: m l c v y h */
+      texpdf_doc_add_page_content(p, b, len);  /* op: m l c v y h */
       len = 0;
     }
   }
@@ -873,7 +873,7 @@ pdf_dev__flushpath (pdf_path  *pa,
     b[len++] = ' '; b[len++] = 'n';
   }
 
-  pdf_doc_add_page_content(b, len);  /* op: f F s S b B W f* F* s* S* b* B* W* */
+  texpdf_doc_add_page_content(p, b, len);  /* op: f F s S b B W f* F* s* S* b* B* W* */
 
   return 0;
 }
@@ -1107,7 +1107,7 @@ pdf_dev_clear_gstates (void)
 }
 
 int
-pdf_dev_gsave (void)
+pdf_dev_gsave (pdf_doc *p)
 {
   pdf_gstate *gs0, *gs1;
 
@@ -1117,13 +1117,13 @@ pdf_dev_gsave (void)
   copy_a_gstate(gs1, gs0);
   m_stack_push(&gs_stack, gs1);
 
-  pdf_doc_add_page_content(" q", 2);  /* op: q */
+  texpdf_doc_add_page_content(p, " q", 2);  /* op: q */
 
   return 0;
 }
 
 int
-pdf_dev_grestore (void)
+pdf_dev_grestore (pdf_doc *p)
 {
   pdf_gstate *gs;
 
@@ -1136,7 +1136,7 @@ pdf_dev_grestore (void)
   clear_a_gstate(gs);
   RELEASE(gs);
 
-  pdf_doc_add_page_content(" Q", 2);  /* op: Q */
+  texpdf_doc_add_page_content(p, " Q", 2);  /* op: Q */
 
   pdf_dev_reset_fonts();
 
@@ -1186,7 +1186,7 @@ pdf_dev_current_depth (void)
 }
 
 void
-pdf_dev_grestore_to (int depth)
+pdf_dev_grestore_to (pdf_doc *p, int depth)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs;
@@ -1198,7 +1198,7 @@ pdf_dev_grestore_to (int depth)
   }
 
   while (m_stack_depth(gss) > depth + 1) {
-    pdf_doc_add_page_content(" Q", 2);  /* op: Q */
+    texpdf_doc_add_page_content(p, " Q", 2);  /* op: Q */
     gs = m_stack_pop(gss);
     clear_a_gstate(gs);
     RELEASE(gs);
@@ -1260,7 +1260,7 @@ pdf_dev_currentcolor (pdf_color *color, int is_fill)
  *   the color is the same as the current graphics state color
  */
 void
-pdf_dev_set_color (const pdf_color *color, char mask, int force)
+pdf_dev_set_color (pdf_doc *p, const pdf_color *color, char mask, int force)
 {
   int len;
 
@@ -1276,7 +1276,7 @@ pdf_dev_set_color (const pdf_color *color, char mask, int force)
      */
     return;
 
-  graphics_mode();
+  graphics_mode(p);
   len = pdf_color_to_string(color, fmt_buf);
   fmt_buf[len++] = ' ';
   switch (pdf_color_type(color)) {
@@ -1293,13 +1293,13 @@ pdf_dev_set_color (const pdf_color *color, char mask, int force)
   default: /* already verified the given color */
     break;
   }
-  pdf_doc_add_page_content(fmt_buf, len);  /* op: RG K G rg k g */
+  texpdf_doc_add_page_content(p, fmt_buf, len);  /* op: RG K G rg k g */
 
   pdf_color_copycolor(current, color);
 }
 
 int
-pdf_dev_concat (const pdf_tmatrix *M)
+pdf_dev_concat (pdf_doc *p, const pdf_tmatrix *M)
 {
   m_stack     *gss = &gs_stack;
   pdf_gstate  *gs  = m_stack_top(gss);
@@ -1330,7 +1330,7 @@ pdf_dev_concat (const pdf_tmatrix *M)
     buf[len++] = ' ';
     buf[len++] = 'c';
     buf[len++] = 'm';
-    pdf_doc_add_page_content(buf, len);  /* op: cm */
+    texpdf_doc_add_page_content(p, buf, len);  /* op: cm */
 
     pdf_concatmatrix(CTM, M);
   }
@@ -1353,7 +1353,7 @@ pdf_dev_concat (const pdf_tmatrix *M)
  * name gs      --  name: res. name of ExtGState dict.  
  */      
 int
-pdf_dev_setmiterlimit (double mlimit)
+pdf_dev_setmiterlimit (pdf_doc *p, double mlimit)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
@@ -1365,7 +1365,7 @@ pdf_dev_setmiterlimit (double mlimit)
     len += pdf_sprint_length(buf + len, mlimit);
     buf[len++] = ' ';
     buf[len++] = 'M';
-    pdf_doc_add_page_content(buf, len);  /* op: M */
+    texpdf_doc_add_page_content(p, buf, len);  /* op: M */
     gs->miterlimit = mlimit;
   }
 
@@ -1373,7 +1373,7 @@ pdf_dev_setmiterlimit (double mlimit)
 }
 
 int
-pdf_dev_setlinecap (int capstyle)
+pdf_dev_setlinecap (pdf_doc *p, int capstyle)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
@@ -1382,7 +1382,7 @@ pdf_dev_setlinecap (int capstyle)
 
   if (gs->linecap != capstyle) {
     len = sprintf(buf, " %d J", capstyle);
-    pdf_doc_add_page_content(buf, len);  /* op: J */
+    texpdf_doc_add_page_content(p, buf, len);  /* op: J */
     gs->linecap = capstyle;
   }
 
@@ -1390,7 +1390,7 @@ pdf_dev_setlinecap (int capstyle)
 }
 
 int
-pdf_dev_setlinejoin (int joinstyle)
+pdf_dev_setlinejoin (pdf_doc *p, int joinstyle)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
@@ -1399,7 +1399,7 @@ pdf_dev_setlinejoin (int joinstyle)
 
   if (gs->linejoin != joinstyle) {
     len = sprintf(buf, " %d j", joinstyle);
-    pdf_doc_add_page_content(buf, len);  /* op: j */
+    texpdf_doc_add_page_content(p, buf, len);  /* op: j */
     gs->linejoin = joinstyle;
   }
 
@@ -1407,7 +1407,7 @@ pdf_dev_setlinejoin (int joinstyle)
 }
 
 int
-pdf_dev_setlinewidth (double width)
+pdf_dev_setlinewidth (pdf_doc *p, double width)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);  
@@ -1419,7 +1419,7 @@ pdf_dev_setlinewidth (double width)
     len += pdf_sprint_length(buf + len, width);
     buf[len++] = ' ';
     buf[len++] = 'w';
-    pdf_doc_add_page_content(buf, len);  /* op: w */
+    texpdf_doc_add_page_content(p, buf, len);  /* op: w */
     gs->linewidth = width;
   }
 
@@ -1427,7 +1427,7 @@ pdf_dev_setlinewidth (double width)
 }
 
 int
-pdf_dev_setdash (int count, double *pattern, double offset)
+pdf_dev_setdash (pdf_doc *p, int count, double *pattern, double offset)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
@@ -1437,17 +1437,17 @@ pdf_dev_setdash (int count, double *pattern, double offset)
 
   gs->linedash.num_dash = count;
   gs->linedash.offset   = offset;
-  pdf_doc_add_page_content(" [", 2);  /* op: */
+  texpdf_doc_add_page_content(p, " [", 2);  /* op: */
   for (i = 0; i < count; i++) {
     buf[0] = ' ';
     len = pdf_sprint_length (buf + 1, pattern[i]);
-    pdf_doc_add_page_content(buf, len + 1);  /* op: */
+    texpdf_doc_add_page_content(p, buf, len + 1);  /* op: */
     gs->linedash.pattern[i] = pattern[i];
   }
-  pdf_doc_add_page_content("] ", 2);  /* op: */
+  texpdf_doc_add_page_content(p, "] ", 2);  /* op: */
   len = pdf_sprint_length (buf, offset);
-  pdf_doc_add_page_content(buf, len);  /* op: */
-  pdf_doc_add_page_content(" d", 2);  /* op: d */
+  texpdf_doc_add_page_content(p, buf, len);  /* op: */
+  texpdf_doc_add_page_content(p, " d", 2);  /* op: d */
 
   return 0;
 }
@@ -1476,27 +1476,27 @@ pdf_dev_setflat (int flatness)
 
 /* ZSYUEDVEDEOF */
 int
-pdf_dev_clip (void)
+pdf_dev_clip (pdf_doc *p)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
   pdf_path   *cpa = &gs->path;
 
-  return pdf_dev__flushpath(cpa, 'W', PDF_FILL_RULE_NONZERO, 0);
+  return pdf_dev__flushpath(p, cpa, 'W', PDF_FILL_RULE_NONZERO, 0);
 }
 
 int
-pdf_dev_eoclip (void)
+pdf_dev_eoclip (pdf_doc *p)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
   pdf_path   *cpa = &gs->path;
 
-  return pdf_dev__flushpath(cpa, 'W', PDF_FILL_RULE_EVENODD, 0);
+  return pdf_dev__flushpath(p, cpa, 'W', PDF_FILL_RULE_EVENODD, 0);
 }
 
 int
-pdf_dev_flushpath (char p_op, int fill_rule)
+pdf_dev_flushpath (pdf_doc *p, char p_op, int fill_rule)
 {
   m_stack    *gss   = &gs_stack;
   pdf_gstate *gs    = m_stack_top(gss);
@@ -1507,7 +1507,7 @@ pdf_dev_flushpath (char p_op, int fill_rule)
    * that can be converted to a rect where fill rule
    * is inessential.
    */
-  error = pdf_dev__flushpath(cpa, p_op, fill_rule, 1);
+  error = pdf_dev__flushpath(p, cpa, p_op, fill_rule, 1);
   pdf_path__clearpath(cpa);
 
   gs->flags &= ~GS_FLAG_CURRENTPOINT_SET;
@@ -1516,7 +1516,7 @@ pdf_dev_flushpath (char p_op, int fill_rule)
 }
 
 int
-pdf_dev_newpath (void)
+pdf_dev_newpath (pdf_doc *doc)
 {
   m_stack    *gss = &gs_stack;
   pdf_gstate *gs  = m_stack_top(gss);
@@ -1526,7 +1526,7 @@ pdf_dev_newpath (void)
     pdf_path__clearpath (p);
   }
   /* The following is required for "newpath" operator in mpost.c. */
-  pdf_doc_add_page_content(" n", 2);  /* op: n */
+  texpdf_doc_add_page_content(doc, " n", 2);  /* op: n */
 
   return 0;
 }
@@ -1814,7 +1814,7 @@ pdf_dev_rectstroke (double x, double y,
 #endif
 
 int
-pdf_dev_rectfill  (double x, double y,
+pdf_dev_rectfill  (pdf_doc *p, double x, double y,
                    double w, double h)
 {
   pdf_rect r;
@@ -1824,11 +1824,11 @@ pdf_dev_rectfill  (double x, double y,
   r.urx = x + w;
   r.ury = y + h;
 
-  return  pdf_dev__rectshape(&r, NULL, 'f');
+  return  pdf_dev__rectshape(p, &r, NULL, 'f');
 }
 
 int
-pdf_dev_rectclip (double x, double y,
+pdf_dev_rectclip (pdf_doc *p, double x, double y,
                   double w, double h)
 {
   pdf_rect r;
@@ -1838,11 +1838,11 @@ pdf_dev_rectclip (double x, double y,
   r.urx = x + w;
   r.ury = y + h;
   
-  return  pdf_dev__rectshape(&r, NULL, 'W');
+  return  pdf_dev__rectshape(p, &r, NULL, 'W');
 }
 
 int
-pdf_dev_rectadd (double x, double y,
+pdf_dev_rectadd (pdf_doc *p, double x, double y,
                   double w, double h)
 {
   pdf_rect r;
@@ -1853,7 +1853,7 @@ pdf_dev_rectadd (double x, double y,
   r.ury = y + h;
   path_added = 1;
 
-  return  pdf_dev__rectshape(&r, NULL, ' ');
+  return  pdf_dev__rectshape(p, &r, NULL, ' ');
 }
 
 void

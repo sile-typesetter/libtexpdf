@@ -24,107 +24,112 @@
 #define _PDFDOC_H_
 
 #include "pdfobj.h"
-#include "pdfdev.h"
-
+#include "pdftypes.h"
+#include "pdfcolor.h"
+    
 #define PDF_DOC_GRABBING_NEST_MAX 4
 
-extern void     pdf_doc_set_verbose (void);
+#include "pdfdev.h"
 
-extern void     pdf_open_document  (const char *filename,
+
+extern void     texpdf_doc_set_verbose (void);
+
+extern void     texpdf_open_document (pdf_doc *p,
+                    const char *filename,
 				    int do_encryption,
 				    double media_width, double media_height,
 				    double annot_grow_amount, int bookmark_open_depth,
 				    int check_gotos);
-extern void     pdf_close_document (void);
+extern void     texpdf_close_document (pdf_doc *p);
 
 
 /* PDF document metadata */
-extern void     pdf_doc_set_creator   (const char *creator);
+extern void     texpdf_doc_set_creator   (pdf_doc *p, const char *creator);
 
 
 /* They just return PDF dictionary object.
  * Callers are completely responsible for doing right thing...
  */
-extern pdf_obj *pdf_doc_get_dictionary (const char *category);
-extern pdf_obj *pdf_doc_get_reference  (const char *category);
+extern pdf_obj *texpdf_doc_get_dictionary (pdf_doc *p, const char *category);
+extern pdf_obj *texpdf_doc_get_reference  (pdf_doc *p, const char *category);
 
-#define pdf_doc_page_tree() pdf_doc_get_dictionary("Pages")
-#define pdf_doc_catalog()   pdf_doc_get_dictionary("Catalog")
-#define pdf_doc_docinfo()   pdf_doc_get_dictionary("Info")
-#define pdf_doc_names()     pdf_doc_get_dictionary("Names")
-#define pdf_doc_this_page() pdf_doc_get_dictionary("@THISPAGE")
+#define texpdf_doc_page_tree(p) texpdf_doc_get_dictionary(p,"Pages")
+#define texpdf_doc_catalog(p)   texpdf_doc_get_dictionary(p,"Catalog")
+#define texpdf_doc_docinfo(p)   texpdf_doc_get_dictionary(p,"Info")
+#define texpdf_doc_names(p)     texpdf_doc_get_dictionary(p,"Names")
+#define texpdf_doc_this_page(p) texpdf_doc_get_dictionary(p,"@THISPAGE")
 
-extern pdf_obj *pdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
+extern pdf_obj *texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
 				  pdf_rect *bbox, pdf_obj **resources_p);
 
-extern long     pdf_doc_current_page_number    (void);
-extern pdf_obj *pdf_doc_current_page_resources (void);
+extern long     texpdf_doc_current_page_number    (pdf_doc *p);
+extern pdf_obj *texpdf_doc_current_page_resources (pdf_doc *p);
 
-extern pdf_obj *pdf_doc_ref_page (unsigned long page_no);
-#define pdf_doc_this_page_ref() pdf_doc_get_reference("@THISPAGE")
-#define pdf_doc_next_page_ref() pdf_doc_get_reference("@NEXTPAGE")
-#define pdf_doc_prev_page_ref() pdf_doc_get_reference("@PREVPAGE")
+extern pdf_obj *texpdf_doc_ref_page (pdf_doc *p, unsigned long page_no);
+#define texpdf_doc_this_page_ref(p) pdf_doc_get_reference(p,"@THISPAGE")
+#define texpdf_doc_next_page_ref(p) pdf_doc_get_reference(p,"@NEXTPAGE")
+#define texpdf_doc_prev_page_ref(p) pdf_doc_get_reference(p,"@PREVPAGE")
 
 /* Not really managing tree...
  * There should be something for number tree.
  */
-extern int      pdf_doc_add_names       (const char *category,
+extern int      texpdf_doc_add_names       (pdf_doc *p, const char *category,
 					 const void *key, int keylen, pdf_obj *value);
 
-extern void     pdf_doc_set_bop_content (const char *str, unsigned length);
-extern void     pdf_doc_set_eop_content (const char *str, unsigned length);
+extern void     texpdf_doc_set_bop_content (pdf_doc *p, const char *str, unsigned length);
+extern void     texpdf_doc_set_eop_content (pdf_doc *p, const char *str, unsigned length);
 
 /* Page */
-extern void     pdf_doc_begin_page   (double scale, double x_origin, double y_origin);
-extern void     pdf_doc_end_page     (void);
+extern void     texpdf_doc_begin_page   (pdf_doc *p, double scale, double x_origin, double y_origin);
+extern void     texpdf_doc_end_page     (pdf_doc *p);
 
-extern void     pdf_doc_set_mediabox (unsigned page_no, const pdf_rect *mediabox);
-extern void     pdf_doc_get_mediabox (unsigned page_no, pdf_rect *mediabox);
+extern void     texpdf_doc_set_mediabox (pdf_doc *p, unsigned page_no, const pdf_rect *mediabox);
+extern void     texpdf_doc_get_mediabox (pdf_doc *p, unsigned page_no, pdf_rect *mediabox);
 
-extern void     pdf_doc_add_page_content  (const char *buffer, unsigned length);
-extern void     pdf_doc_add_page_resource (const char *category,
+extern void     texpdf_doc_add_page_content  (pdf_doc *p, const char *buffer, unsigned length);
+extern void     texpdf_doc_add_page_resource (pdf_doc *p, const char *category,
 					   const char *resource_name, pdf_obj *resources);
 
 /* Article thread */
-extern void     pdf_doc_begin_article (const char *article_id, pdf_obj *info);
+extern void     texpdf_doc_begin_article (pdf_doc *p, const char *article_id, pdf_obj *info);
 #if 0
-extern void     pdf_doc_end_article   (const char *article_id);  /* Do nothing... */
+extern void     texpdf_doc_end_article   (pdf_doc *p, const char *article_id);  /* Do nothing... */
 #endif
-extern void     pdf_doc_make_article  (const char *article_id,
+extern void     texpdf_doc_make_article  (pdf_doc *p, const char *article_id,
 				       const char **bead_order, int num_beads);
-extern void     pdf_doc_add_bead      (const char *article_id,
+extern void     texpdf_doc_add_bead      (pdf_doc *p, const char *article_id,
 				       const char *bead_id,
 				       long page_no, const pdf_rect *rect);
 
 /* Bookmarks */
-extern int      pdf_doc_bookmarks_up    (void);
-extern int      pdf_doc_bookmarks_down  (void);
-extern void     pdf_doc_bookmarks_add   (pdf_obj *dict, int is_open);
-extern int      pdf_doc_bookmarks_depth (void);
+extern int      texpdf_doc_bookmarks_up    (pdf_doc *p);
+extern int      texpdf_doc_bookmarks_down  (pdf_doc *p);
+extern void     texpdf_doc_bookmarks_add   (pdf_doc *p, pdf_obj *dict, int is_open);
+extern int      texpdf_doc_bookmarks_depth (pdf_doc *p);
 
 
 /* Returns xobj_id of started xform. */
-extern int      pdf_doc_begin_grabbing (const char *ident,
+extern int      texpdf_doc_begin_grabbing (pdf_doc *p, const char *ident,
 					double ref_x, double ref_y,
 					const pdf_rect *cropbox);
-extern void     pdf_doc_end_grabbing   (pdf_obj *attrib);
+extern void     texpdf_doc_end_grabbing   (pdf_doc *p, pdf_obj *attrib);
 
 
 /* Annotation */
-extern void     pdf_doc_add_annot   (unsigned page_no,
+extern void     texpdf_doc_add_annot   (pdf_doc *p, unsigned page_no,
 				     const pdf_rect *rect,
 				     pdf_obj *annot_dict,
 				     int new_annot);
 
 /* Annotation with auto- clip and line (or page) break */
-extern void     pdf_doc_begin_annot (pdf_obj *dict);
-extern void     pdf_doc_end_annot   (void);
+extern void     texpdf_doc_begin_annot (pdf_doc *p, pdf_obj *dict);
+extern void     texpdf_doc_end_annot   (pdf_doc *p);
 
-extern void     pdf_doc_break_annot (void);
-extern void     pdf_doc_expand_box  (const pdf_rect *rect);
+extern void     texpdf_doc_break_annot (pdf_doc *p);
+extern void     texpdf_doc_expand_box  (pdf_doc *p, const pdf_rect *rect);
 
 /* Manual thumbnail */
-extern void     pdf_doc_enable_manual_thumbnails (void);
+extern void     texpdf_doc_enable_manual_thumbnails (pdf_doc *p);
 
 #if 0
 /* PageLabels - */
@@ -136,6 +141,6 @@ extern void     pdf_doc_set_pagelabel (long  page_start,
 
 /* Similar to bop_content */
 #include "pdfcolor.h"
-extern void     pdf_doc_set_bgcolor   (const pdf_color *color);
+extern void     texpdf_doc_set_bgcolor   (pdf_doc *p, const pdf_color *color);
 
 #endif /* _PDFDOC_H_ */

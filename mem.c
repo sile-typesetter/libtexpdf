@@ -20,21 +20,38 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifndef _EPDF_H_
-#define _EPDF_H_
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-#include "mfileio.h"
-#include "pdfximage.h"
+#include <stdio.h>	
+#include <stdlib.h>
 
-#define pdfbox_crop  1
-#define pdfbox_media 2
-#define pdfbox_bleed 3
-#define pdfbox_trim  4
-#define pdfbox_art   5
+#include "system.h"
+#include "mem.h"
+#include "error.h"
 
-extern int pdf_copy_clip (pdf_doc *p, FILE *image_file, int page_index, double x_user, double y_user);
+void *new (size_t size)
+{
+  void *result = malloc (size);
+  if (!result) {
+    ERROR("Out of memory - asked for %lu bytes\n", (unsigned long) size);
+  }
 
-extern int pdf_include_page (pdf_ximage *ximage, FILE *file,
-			     const char *filename);
+  return result;
+}
 
-#endif /* _EPDF_H_ */
+void *renew (void *mem, size_t size)
+{
+  if (size) {
+    void *result = realloc (mem, size);
+    if (!result) {
+      ERROR("Out of memory - asked for %lu bytes\n", (unsigned long) size);
+    }
+    return result;
+  } else {
+    /* realloc may not return NULL if size == 0 */
+    free(mem);
+    return NULL;
+  }
+}
