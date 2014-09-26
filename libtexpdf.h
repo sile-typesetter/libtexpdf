@@ -1,3 +1,7 @@
+#ifndef _LIBTEXPDF_H
+#define _LIBTEXPDF_H
+#include <stdlib.h>
+
 #include "agl.h"
 #include "bmpimage.h"
 #include "cff.h"
@@ -60,3 +64,4 @@
 #include "type1.h"
 #include "type1c.h"
 #include "unicode.h"
+#endif
