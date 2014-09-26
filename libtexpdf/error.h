@@ -23,7 +23,21 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#include "system.h"
+#ifdef WIN32
+#  undef ERROR
+#  undef NO_ERROR
+#  undef RGB
+#  undef CMYK
+#  undef SETLINECAP
+#  undef SETLINEJOIN
+#  undef SETMITERLIMIT
+#  pragma warning(disable : 4101 4018)
+#else
+#  ifndef __cdecl
+#  define __cdecl
+#  endif
+#  define CDECL
+#endif /* WIN32 */
 
 extern void error_cleanup (void);
 

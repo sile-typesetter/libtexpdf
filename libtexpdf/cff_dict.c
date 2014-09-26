@@ -31,6 +31,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 #include "error.h"
 #include "mem.h"
