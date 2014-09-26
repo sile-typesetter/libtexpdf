@@ -100,7 +100,6 @@ typedef struct pdf_article
   pdf_bead *beads;
 } pdf_article;
 
-
 typedef struct pdf_doc
 {
   struct {
@@ -149,7 +148,7 @@ typedef struct pdf_doc
   struct form_list_node *pending_forms;
   char  manual_thumb_enabled;
   char* doccreator;
-  pdf_color bgcolor; /* XXX Initialize to { 1, { 1.0 } } */
+  pdf_color bgcolor;
 } pdf_doc;
 
 #endif

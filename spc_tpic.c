@@ -30,6 +30,7 @@
 
 #include "numbers.h"
 #include "libtexpdf/libtexpdf.h"
+#include "dvipdfmx.h"
 
 #include "specials.h"
 #include "spc_tpic.h"
@@ -130,7 +131,7 @@ check_resourcestatus (const char *category, const char *resname)
 {
   pdf_obj  *dict1, *dict2;
 
-  dict1 = pdf_doc_current_page_resources();
+  dict1 = texpdf_doc_current_page_resources(pdf);
   if (!dict1)
     return  0;
 
@@ -148,20 +149,20 @@ set_linestyle (double pn, double da)
 {
   double  dp[2]; /* dash pattern */
 
-  pdf_dev_setlinejoin(1);
-  pdf_dev_setmiterlimit(1.4);
-  pdf_dev_setlinewidth(pn);
+  pdf_dev_setlinejoin(pdf, 1);
+  pdf_dev_setmiterlimit(pdf, 1.4);
+  pdf_dev_setlinewidth(pdf, pn);
   if (da > 0.0) {
     dp[0] =  da * 72.0;
-    pdf_dev_setdash(1, dp, 0);
-    pdf_dev_setlinecap(0);
+    pdf_dev_setdash(pdf, 1, dp, 0);
+    pdf_dev_setlinecap(pdf, 0);
   } else if (da < 0.0) {
     dp[0] =  pn;
     dp[1] = -da * 72.0;
-    pdf_dev_setdash(2, dp, 0);
-    pdf_dev_setlinecap(1);
+    pdf_dev_setdash(pdf, 2, dp, 0);
+    pdf_dev_setlinecap(pdf, 1);
   } else {
-    pdf_dev_setlinecap(0);
+    pdf_dev_setlinecap(pdf, 0);
   }
 
   return  0;
@@ -180,13 +181,13 @@ set_fillstyle (double g, double a, int f_ais)
     sprintf(resname, "_Tps_a%03d_", alp);
     if (!check_resourcestatus("ExtGState", resname)) {
       dict = create_xgstate(ROUND(0.01 * alp, 0.01), f_ais);
-      pdf_doc_add_page_resource("ExtGState",
+      texpdf_doc_add_page_resource(pdf, "ExtGState",
                                 resname, pdf_ref_obj(dict));
       pdf_release_obj(dict);
     }
     len += sprintf(buf + len, " /%s gs", resname);
 
-    pdf_doc_add_page_content(buf, len);  /* op: gs */
+    texpdf_doc_add_page_content(pdf, buf, len);  /* op: gs */
   }
 
   {
@@ -194,7 +195,7 @@ set_fillstyle (double g, double a, int f_ais)
 
     pdf_color_get_current (&sc, &fc); /* get stroking and fill colors */
     pdf_color_brighten_color(&new_fc, fc, g);
-    pdf_dev_set_nonstrokingcolor(&new_fc);
+    pdf_dev_set_nonstrokingcolor(pdf, &new_fc);
   }
 
   return  0;
@@ -210,7 +211,7 @@ set_styles (struct spc_tpic_ *tp,
   pdf_tmatrix M;
 
   pdf_setmatrix (&M, 1.0, 0.0, 0.0, -1.0, c->x, c->y);
-  pdf_dev_concat(&M);
+  pdf_dev_concat(pdf, &M);
 
   if (f_vp)
     set_linestyle(pn, da);
@@ -238,9 +239,9 @@ showpath (int f_vp, int f_fs) /* visible_path, fill_shape */
 {
   if (f_vp) {
     if (f_fs)
-      pdf_dev_flushpath('b', PDF_FILL_RULE_NONZERO);
+      pdf_dev_flushpath(pdf, 'b', PDF_FILL_RULE_NONZERO);
     else {
-      pdf_dev_flushpath('S', PDF_FILL_RULE_NONZERO);
+      pdf_dev_flushpath(pdf, 'S', PDF_FILL_RULE_NONZERO);
     }
   } else {
     /*
@@ -248,9 +249,9 @@ showpath (int f_vp, int f_fs) /* visible_path, fill_shape */
      * path (a path without path-painting operator applied)?
      */
     if (f_fs)
-      pdf_dev_flushpath('f', PDF_FILL_RULE_NONZERO);
+      pdf_dev_flushpath(pdf, 'f', PDF_FILL_RULE_NONZERO);
     else {
-      pdf_dev_newpath();
+      pdf_dev_newpath(pdf);
     }
   }
 }
@@ -275,7 +276,7 @@ tpic__polyline (struct spc_tpic_ *tp,
   f_vp  = (pn > 0.0) ? f_vp : 0;
 
   if (f_vp || f_fs) {
-    pdf_dev_gsave();
+    pdf_dev_gsave(pdf);
 
     set_styles(tp, c, f_fs, f_vp, pn, da);
 
@@ -285,7 +286,7 @@ tpic__polyline (struct spc_tpic_ *tp,
 
     showpath(f_vp, f_fs);
 
-    pdf_dev_grestore();
+    pdf_dev_grestore(pdf);
   }
 
   tpic__clear(tp);
@@ -328,7 +329,7 @@ tpic__spline (struct spc_tpic_ *tp,
   f_vp  = (pn > 0.0) ? f_vp : 0;
 
   if (f_vp || f_fs) {
-    pdf_dev_gsave();
+    pdf_dev_gsave(pdf);
 
     set_styles(tp, c, f_fs, f_vp, pn, da);
 
@@ -351,7 +352,7 @@ tpic__spline (struct spc_tpic_ *tp,
 
     showpath(f_vp, f_fs);
 
-    pdf_dev_grestore();
+    pdf_dev_grestore(pdf);
   }
   tpic__clear(tp);
 
@@ -372,7 +373,7 @@ tpic__arc (struct spc_tpic_ *tp,
   f_vp  = (pn > 0.0) ? f_vp : 0;
 
   if (f_vp || f_fs) {
-    pdf_dev_gsave();
+    pdf_dev_gsave(pdf);
 
     set_styles(tp, c, f_fs, f_vp, pn, da);
 
@@ -380,7 +381,7 @@ tpic__arc (struct spc_tpic_ *tp,
 
     showpath(f_vp, f_fs);
 
-    pdf_dev_grestore();
+    pdf_dev_grestore(pdf);
   }
   tpic__clear(tp);
 

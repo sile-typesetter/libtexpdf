@@ -688,7 +688,7 @@ dvi_mark_depth (void)
    * See if this appears to be the end of a "logical unit"
    * that's been broken.  If so, flush the logical unit.
    */
-    pdf_doc_break_annot();
+    texpdf_doc_break_annot(pdf);
   }
   marked_depth = dvi_stack_depth;
 }
@@ -736,7 +736,7 @@ dvi_do_special (const void *buffer, int32_t size)
   double x_user, y_user, mag;
   const char *p;
 
-  graphics_mode();
+  graphics_mode(pdf);
 
   p = (const char *) buffer;
 
@@ -1036,22 +1036,22 @@ dvi_set (int32_t ch)
       wbuf[1] =  UTF32toUTF16HS(ch)       & 0xff;
       wbuf[2] = (UTF32toUTF16LS(ch) >> 8) & 0xff;
       wbuf[3] =  UTF32toUTF16LS(ch)       & 0xff;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 4,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 4,
 			 width, font->font_id, 2);
     } else if (ch > 255) { /* _FIXME_ */
       wbuf[0] = (ch >> 8) & 0xff;
       wbuf[1] =  ch & 0xff;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 2,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else if (font->subfont_id >= 0) {
       unsigned short uch = lookup_sfd_record(font->subfont_id, (unsigned char) ch);
       wbuf[0] = (uch >> 8) & 0xff;
       wbuf[1] =  uch & 0xff;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 2,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else {
       wbuf[0] = (unsigned char) ch;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 1,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 1,
 			 width, font->font_id, 1);
     }
     if (dvi_is_tracking_boxes()) {
@@ -1064,7 +1064,7 @@ dvi_set (int32_t ch)
 
       pdf_dev_set_rect  (&rect, dvi_state.h, -dvi_state.v,
 			 width, height, depth);
-      pdf_doc_expand_box(&rect);
+      texpdf_doc_expand_box(pdf, &rect);
     }
     break;
   case  VIRTUAL:
@@ -1108,12 +1108,12 @@ dvi_put (int32_t ch)
       wbuf[1] =  UTF32toUTF16HS(ch)       & 0xff;
       wbuf[2] = (UTF32toUTF16LS(ch) >> 8) & 0xff;
       wbuf[3] =  UTF32toUTF16LS(ch)       & 0xff;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 4,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 4,
 			 width, font->font_id, 2);
     } else if (ch > 255) { /* _FIXME_ */
       wbuf[0] = (ch >> 8) & 0xff;
       wbuf[1] =  ch & 0xff;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 2,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else if (font->subfont_id >= 0) {
       unsigned int uch;
@@ -1121,11 +1121,11 @@ dvi_put (int32_t ch)
       uch = lookup_sfd_record(font->subfont_id, (unsigned char) ch);
       wbuf[0] = (uch >> 8) & 0xff;
       wbuf[1] =  uch & 0xff;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 2,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else {
       wbuf[0] = (unsigned char) ch;
-      pdf_dev_set_string(dvi_state.h, -dvi_state.v, wbuf, 1,
+      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 1,
 			 width, font->font_id, 1);
     }
     if (dvi_is_tracking_boxes()) {
@@ -1138,7 +1138,7 @@ dvi_put (int32_t ch)
 
       pdf_dev_set_rect  (&rect, dvi_state.h, -dvi_state.v,
 			 width, height, depth);
-      pdf_doc_expand_box(&rect);
+      texpdf_doc_expand_box(pdf, &rect);
     }
     break;
   case  VIRTUAL:    
@@ -1163,13 +1163,13 @@ dvi_rule (int32_t width, int32_t height)
 
     switch (dvi_state.d) {
     case 0:
-      pdf_dev_set_rule(dvi_state.h, -dvi_state.v,  width, height);
+      pdf_dev_set_rule(pdf, dvi_state.h, -dvi_state.v,  width, height);
       break;
     case 1:
-      pdf_dev_set_rule(dvi_state.h, -dvi_state.v - width, height, width);
+      pdf_dev_set_rule(pdf, dvi_state.h, -dvi_state.v - width, height, width);
       break;
     case 3: 
-      pdf_dev_set_rule(dvi_state.h - height, -dvi_state.v , height, width);
+      pdf_dev_set_rule(pdf, dvi_state.h - height, -dvi_state.v , height, width);
       break;
     }
   }
@@ -1397,7 +1397,7 @@ do_bop (void)
   clear_state();
   processing_page = 1;
 
-  pdf_doc_begin_page(dvi_tell_mag(), dev_origin_x, dev_origin_y);
+  texpdf_doc_begin_page(pdf, dvi_tell_mag(), dev_origin_x, dev_origin_y);
   spc_exec_at_begin_page();
 
   return;
@@ -1413,7 +1413,7 @@ do_eop (void)
   }
   spc_exec_at_end_page();
 
-  pdf_doc_end_page();
+  texpdf_doc_end_page(pdf);
 
   return;
 }
@@ -1552,7 +1552,7 @@ do_glyphs (void)
       (double)((unsigned char)(font->rgba_color >> 24) & 0xff) / 255,
       (double)((unsigned char)(font->rgba_color >> 16) & 0xff) / 255,
       (double)((unsigned char)(font->rgba_color >>  8) & 0xff) / 255);
-    pdf_color_push(&color, &color);
+    pdf_color_push(pdf, &color, &color);
   }
 
   for (i = 0; i < slen; i++) {
@@ -1576,18 +1576,18 @@ do_glyphs (void)
         height = (double)font->size * (double)font->ft_face->ascender / (double)font->ft_face->units_per_EM;
         depth  = (double)font->size * -(double)font->ft_face->descender / (double)font->ft_face->units_per_EM;
         pdf_dev_set_rect(&rect, dvi_state.h + xloc[i], -dvi_state.v - yloc[i], glyph_width, height, depth);
-        pdf_doc_expand_box(&rect);
+        texpdf_doc_expand_box(pdf, &rect);
       }
     }
 
     wbuf[0] = glyph_id >> 8;
     wbuf[1] = glyph_id & 0xff;
-    pdf_dev_set_string(dvi_state.h + xloc[i], -dvi_state.v - yloc[i], wbuf, 2,
+    pdf_dev_set_string(pdf, dvi_state.h + xloc[i], -dvi_state.v - yloc[i], wbuf, 2,
                        glyph_width, font->font_id, -1);
   }
 
   if (font->rgba_color != 0xffffffff) {
-    pdf_color_pop();
+    pdf_color_pop(pdf);
   }
   RELEASE(xloc);
   RELEASE(yloc);

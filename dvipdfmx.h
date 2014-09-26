@@ -25,10 +25,14 @@
 #ifndef _DVIPDFMX_H_
 #define _DVIPDFMX_H_
 
+#include "libtexpdf/libtexpdf.h"
+
 extern int compat_mode;
 extern int is_xdv;
 extern const char *my_name;
 
 extern int extractbb(int argc, char *argv[]);
+
+extern pdf_doc* pdf;
 
 #endif /* _DVIPDFMX_H_ */

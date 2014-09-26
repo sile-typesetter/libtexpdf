@@ -42,6 +42,7 @@
 #include "numbers.h"
     
 #include "libtexpdf/libtexpdf.h"
+#include "dvipdfmx.h"
 
 #include "specials.h"
 
@@ -63,7 +64,7 @@ spc_handler_xtx_do_transform (double x_user, double y_user, double a, double b, 
   M.e = ((1.0 - M.a) * x_user - M.c * y_user) + e;
   M.f = ((1.0 - M.d) * y_user - M.b * x_user) + f;
 
-  pdf_dev_concat(&M);
+  pdf_dev_concat(pdf, &M);
   pdf_dev_get_fixed_point(&pt);
   pdf_dev_set_fixed_point(x_user - pt.x, y_user - pt.y);
 
@@ -136,7 +137,7 @@ spc_handler_xtx_rotate (struct spc_env *spe, struct spc_arg *args)
 int
 spc_handler_xtx_gsave (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_dev_gsave();
+  pdf_dev_gsave(pdf);
 
   return  0;
 }
@@ -144,7 +145,7 @@ spc_handler_xtx_gsave (struct spc_env *spe, struct spc_arg *args)
 int
 spc_handler_xtx_grestore (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_dev_grestore();
+  pdf_dev_grestore(pdf);
 
   /*
    * Unfortunately, the following line is necessary in case
@@ -154,7 +155,7 @@ spc_handler_xtx_grestore (struct spc_env *spe, struct spc_arg *args)
    * starting a new page.
    */
   pdf_dev_reset_fonts();
-  pdf_dev_reset_color(0);
+  pdf_dev_reset_color(pdf, 0);
 
   return  0;
 }
@@ -178,7 +179,7 @@ spc_handler_xtx_backgroundcolor (struct spc_env *spe, struct spc_arg *args)
   if (error)
     spc_warn(spe, "No valid color specified?");
   else {
-    pdf_doc_set_bgcolor(&colorspec);
+    texpdf_doc_set_bgcolor(pdf, &colorspec);
   }
 
   return  error;
@@ -299,11 +300,11 @@ spc_handler_xtx_clipoverlay (struct spc_env *spe, struct spc_arg *args)
   skip_white(&args->curptr, args->endptr);
   if (args->curptr >= args->endptr)
     return -1;
-  pdf_dev_grestore();
-  pdf_dev_gsave();
+  pdf_dev_grestore(pdf);
+  pdf_dev_gsave(pdf);
   if (strncmp(overlay_name, args->curptr, strlen(overlay_name)) != 0
    && strncmp("all", args->curptr, strlen("all")) != 0)
-    pdf_doc_add_page_content(" 0 0 m W n", 10);
+    texpdf_doc_add_page_content(pdf, " 0 0 m W n", 10);
 
   args->curptr = args->endptr;
   return 0;
@@ -322,11 +323,11 @@ spc_handler_xtx_renderingmode (struct spc_env *spe, struct spc_arg *args)
     return -1;
   }
   sprintf(work_buffer, " %d Tr", (int) value);
-  pdf_doc_add_page_content(work_buffer, strlen(work_buffer));
+  texpdf_doc_add_page_content(pdf, work_buffer, strlen(work_buffer));
   skip_white(&args->curptr, args->endptr);
   if (args->curptr < args->endptr) {
-    pdf_doc_add_page_content(" ", 1);
-    pdf_doc_add_page_content(args->curptr, args->endptr - args->curptr);
+    texpdf_doc_add_page_content(pdf, " ", 1);
+    texpdf_doc_add_page_content(pdf, args->curptr, args->endptr - args->curptr);
   }
 
   args->curptr = args->endptr;

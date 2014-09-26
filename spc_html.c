@@ -29,6 +29,7 @@
 #include "error.h"
 
 #include "libtexpdf/libtexpdf.h"
+#include "dvipdfmx.h"
 
 #include "specials.h"
 #include "spc_util.h"
@@ -360,7 +361,7 @@ html_open_dest (struct spc_env *spe, const char *name, struct spc_html_ *sd)
   cp.x = spe->x_user; cp.y = spe->y_user;
   pdf_dev_transform(&cp, NULL);
 
-  page_ref = pdf_doc_this_page_ref();
+  page_ref = texpdf_doc_this_page_ref(pdf);
   ASSERT( page_ref ); /* Otherwise must be bug */
 
   array = pdf_new_array();
@@ -370,7 +371,7 @@ html_open_dest (struct spc_env *spe, const char *name, struct spc_html_ *sd)
   pdf_add_array(array, pdf_new_number(cp.y + 24.0));
   pdf_add_array(array, pdf_new_null());
 
-  error = pdf_doc_add_names("Dests",
+  error = texpdf_doc_add_names(pdf, "Dests",
 			    name, strlen(name),
 			    array);
 
@@ -546,7 +547,7 @@ check_resourcestatus (const char *category, const char *resname)
 {
   pdf_obj  *dict1, *dict2;
 
-  dict1 = pdf_doc_current_page_resources();
+  dict1 = texpdf_doc_current_page_resources(pdf);
   if (!dict1)
     return  0;
 
@@ -631,7 +632,7 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
     return  error;
   }
 
-  id = pdf_ximage_findresource(pdf_string_value(src), 0, NULL);
+  id = pdf_ximage_findresource(pdf, pdf_string_value(src), 0, NULL);
   if (id < 0) {
     spc_warn(spe, "Could not find/load image: %s", pdf_string_value(src)); 
     error = -1;
@@ -641,9 +642,9 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
       char     *res_name;
       pdf_rect  r;
 
-      graphics_mode();
+      graphics_mode(pdf);
 
-      pdf_dev_gsave();
+      pdf_dev_gsave(pdf);
 
 #ifdef  ENABLE_HTML_SVG_OPACITY
       {
@@ -654,13 +655,13 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
           sprintf(res_name, "_Tps_a%03d_", a); /* Not Tps prefix but... */
           if (!check_resourcestatus("ExtGState", res_name)) {
             dict = create_xgstate(round_at(0.01 * a, 0.01), 0);
-            pdf_doc_add_page_resource("ExtGState",
+            texpdf_doc_add_page_resource(pdf, "ExtGState",
                                       res_name, pdf_ref_obj(dict));
             pdf_release_obj(dict);
           }
-          pdf_doc_add_page_content(" /", 2);  /* op: */
-          pdf_doc_add_page_content(res_name, strlen(res_name));  /* op: */
-          pdf_doc_add_page_content(" gs", 3);  /* op: gs */
+          texpdf_doc_add_page_content(pdf, " /", 2);  /* op: */
+          texpdf_doc_add_page_content(pdf, res_name, strlen(res_name));  /* op: */
+          texpdf_doc_add_page_content(pdf, " gs", 3);  /* op: gs */
           RELEASE(res_name);
         }
       }
@@ -668,18 +669,18 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
 
       pdf_ximage_scale_image(id, &M1, &r, &ti);
       pdf_concatmatrix(&M, &M1);
-      pdf_dev_concat(&M);
+      pdf_dev_concat(pdf, &M);
 
-      pdf_dev_rectclip(r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
+      pdf_dev_rectclip(pdf, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
 
       res_name = pdf_ximage_get_resname(id);
-      pdf_doc_add_page_content(" /", 2);  /* op: */
-      pdf_doc_add_page_content(res_name, strlen(res_name));  /* op: */
-      pdf_doc_add_page_content(" Do", 3);  /* op: Do */
+      texpdf_doc_add_page_content(pdf, " /", 2);  /* op: */
+      texpdf_doc_add_page_content(pdf, res_name, strlen(res_name));  /* op: */
+      texpdf_doc_add_page_content(pdf, " Do", 3);  /* op: Do */
 
-      pdf_dev_grestore();
+      pdf_dev_grestore(pdf);
 
-      pdf_doc_add_page_resource("XObject",
+      texpdf_doc_add_page_resource(pdf, "XObject",
                                 res_name,
                                 pdf_ximage_get_reference(id));
     }

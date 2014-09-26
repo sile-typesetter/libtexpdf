@@ -35,6 +35,7 @@
 #include "dvi.h"
 #include "dvicodes.h"
 
+#include "dvipdfmx.h"
 #include "libtexpdf/libtexpdf.h"
 
 #include "specials.h"
@@ -153,7 +154,7 @@ spc_handler_ps_file (struct spc_env *spe, struct spc_arg *args)
     return  -1;
   }
 
-  form_id = pdf_ximage_findresource(filename, 1, NULL);
+  form_id = pdf_ximage_findresource(pdf, filename, 1, NULL);
   if (form_id < 0) {
     spc_warn(spe, "Failed to read image file: %s", filename);
     RELEASE(filename);
@@ -161,7 +162,7 @@ spc_handler_ps_file (struct spc_env *spe, struct spc_arg *args)
   }
   RELEASE(filename);
 
-  pdf_dev_put_image(form_id, &ti, spe->x_user, spe->y_user);
+  pdf_dev_put_image(pdf, form_id, &ti, spe->x_user, spe->y_user);
 
   return  0;
 }
@@ -186,7 +187,7 @@ spc_handler_ps_plotfile (struct spc_env *spe, struct spc_arg *args)
     return -1;
   }
 
-  form_id = pdf_ximage_findresource(filename, 1, NULL);
+  form_id = pdf_ximage_findresource(pdf, filename, 1, NULL);
   if (form_id < 0) {
     spc_warn(spe, "Could not open PS file: %s", filename);
     error = -1;
@@ -199,7 +200,7 @@ spc_handler_ps_plotfile (struct spc_env *spe, struct spc_arg *args)
 		      block_pending ? pending_x : spe->x_user,
 		      block_pending ? pending_y : spe->y_user);
 #endif
-    pdf_dev_put_image(form_id, &p, 0, 0);
+    pdf_dev_put_image(pdf, form_id, &p, 0, 0);
   }
   RELEASE(filename);
 
@@ -253,12 +254,12 @@ spc_handler_ps_literal (struct spc_env *spe, struct spc_arg *args)
     st_depth = mps_stack_depth();
     gs_depth = pdf_dev_current_depth();
 
-    error = mps_exec_inline(&args->curptr,
+    error = mps_exec_inline(pdf, &args->curptr,
 			    args->endptr,
 			    x_user, y_user);
     if (error) {
       spc_warn(spe, "Interpreting PS code failed!!! Output might be broken!!!");
-      pdf_dev_grestore_to(gs_depth);
+      pdf_dev_grestore_to(pdf, gs_depth);
     } else if (st_depth != mps_stack_depth()) {
       spc_warn(spe, "Stack not empty after execution of inline PostScript code.");
       spc_warn(spe, ">> Your macro package makes some assumption on internal behaviour of DVI drivers.");
@@ -382,7 +383,7 @@ spc_handler_ps_tricks_bput (struct spc_env *spe, struct spc_arg *args, int must_
   }
   T.e = tr.x; T.f = tr.y;
 
-  pdf_dev_concat(&T);
+  pdf_dev_concat(pdf, &T);
 
   if (must_def != 0) {
     FILE* fp;
@@ -412,7 +413,7 @@ spc_handler_ps_tricks_eput (struct spc_env *spe, struct spc_arg *args)
   pdf_coord tr = put_stack[put_stack_depth--];
   pdf_tmatrix M = { 1, 0, 0, 1, -tr.x, -tr.y };
 
-  pdf_dev_concat(&M);
+  pdf_dev_concat(pdf, &M);
 
   return 0;
 }
@@ -596,7 +597,7 @@ spc_handler_ps_tricks_parse_path (struct spc_env *spe, struct spc_arg *args)
   }
 
   fp = fopen(gs_out, "rb");
-   if (pdf_copy_clip(fp, 1, 0, 0) != 0) {
+   if (pdf_copy_clip(pdf, fp, 1, 0, 0) != 0) {
     spc_warn(spe, "Failed to parse the clipping path.");
     RELEASE(gs_in);
     gs_in = 0;
@@ -682,7 +683,7 @@ spc_handler_ps_tricks_render (struct spc_env *spe, struct spc_arg *args)
       return error;
     }
 
-    form_id = pdf_ximage_findresource(gs_out, 1, NULL);
+    form_id = pdf_ximage_findresource(pdf, gs_out, 1, NULL);
     if (form_id < 0) {
       spc_warn(spe, "Failed to read converted PSTricks image file.");
       RELEASE(gs_in);
@@ -690,7 +691,7 @@ spc_handler_ps_tricks_render (struct spc_env *spe, struct spc_arg *args)
       RELEASE(gs_out);
       return  -1;
     }
-    pdf_dev_put_image(form_id, &p, 0, 0);
+    pdf_dev_put_image(pdf, form_id, &p, 0, 0);
 
     dpx_delete_temp_file(gs_out, true);
     dpx_delete_temp_file(gs_in, true);
@@ -809,7 +810,7 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
 
   ASSERT(spe && args);
 
-  pdf_dev_gsave();
+  pdf_dev_gsave(pdf);
 
   st_depth = mps_stack_depth();
   gs_depth = pdf_dev_current_depth();
@@ -817,12 +818,12 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
   {
     pdf_tmatrix M;
     M.a = M.d = 1.0; M.b = M.c = 0.0; M.e = spe->x_user; M.f = spe->y_user;
-    pdf_dev_concat(&M);
-  error = mps_exec_inline(&args->curptr,
+    pdf_dev_concat(pdf, &M);
+  error = mps_exec_inline(pdf, &args->curptr,
 			  args->endptr,
 			  spe->x_user, spe->y_user);
     M.e = -spe->x_user; M.f = -spe->y_user;
-    pdf_dev_concat(&M);
+    pdf_dev_concat(pdf, &M);
   }
   if (error)
     spc_warn(spe, "Interpreting PS code failed!!! Output might be broken!!!");
@@ -834,8 +835,8 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
     }
   }
 
-  pdf_dev_grestore_to(gs_depth);
-  pdf_dev_grestore();
+  pdf_dev_grestore_to(pdf, gs_depth);
+  pdf_dev_grestore(pdf);
 
   return  error;
 }

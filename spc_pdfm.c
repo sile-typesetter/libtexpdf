@@ -34,6 +34,7 @@
 #include "numbers.h"
 
 #include "libtexpdf/libtexpdf.h"
+#include "dvipdfmx.h"
 
 #include "specials.h"
 
@@ -180,7 +181,7 @@ static int
 spc_handler_pdfm_bop (struct spc_env *spe, struct spc_arg *args)
 {
   if (args->curptr < args->endptr) {
-    pdf_doc_set_bop_content(args->curptr,
+    texpdf_doc_set_bop_content(pdf, args->curptr,
 			    (long) (args->endptr - args->curptr));
   }
 
@@ -193,7 +194,7 @@ static int
 spc_handler_pdfm_eop (struct spc_env *spe, struct spc_arg *args)
 {
   if (args->curptr < args->endptr) {
-    pdf_doc_set_eop_content(args->curptr,
+    texpdf_doc_set_eop_content(pdf, args->curptr,
 			    (long) (args->endptr - args->curptr));
   }
 
@@ -621,7 +622,7 @@ spc_handler_pdfm_annot (struct spc_env *spe, struct spc_arg *args)
   if (ident)
     spc_push_object(ident, pdf_link_obj(annot_dict));
   /* Add this reference. */
-  pdf_doc_add_annot(pdf_doc_current_page_number(), &rect, annot_dict, 1);
+  texpdf_doc_add_annot(pdf, texpdf_doc_current_page_number(pdf), &rect, annot_dict, 1);
 
   if (ident) {
     spc_flush_object(ident);
@@ -703,7 +704,7 @@ spc_handler_pdfm_bcolor (struct spc_env *spe, struct spc_arg *ap)
   if (error)
     spc_warn(spe, "Invalid color specification?");
   else {
-    pdf_color_push(&sc, &fc); /* save currentcolor */
+    pdf_color_push(pdf, &sc, &fc); /* save currentcolor */
   }
 
   return  error;
@@ -733,7 +734,7 @@ spc_handler_pdfm_scolor (struct spc_env *spe, struct spc_arg *ap)
   if (error)
     spc_warn(spe, "Invalid color specification?");
   else
-    pdf_color_set(&sc, &fc);
+    pdf_color_set(pdf, &sc, &fc);
 
   return  error;
 }
@@ -741,7 +742,7 @@ spc_handler_pdfm_scolor (struct spc_env *spe, struct spc_arg *ap)
 static int
 spc_handler_pdfm_ecolor (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_color_pop();
+  pdf_color_pop(pdf);
   return 0;
 }
 
@@ -762,8 +763,8 @@ spc_handler_pdfm_btrans (struct spc_env *spe, struct spc_arg *args)
   M.e += ((1.0 - M.a) * spe->x_user - M.c * spe->y_user);
   M.f += ((1.0 - M.d) * spe->y_user - M.b * spe->x_user);
 
-  pdf_dev_gsave();
-  pdf_dev_concat(&M);
+  pdf_dev_gsave(pdf);
+  pdf_dev_concat(pdf, &M);
 
   return 0;
 }
@@ -771,7 +772,7 @@ spc_handler_pdfm_btrans (struct spc_env *spe, struct spc_arg *args)
 static int
 spc_handler_pdfm_etrans (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_dev_grestore();
+  pdf_dev_grestore(pdf);
 
   /*
    * Unfortunately, the following line is necessary in case
@@ -781,7 +782,7 @@ spc_handler_pdfm_etrans (struct spc_env *spe, struct spc_arg *args)
    * we make no assumptions about what fonts. We act like we are
    * starting a new page.
    */
-  pdf_dev_reset_color(0);
+  pdf_dev_reset_color(pdf, 0);
 
   return 0;
 }
@@ -846,16 +847,16 @@ spc_handler_pdfm_outline (struct spc_env *spe, struct spc_arg *args)
     spc_warn(spe, "Ignoring invalid dictionary.");
     return  -1;
   }
-  current_depth = pdf_doc_bookmarks_depth();
+  current_depth = texpdf_doc_bookmarks_depth(pdf);
   if (current_depth > level) {
     while (current_depth-- > level)
-      pdf_doc_bookmarks_up();
+      texpdf_doc_bookmarks_up(pdf);
   } else if (current_depth < level) {
     while (current_depth++ < level)
-      pdf_doc_bookmarks_down();
+      texpdf_doc_bookmarks_down(pdf);
   }
 
-  pdf_doc_bookmarks_add(item_dict, is_open);
+  texpdf_doc_bookmarks_add(pdf, item_dict, is_open);
 
   return 0;
 }
@@ -882,7 +883,7 @@ spc_handler_pdfm_article (struct spc_env *spe, struct spc_arg *args)
     return  -1;
   }
 
-  pdf_doc_begin_article(ident, pdf_link_obj(info_dict));
+  texpdf_doc_begin_article(pdf, ident, pdf_link_obj(info_dict));
   spc_push_object(ident, info_dict);
   RELEASE(ident);
 
@@ -960,11 +961,11 @@ spc_handler_pdfm_bead (struct spc_env *spe, struct spc_arg *args)
     pdf_merge_dict (article, article_info);
     pdf_release_obj(article_info);
   } else {
-    pdf_doc_begin_article(article_name, pdf_link_obj(article_info));
+    texpdf_doc_begin_article(pdf, article_name, pdf_link_obj(article_info));
     spc_push_object(article_name, article_info);
   }
-  page_no = pdf_doc_current_page_number();
-  pdf_doc_add_bead(article_name, NULL, page_no, &rect);
+  page_no = texpdf_doc_current_page_number(pdf);
+  texpdf_doc_add_bead(pdf, article_name, NULL, page_no, &rect);
 
   RELEASE(article_name);
   return 0;
@@ -1023,7 +1024,7 @@ spc_handler_pdfm_image (struct spc_env *spe, struct spc_arg *args)
     }
   }
 
-  xobj_id = pdf_ximage_findresource(pdf_string_value(fspec), page_no, attr);
+  xobj_id = pdf_ximage_findresource(pdf, pdf_string_value(fspec), page_no, attr);
   if (xobj_id < 0) {
     spc_warn(spe, "Could not find image resource...");
     pdf_release_obj(fspec);
@@ -1033,7 +1034,7 @@ spc_handler_pdfm_image (struct spc_env *spe, struct spc_arg *args)
   }
 
   if (!(ti.flags & INFO_DO_HIDE))
-    pdf_dev_put_image(xobj_id, &ti, spe->x_user, spe->y_user);
+    pdf_dev_put_image(pdf, xobj_id, &ti, spe->x_user, spe->y_user);
 
   if (ident) {
     if (compat_mode &&
@@ -1081,7 +1082,7 @@ spc_handler_pdfm_dest (struct spc_env *spe, struct spc_arg *args)
     return  -1;
   }
 
-  pdf_doc_add_names("Dests",
+  texpdf_doc_add_names(pdf, "Dests",
                     pdf_string_value (name),
                     pdf_string_length(name),
                     array);
@@ -1128,7 +1129,7 @@ spc_handler_pdfm_names (struct spc_env *spe, struct spc_arg *args)
         pdf_release_obj(category);
         pdf_release_obj(tmp);
         return -1;
-      } else if (pdf_doc_add_names(pdf_name_value(category),
+      } else if (texpdf_doc_add_names(pdf, pdf_name_value(category),
                                    pdf_string_value (key),
                                    pdf_string_length(key),
                                    pdf_link_obj(value)) < 0) {
@@ -1148,7 +1149,7 @@ spc_handler_pdfm_names (struct spc_env *spe, struct spc_arg *args)
       spc_warn(spe, "PDF object expected but not found.");
       return -1;
     }
-    if (pdf_doc_add_names(pdf_name_value(category),
+    if (texpdf_doc_add_names(pdf, pdf_name_value(category),
                           pdf_string_value (key),
                           pdf_string_length(key),
                           value) < 0) {
@@ -1181,7 +1182,7 @@ spc_handler_pdfm_docinfo (struct spc_env *spe, struct spc_arg *args)
     return  -1;
   }
 
-  docinfo = pdf_doc_docinfo();
+  docinfo = texpdf_doc_docinfo(pdf);
   pdf_merge_dict(docinfo, dict);
   pdf_release_obj(dict);
 
@@ -1201,7 +1202,7 @@ spc_handler_pdfm_docview (struct spc_env *spe, struct spc_arg *args)
     return  -1;
   }
 
-  catalog  = pdf_doc_catalog();
+  catalog  = texpdf_doc_catalog(pdf);
   /* Avoid overriding whole ViewerPreferences */
   pref_old = pdf_lookup_dict(catalog, "ViewerPreferences");
   pref_add = pdf_lookup_dict(dict,    "ViewerPreferences");
@@ -1277,10 +1278,10 @@ spc_handler_pdfm_content (struct spc_env *spe, struct spc_arg *args)
     work_buffer[len++] = 'm';
     work_buffer[len++] = ' ';
 
-    pdf_doc_add_page_content(work_buffer, len);  /* op: q cm */
+    texpdf_doc_add_page_content(pdf, work_buffer, len);  /* op: q cm */
     len = (long) (args->endptr - args->curptr);
-    pdf_doc_add_page_content(args->curptr, len);  /* op: ANY */
-    pdf_doc_add_page_content(" Q", 2);  /* op: Q */
+    texpdf_doc_add_page_content(pdf, args->curptr, len);  /* op: ANY */
+    texpdf_doc_add_page_content(pdf, " Q", 2);  /* op: Q */
   }
   args->curptr = args->endptr;
 
@@ -1313,13 +1314,13 @@ spc_handler_pdfm_literal (struct spc_env *spe, struct spc_arg *args)
     if (!direct) {
       M.a = M.d = 1.0; M.b = M.c = 0.0;
       M.e = spe->x_user; M.f = spe->y_user;
-      pdf_dev_concat(&M);
+      pdf_dev_concat(pdf, &M);
     }
-    pdf_doc_add_page_content(" ", 1);  /* op: */
-    pdf_doc_add_page_content(args->curptr, (long) (args->endptr - args->curptr));  /* op: ANY */
+    texpdf_doc_add_page_content(pdf, " ", 1);  /* op: */
+    texpdf_doc_add_page_content(pdf, args->curptr, (long) (args->endptr - args->curptr));  /* op: ANY */
     if (!direct) {
       M.e = -spe->x_user; M.f = -spe->y_user;
-      pdf_dev_concat(&M);
+      pdf_dev_concat(pdf, &M);
     }
   }
 
@@ -1334,10 +1335,10 @@ spc_handler_pdfm_bcontent (struct spc_env *spe, struct spc_arg *args)
   pdf_tmatrix M;
   double xpos, ypos;
 
-  pdf_dev_gsave();
+  pdf_dev_gsave(pdf);
   pdf_dev_get_coord(&xpos, &ypos);
   pdf_setmatrix(&M, 1.0, 0.0, 0.0, 1.0, spe->x_user - xpos, spe->y_user - ypos);
-  pdf_dev_concat(&M);
+  pdf_dev_concat(pdf, &M);
   pdf_dev_push_coord(spe->x_user, spe->y_user);
   return 0;
 }
@@ -1346,8 +1347,8 @@ static int
 spc_handler_pdfm_econtent (struct spc_env *spe, struct spc_arg *args)
 {
   pdf_dev_pop_coord();
-  pdf_dev_grestore();
-  pdf_dev_reset_color(0);
+  pdf_dev_grestore(pdf);
+  pdf_dev_reset_color(pdf, 0);
 
   return 0;
 }
@@ -1358,8 +1359,8 @@ spc_handler_pdfm_code (struct spc_env *spe, struct spc_arg *args)
   skip_white(&args->curptr, args->endptr);
 
   if (args->curptr < args->endptr) {
-    pdf_doc_add_page_content(" ", 1);  /* op: */
-    pdf_doc_add_page_content(args->curptr, (long) (args->endptr - args->curptr));  /* op: ANY */
+    texpdf_doc_add_page_content(pdf, " ", 1);  /* op: */
+    texpdf_doc_add_page_content(pdf, args->curptr, (long) (args->endptr - args->curptr));  /* op: ANY */
     args->curptr = args->endptr;
   }
 
@@ -1575,7 +1576,7 @@ spc_handler_pdfm_bform (struct spc_env *spe, struct spc_arg *args)
     cropbox.ury = ti.height;
   }
 
-  xobj_id = pdf_doc_begin_grabbing(ident, spe->x_user, spe->y_user, &cropbox);
+  xobj_id = texpdf_doc_begin_grabbing(pdf, ident, spe->x_user, spe->y_user, &cropbox);
 
   if (xobj_id < 0) {
     RELEASE(ident);
@@ -1607,7 +1608,7 @@ spc_handler_pdfm_eform (struct spc_env *spe, struct spc_arg *args)
       attrib = NULL;
     }
   }
-  pdf_doc_end_grabbing(attrib);
+  texpdf_doc_end_grabbing(pdf, attrib);
 
   return 0;
 }
@@ -1664,7 +1665,7 @@ spc_handler_pdfm_uxobj (struct spc_env *spe, struct spc_arg *args)
    */
   xobj_id = findresource(sd, ident);
   if (xobj_id < 0) {
-    xobj_id = pdf_ximage_findresource(ident, 0, NULL);
+    xobj_id = pdf_ximage_findresource(pdf, ident, 0, NULL);
     if (xobj_id < 0) {
       spc_warn(spe, "Specified (image) object doesn't exist: %s", ident);
       RELEASE(ident);
@@ -1672,7 +1673,7 @@ spc_handler_pdfm_uxobj (struct spc_env *spe, struct spc_arg *args)
     }
   }
 
-  pdf_dev_put_image(xobj_id, &ti, spe->x_user, spe->y_user);
+  pdf_dev_put_image(pdf, xobj_id, &ti, spe->x_user, spe->y_user);
   RELEASE(ident);
 
   return 0;
@@ -1714,7 +1715,7 @@ spc_handler_pdfm_bgcolor (struct spc_env *spe, struct spc_arg *args)
   if (error)
     spc_warn(spe, "No valid color specified?");
   else {
-    pdf_doc_set_bgcolor(&colorspec);
+    texpdf_doc_set_bgcolor(pdf, &colorspec);
   }
 
   return  error;

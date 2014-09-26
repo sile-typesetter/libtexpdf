@@ -34,7 +34,7 @@
 
 extern void     texpdf_doc_set_verbose (void);
 
-extern void     texpdf_open_document (pdf_doc *p,
+extern pdf_doc* texpdf_open_document (
                     const char *filename,
 				    int do_encryption,
 				    double media_width, double media_height,
@@ -66,9 +66,9 @@ extern long     texpdf_doc_current_page_number    (pdf_doc *p);
 extern pdf_obj *texpdf_doc_current_page_resources (pdf_doc *p);
 
 extern pdf_obj *texpdf_doc_ref_page (pdf_doc *p, unsigned long page_no);
-#define texpdf_doc_this_page_ref(p) pdf_doc_get_reference(p,"@THISPAGE")
-#define texpdf_doc_next_page_ref(p) pdf_doc_get_reference(p,"@NEXTPAGE")
-#define texpdf_doc_prev_page_ref(p) pdf_doc_get_reference(p,"@PREVPAGE")
+#define texpdf_doc_this_page_ref(p) texpdf_doc_get_reference(p,"@THISPAGE")
+#define texpdf_doc_next_page_ref(p) texpdf_doc_get_reference(p,"@NEXTPAGE")
+#define texpdf_doc_prev_page_ref(p) texpdf_doc_get_reference(p,"@PREVPAGE")
 
 /* Not really managing tree...
  * There should be something for number tree.

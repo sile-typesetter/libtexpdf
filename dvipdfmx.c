@@ -70,12 +70,13 @@ static long opt_flags = 0;
 #define OPT_FONTMAP_FIRST_MATCH   (1 << 3)
 #define OPT_PDFDOC_NO_DEST_REMOVE (1 << 4)
 
-static char   ignore_colors = 0;
-static double annot_grow    = 0.0;
-static int    bookmark_open = 0;
-static double mag           = 1.0;
-static int    font_dpi      = 600;
-static int    really_quiet  = 0;
+static char   ignore_colors     = 0;
+static double annot_grow        = 0.0;
+static int    bookmark_open     = 0;
+static int    manual_thumbnails = 0;
+static double mag               = 1.0;
+static int    font_dpi          = 600;
+static int    really_quiet      = 0;
 /*
  * Precision is essentially limited to 0.01pt.
  * See, dev_set_string() in pdfdev.c.
@@ -103,6 +104,8 @@ char   landscape_mode    = 0;
 int always_embed = 0; /* always embed fonts, regardless of licensing flags */
 
 char *dvi_filename = NULL, *pdf_filename = NULL;
+
+pdf_doc *pdf;
 
 static void
 read_config_file (const char *config);
@@ -399,7 +402,7 @@ set_verbose (int argc, char *argv[])
     for (i = 0; i < verbose; i++) {
       dvi_set_verbose();
       pdf_dev_set_verbose();
-      pdf_doc_set_verbose();
+      texpdf_doc_set_verbose();
       pdf_enc_set_verbose();
       pdf_obj_set_verbose();
       pdf_fontmap_set_verbose();
@@ -492,7 +495,7 @@ do_args (int argc, char *argv[])
         POP_ARG();
         break;
       case 't':
-        pdf_doc_enable_manual_thumbnails();
+        manual_thumbnails = 1;
         break;
       case 'p':
         CHECK_ARG(1, "paper format/size");
@@ -759,7 +762,7 @@ do_dvi_pages (void)
   mediabox.urx = paper_width;
   mediabox.ury = paper_height;
 
-  pdf_doc_set_mediabox(0, &mediabox); /* Root node */
+  texpdf_doc_set_mediabox(pdf, 0, &mediabox); /* Root node */
 
   for (i = 0; i < num_page_ranges && dvi_npages(); i++) {
     if (page_ranges[i].last < 0)
@@ -796,7 +799,7 @@ do_dvi_pages (void)
           mediabox.lly = 0.0;
           mediabox.urx = page_width;
           mediabox.ury = page_height;
-          pdf_doc_set_mediabox(page_count+1, &mediabox);
+          texpdf_doc_set_mediabox(pdf, page_count+1, &mediabox);
         }
         dvi_do_page(page_height, x_offset, y_offset);
         page_count++;
@@ -830,7 +833,7 @@ do_mps_pages (void)
   /* _FIXME_ */
   fp = MFOPEN(dvi_filename, FOPEN_RBIN_MODE);
   if (fp) {
-    mps_do_page(fp);
+    mps_do_page(pdf, fp);
     MFCLOSE(fp);
   } else {
     long  i, page_no, step, page_count = 0;
@@ -848,7 +851,7 @@ do_mps_pages (void)
         fp = MFOPEN(filename, FOPEN_RBIN_MODE);
         if (fp) {
           MESG("[%ld<%s>", page_no + 1, filename);
-          mps_do_page(fp);
+          mps_do_page(pdf, fp);
           page_count++;
           MESG("]");
           MFCLOSE(fp);
@@ -993,8 +996,6 @@ main (int argc, char *argv[])
     if (dvi2pts == 0.0)
       ERROR("dvi_init() failed!");
 
-    pdf_doc_set_creator(dvi_comment());
-
     if (do_encryption)
       /* command line takes precedence */
       dvi_scan_specials(0, &paper_width, &paper_height, &x_offset, &y_offset, &landscape_mode,
@@ -1026,14 +1027,18 @@ main (int argc, char *argv[])
    * annot_grow:    Margin of annotation.
    * bookmark_open: Miximal depth of open bookmarks.
    */
-  pdf_open_document(pdf_filename, do_encryption,
+  pdf = texpdf_open_document(pdf_filename, do_encryption,
                     paper_width, paper_height, annot_grow, bookmark_open,
                     !(opt_flags & OPT_PDFDOC_NO_DEST_REMOVE));
 
   /* Ignore_colors placed here since
    * they are considered as device's capacity.
    */
-  pdf_init_device(dvi2pts, pdfdecimaldigits, ignore_colors);
+  pdf_init_device(pdf, dvi2pts, pdfdecimaldigits, ignore_colors);
+  texpdf_doc_set_creator(pdf, dvi_comment());
+
+  if (manual_thumbnails)
+    texpdf_doc_enable_manual_thumbnails(pdf);
 
   if (opt_flags & OPT_CIDFONT_FIXEDPITCH)
     CIDFont_set_flags(CIDFONT_FORCE_FIXEDPITCH);
@@ -1053,7 +1058,7 @@ main (int argc, char *argv[])
   /* Order of close... */
   pdf_close_device  ();
   /* pdf_close_document flushes XObject (image) and other resources. */
-  pdf_close_document();
+  texpdf_close_document(pdf);
 
   pdf_close_fontmaps(); /* pdf_font may depend on fontmap. */
 

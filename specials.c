@@ -33,6 +33,7 @@
 
 #include "dvi.h"
 #include "libtexpdf/libtexpdf.h"
+#include "dvipdfmx.h"
 
 #include "spc_pdfm.h"
 #include "spc_tpic.h"
@@ -75,7 +76,7 @@ spc_warn (struct spc_env *spe, const char *fmt, ...)
 int
 spc_begin_annot (struct spc_env *spe, pdf_obj *dict)
 {
-  pdf_doc_begin_annot(dict);
+  texpdf_doc_begin_annot(pdf, dict);
   dvi_tag_depth(); /* Tell dvi interpreter to handle line-break. */
   return  0;
 }
@@ -84,7 +85,7 @@ int
 spc_end_annot (struct spc_env *spe)
 {
   dvi_untag_depth();
-  pdf_doc_end_annot();
+  texpdf_doc_end_annot(pdf);
   return  0;
 }
 
@@ -177,32 +178,32 @@ spc_lookup_reference (const char *key)
     value = pdf_new_number(ROUND(cp.y, .01));
     break;
   case  K_OBJ__THISPAGE:
-    value = pdf_doc_this_page_ref();
+    value = texpdf_doc_this_page_ref(pdf);
     break;
   case  K_OBJ__PREVPAGE:
-    value = pdf_doc_prev_page_ref();
+    value = texpdf_doc_prev_page_ref(pdf);
     break;
   case  K_OBJ__NEXTPAGE:
-    value = pdf_doc_next_page_ref();
+    value = texpdf_doc_next_page_ref(pdf);
     break;
   case  K_OBJ__PAGES:
-    value = pdf_ref_obj(pdf_doc_page_tree());
+    value = pdf_ref_obj(texpdf_doc_page_tree(pdf));
     break;
   case  K_OBJ__NAMES:
-    value = pdf_ref_obj(pdf_doc_names());
+    value = pdf_ref_obj(texpdf_doc_names(pdf));
     break;
   case  K_OBJ__RESOURCES:
-    value = pdf_ref_obj(pdf_doc_current_page_resources());
+    value = pdf_ref_obj(texpdf_doc_current_page_resources(pdf));
     break;
   case  K_OBJ__CATALOG:
-    value = pdf_ref_obj(pdf_doc_catalog());
+    value = pdf_ref_obj(texpdf_doc_catalog(pdf));
     break;
   case  K_OBJ__DOCINFO:
-    value = pdf_ref_obj(pdf_doc_docinfo());
+    value = pdf_ref_obj(texpdf_doc_docinfo(pdf));
     break;
   default:
     if (ispageref(key))
-      value = pdf_doc_ref_page(atoi(key + 4));
+      value = texpdf_doc_ref_page(pdf, atoi(key + 4));
     else {
       value = pdf_names_lookup_reference(named_objects, key, strlen(key));
     }
@@ -241,22 +242,22 @@ spc_lookup_object (const char *key)
     value = pdf_new_number(ROUND(cp.y, .01));
     break;
   case  K_OBJ__THISPAGE:
-    value = pdf_doc_this_page();
+    value = texpdf_doc_this_page(pdf);
     break;
   case  K_OBJ__PAGES:
-    value = pdf_doc_page_tree();
+    value = texpdf_doc_page_tree(pdf);
     break;
   case  K_OBJ__NAMES:
-    value = pdf_doc_names();
+    value = texpdf_doc_names(pdf);
     break;
   case  K_OBJ__RESOURCES:
-    value = pdf_doc_current_page_resources();
+    value = texpdf_doc_current_page_resources(pdf);
     break;
   case  K_OBJ__CATALOG:
-    value = pdf_doc_catalog();
+    value = texpdf_doc_catalog(pdf);
     break;
   case  K_OBJ__DOCINFO:
-    value = pdf_doc_docinfo();
+    value = texpdf_doc_docinfo(pdf);
     break;
   default:
     value = pdf_names_lookup_object(named_objects, key, strlen(key));
@@ -322,7 +323,7 @@ init_special (struct spc_handler *special,
   spe->x_user = x_user;
   spe->y_user = y_user;
   spe->mag    = mag;
-  spe->pg     = pdf_doc_current_page_number(); /* _FIXME_ */
+  spe->pg     = texpdf_doc_current_page_number(pdf); /* _FIXME_ */
 
   args->curptr = p;
   args->endptr = args->curptr + size;

@@ -236,7 +236,7 @@ static void do_pdf (FILE *fp, char *filename)
     return;
   }
 
-  page = pdf_doc_get_page(pf, page_no, &count, &bbox, NULL);
+  page = texpdf_doc_get_page(pf, page_no, &count, &bbox, NULL); /* DANGER */
 
   pdf_close(pf);
 

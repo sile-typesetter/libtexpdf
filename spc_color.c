@@ -24,6 +24,7 @@
 #include <config.h>
 #endif
 
+#include "dvipdfmx.h"
 #include "system.h"
 #include "mem.h"
 #include "error.h"
@@ -50,7 +51,7 @@ spc_handler_color_push (struct spc_env *spe, struct spc_arg *args)
 
   error = spc_util_read_colorspec(spe, &colorspec, args, 1);
   if (!error) {
-    pdf_color_push(&colorspec, &colorspec);
+    pdf_color_push(pdf, &colorspec, &colorspec);
   }
 
   return  error;
@@ -59,7 +60,7 @@ spc_handler_color_push (struct spc_env *spe, struct spc_arg *args)
 static int
 spc_handler_color_pop  (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_color_pop();
+  pdf_color_pop(pdf);
 
   return  0;
 }
@@ -76,7 +77,7 @@ spc_handler_color_default (struct spc_env *spe, struct spc_arg *args)
   error = spc_util_read_colorspec(spe, &colorspec, args, 1);
   if (!error) {
     pdf_color_clear_stack();
-    pdf_color_set(&colorspec, &colorspec);
+    pdf_color_set(pdf, &colorspec, &colorspec);
   }
 
   return  error;
@@ -93,7 +94,7 @@ spc_handler_background (struct spc_env *spe, struct spc_arg *args)
 
   error = spc_util_read_colorspec(spe, &colorspec, args, 1);
   if (!error)
-    pdf_doc_set_bgcolor(&colorspec);
+    texpdf_doc_set_bgcolor(pdf, &colorspec);
 
   return  error;
 }
