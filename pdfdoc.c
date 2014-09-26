@@ -2220,7 +2220,7 @@ texpdf_doc_begin_page (pdf_doc *p, double scale, double x_origin, double y_origi
 }
 
 void
-pdf_doc_end_page (pdf_doc *p)
+texpdf_doc_end_page (pdf_doc *p)
 {
   pdf_dev_eop(p);
   doc_fill_page_background(p);
@@ -2245,13 +2245,27 @@ texpdf_doc_add_page_content (pdf_doc *p, const char *buffer, unsigned length)
   return;
 }
 
-void
-texpdf_open_document (pdf_doc *p, const char *filename,
+static void pdf_init(pdf_doc *p)
+{
+  p->bgcolor.num_components = 1;
+  p->bgcolor.values[0] = 1.0;
+}
+
+void 
+texpdf_doc_free(pdf_doc *p) {
+  // XXX
+  free(p);
+}
+
+pdf_doc *
+texpdf_open_document (const char *filename,
 		   int do_encryption,
                    double media_width, double media_height,
                    double annot_grow_amount, int bookmark_open_depth,
                    int check_gotos)
 {
+  pdf_doc *p = malloc(sizeof(pdf_doc));
+  pdf_init(p);
   pdf_out_init(filename, do_encryption);
 
   pdf_doc_init_catalog(p);
@@ -2302,7 +2316,7 @@ texpdf_open_document (pdf_doc *p, const char *filename,
 
   p->pending_forms = NULL;
    
-  return;
+  return p;
 }
 
 void

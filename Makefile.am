@@ -129,4 +129,4 @@ libtexpdf_la_SOURCES = \
 	unicode.c \
 	unicode.h
 
-libtexpdf_la_LIBADD = $(FREETYPE2_LIBS) $(KPATHSEA_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
+libtexpdf_la_LIBADD = $(FREETYPE2_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
