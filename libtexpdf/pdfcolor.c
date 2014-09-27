@@ -23,20 +23,7 @@
 /* No page independence here...
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "dpxfile.h"
-
-#include "pdfdoc.h"
-#include "pdfdev.h"
-
-#include "pdfcolor.h"
+#include "libtexpdf.h"
 
 static int verbose = 0;
 void

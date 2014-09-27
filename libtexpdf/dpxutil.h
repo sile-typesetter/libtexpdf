@@ -41,6 +41,7 @@
                      (c) == '{' || (c) == '}' || \
                      (c) == '%')
 #endif
+#include <ctype.h>
 
 extern void skip_white_spaces (unsigned char **s, unsigned char *endptr);
 extern int  getxpair (unsigned char **str);

@@ -20,26 +20,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 #include <ctype.h>
 #include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "numbers.h"
-
-#include "mfileio.h"
-
-#include "pdfobj.h"
-#include "pdfdoc.h"
-#include "pdfdev.h"
-
-#include "pdfparse.h"
 
 /* PDF */
 #ifdef  is_space

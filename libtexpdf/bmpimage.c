@@ -20,23 +20,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 /*
  * BMP SUPPORT: Not fully supported.
  *   Unsupported features: Transparency, etc.
  */
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-
-#include "dvipdfmx.h" /* only for "compat_mode" */
-#include "pdfobj.h"
-
-#include "bmpimage.h"
 
 #define DIB_FILE_HEADER_SIZE 14
 #define DIB_CORE_HEADER_SIZE 12

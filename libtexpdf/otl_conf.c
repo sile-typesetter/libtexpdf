@@ -18,22 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-#include "dpxfile.h"
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-#include "pdfparse.h"
-
-#include "agl.h"
-
-#include "otl_conf.h"
+#include "libtexpdf.h"
 
 #define VERBOSE_LEVEL_MIN 0
 static int verbose = 0;

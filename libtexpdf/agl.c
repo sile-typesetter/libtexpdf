@@ -34,7 +34,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "system.h"
 #include "mem.h"
 #include "error.h"
 

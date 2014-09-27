@@ -20,9 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 /*
  * PNG SUPPORT
@@ -46,15 +44,6 @@
  *  16 bpc support for PDF-1.5. JBIG compression for monochrome image.
  *  Predictor for deflate ?
  */
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-
-#include "dvipdfmx.h"
-
-#include "pdfcolor.h"
-#include "pdfobj.h"
 
 #define PNG_DEBUG_STR "PNG"
 #define PNG_DEBUG     3

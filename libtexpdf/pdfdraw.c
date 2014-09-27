@@ -20,25 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <math.h>
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-#include "mfileio.h"
-#include "dpxutil.h"
-#include "numbers.h"
-
-#include "pdfdoc.h"
-#include "pdfdev.h"
-#include "pdfcolor.h"
-
-#include "pdfdraw.h"
-
+#include "libtexpdf.h"
 
 /*
  * Numbers are rounding to 0-5 fractional digits

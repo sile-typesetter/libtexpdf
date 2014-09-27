@@ -20,20 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-#include <ctype.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "dpxutil.h"
-#include "pst_obj.h"
-#include "pst.h"
-
+#include "libtexpdf.h"
 
 #define TYPE_CHECK(o, t) do { \
                              if ((o) == NULL || pst_type_of((o)) != (t)) \
@@ -60,7 +47,7 @@ pst_parse_any (unsigned char **inbuf, unsigned char *inbufend)
 }
 
 static void
-skip_line (unsigned char **inbuf, unsigned char *inbufend)
+pst_skip_line (unsigned char **inbuf, unsigned char *inbufend)
 {
   while (*inbuf < inbufend && **inbuf != '\n' && **inbuf != '\r')
     (*inbuf)++;
@@ -74,7 +61,7 @@ static void
 skip_comments (unsigned char **inbuf, unsigned char *inbufend)
 {
   while (*inbuf < inbufend && **inbuf == '%') {
-    skip_line(inbuf, inbufend);
+    pst_skip_line(inbuf, inbufend);
     skip_white_spaces(inbuf, inbufend);
   }
 }

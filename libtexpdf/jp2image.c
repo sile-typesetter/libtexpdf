@@ -20,24 +20,13 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 /*
  * JP2 & JPX baseline SUPPORT:
  */
 
 #include <math.h>
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-
-#include "dvipdfmx.h"
-
-#include "pdfobj.h"
-
-#include "jp2image.h"
 
 /* Box types. */
 #define JP2_BOX_JP__  0x6a502020  /* Signature */

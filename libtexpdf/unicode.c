@@ -27,18 +27,7 @@
  *
  * Normalization?
  */
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "unicode.h"
+#include "libtexpdf.h"
 
 static int __verbose = 0;
 

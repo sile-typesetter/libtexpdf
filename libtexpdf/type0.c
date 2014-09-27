@@ -26,25 +26,7 @@
  *  Composite font (multiple descendants) - not supported in PDF
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "dpxfile.h"
-
-#include "pdfobj.h"
-#include "fontmap.h"
-
-#include "cmap.h"
-#include "cid.h"
-
-#include "type0.h"
-
+#include "libtexpdf.h"
 
 #define TYPE0FONT_DEBUG_STR "Type0"
 #define TYPE0FONT_DEBUG     3

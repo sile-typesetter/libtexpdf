@@ -20,36 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <ctype.h>
-#include <string.h>
-#include <math.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "mfileio.h"
-#include "numbers.h"
-
-#include "tfm.h"
-
-#include "pdfobj.h"
-#include "pdfparse.h"
-#include "pdfdev.h"
-#include "pdfdoc.h"
-
-#include "pdfcolor.h"
-#include "pdfdraw.h"
-
-#include "fontmap.h"
-#include "subfont.h"
-
-#include "pdfximage.h"
-
-#include "mpost.h"
+#include "libtexpdf.h"
 
 /*
  * Define the origin as (llx, lly) in order to
@@ -136,7 +107,9 @@ mp_setfont (const char *font_name, double pt_size)
   strcpy(font->font_name, font_name);
   font->subfont_id = subfont_id;
   font->pt_size    = pt_size;
+#ifdef TEXLIVE_INTERNAL  
   font->tfm_id     = tfm_open(font_name, 0); /* Need not exist in MP mode */
+#endif  
   font->font_id    = pdf_dev_locate_font(name,
                                          (spt_t) (pt_size * dev_unit_dviunit()));
 
@@ -207,8 +180,11 @@ is_fontname (const char *token)
   mrec = pdf_lookup_fontmap_record(token);
   if (mrec)
     return  1;
-
+#ifdef TEXLIVE_INTERNAL
   return  tfm_exists(token);
+#else
+  return 0;
+#endif  
 }
 
 int
@@ -785,10 +761,12 @@ do_show (pdf_doc *p)
   strptr = pdf_string_value (text_str);
   length = pdf_string_length(text_str);
 
+#ifdef TEXLIVE_INTERNAL
   if (font->tfm_id < 0) {
     WARN("mpost: TFM not found for \"%s\".", font->font_name);
     WARN("mpost: Text width not calculated...");
   }
+#endif
 
   text_width = 0.0;
   if (font->subfont_id >= 0) {
@@ -801,9 +779,11 @@ do_show (pdf_doc *p)
       uch = lookup_sfd_record(font->subfont_id, strptr[i]);
       ustr[2*i  ] = uch >> 8;
       ustr[2*i+1] = uch & 0xff;
+#ifdef TEXLIVE_INTERNAL      
       if (font->tfm_id >= 0) {
 	text_width += tfm_get_width(font->tfm_id, strptr[i]);
       }
+#endif      
     }
     text_width *= font->pt_size;
 
@@ -815,10 +795,12 @@ do_show (pdf_doc *p)
     RELEASE(ustr);
   } else {
 #define FWBASE ((double) (1<<20))
+#ifdef TEXLIVE_INTERNAL
     if (font->tfm_id >= 0) {
       text_width = (double) tfm_string_width(font->tfm_id, strptr, length)/FWBASE;
       text_width *= font->pt_size;
     }
+#endif    
     pdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
 		       (spt_t)(cp.y * dev_unit_dviunit()),
 		       strptr, length,
@@ -893,7 +875,7 @@ do_texfig_operator (pdf_doc *p, int opcode, double x_user, double y_user)
       ERROR("endTexFig without valid startTexFig!.");
 
     texpdf_doc_end_grabbing(p, NULL);
-    pdf_dev_put_image(p, xobj_id, &fig_p, x_user, y_user);
+    pdf_dev_put_image(p, xobj_id, &fig_p, x_user, y_user, 0); /* XXX tracking_boxes */
     in_tfig = 0;
     break;
   default:

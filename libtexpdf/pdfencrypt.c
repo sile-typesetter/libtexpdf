@@ -18,9 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,18 +32,10 @@
 #include <unistd.h>
 #endif /* WIN32 */
 
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "pdfobj.h"
-#include "dpxcrypt.h"
-
-#include "pdfencrypt.h"
-
-#include "dvipdfmx.h"
-
 #define MAX_KEY_LEN 16
 #define MAX_STR_LEN 32
+
+static char* my_name = "libtexpdf";
 
 static unsigned char algorithm, revision, key_size;
 static long permission;

@@ -44,22 +44,9 @@
  * charstring spec..
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
+#include "libtexpdf.h"
 #include <stdio.h>
-
-/* fabs, sqrt ... */
 #include <math.h>
-
-#include "error.h"
-
-/* data types, limits */
-#include "cff_types.h"
-#include "cff_limits.h"
-
-#include "cs_type2.h"
 
 #define CS_TYPE2_DEBUG_STR "Type2 Charstring Parser"
 #define CS_TYPE2_DEBUG     5

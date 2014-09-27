@@ -20,15 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "system.h"
-#include "mfileio.h"
-#include "error.h"
+#include "libtexpdf.h"
 
 #ifdef IODEBUG 
 static FILE *iodebug_file = NULL;

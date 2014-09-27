@@ -18,39 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-
-#include "numbers.h"
-#include "error.h"
-#include "mem.h"
-
-#include "dpxfile.h"
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-#include "pdfresource.h"
-#include "pdffont.h"
-
-#include "pdfencoding.h"
-#include "unicode.h"
-#include "agl.h"
-
-/* TrueType */
-#include "sfnt.h"
-#include "tt_cmap.h"
-#include "tt_table.h"
-#include "tt_glyf.h"
-#include "tt_post.h"
-#include "tt_gsub.h"
-#include "tt_aux.h"
-
-#include "truetype.h"
-
-#include "tfm.h"
+#include "libtexpdf.h"
 
 /* Modifying this has no effect :P */
 #ifdef ENABLE_NOEMBED

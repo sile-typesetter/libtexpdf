@@ -20,23 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "dpxutil.h"
-
-#include "pdfparse.h"
-#include "pdfobj.h"
-
-#include "dpxfile.h"
-
-#include "pdfencoding.h"
+#include "libtexpdf.h"
 
 static int      is_similar_charset (char **encoding, const char **encoding2);
 static pdf_obj *make_encoding_differences (char **encoding, char **baseenc,

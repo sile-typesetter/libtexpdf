@@ -20,39 +20,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
+#include "libtexpdf.h"
 #include <time.h>
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-
-#include "dpxfile.h"
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-
-#include "agl.h"
-#include "pdfencoding.h"
-#include "cmap.h"
-#include "unicode.h"
-
-#include "type1.h"
-#include "type1c.h"
-#include "truetype.h"
-
-#include "pkfont.h"
-
-#include "type0.h"
-#include "tt_cmap.h"
-#include "cidtype0.h"
-#include "otl_conf.h"
-
-#include "pdffont.h"
 
 static int __verbose = 0;
 
