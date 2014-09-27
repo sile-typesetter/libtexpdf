@@ -1,6 +1,6 @@
 #ifndef _LIBTEXPDF_H
 #define _LIBTEXPDF_H
-#include "config.h"
+#include <libtexpdf/config.h>
 
 #ifdef HAVE_STRING_H
 #include <string.h>
