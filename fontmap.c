@@ -24,7 +24,6 @@
 #include <config.h>
 #endif
 
-#include "system.h"
 #include "mem.h"
 #include "error.h"
 
@@ -1096,7 +1095,6 @@ int
 pdf_load_native_font (const char *filename, unsigned long index,
                       int layout_dir, int extend, int slant, int embolden)
 {
-  char *q;
   FT_Face face = NULL;
   int  error = -1;
 
@@ -1107,16 +1105,6 @@ pdf_load_native_font (const char *filename, unsigned long index,
 
   /* try loading the filename directly */
   error = FT_New_Face(ftLib, filename, index, &face);
-
-  /* if failed, try locating the file in the TEXMF tree */
-  if ( error &&
-       ( (q = dpx_find_opentype_file(filename)) != NULL
-      || (q = dpx_find_truetype_file(filename)) != NULL
-      || (q = dpx_find_type1_file(filename)) != NULL
-      || (q = dpx_find_dfont_file(filename)) != NULL) ) {
-    error = FT_New_Face(ftLib, q, index, &face);
-    RELEASE(q);
-  }
 
   if (error == 0)
     error = pdf_insert_native_fontmap_record(filename, index, face,
