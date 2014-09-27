@@ -162,11 +162,11 @@ void
 CIDFont_flush (CIDFont *font)
 {
   if (font) {
-    if (font->indirect)   pdf_release_obj(font->indirect);
+    if (font->indirect)   texpdf_release_obj(font->indirect);
     font->indirect = NULL;
-    if (font->fontdict)   pdf_release_obj(font->fontdict);
+    if (font->fontdict)   texpdf_release_obj(font->fontdict);
     font->fontdict = NULL;
-    if (font->descriptor) pdf_release_obj(font->descriptor);
+    if (font->descriptor) texpdf_release_obj(font->descriptor);
     font->descriptor = NULL;
   }
 }
@@ -423,10 +423,10 @@ CIDFont_base_open (CIDFont *font, const char *name, CIDSysInfo *cmap_csi, cid_op
 
     start = cid_basefont[idx].fontdict;
     end   = start + strlen(start);
-    fontdict   = parse_pdf_dict(&start, end, NULL);
+    fontdict   = texpdf_parse_pdf_dict(&start, end, NULL);
     start = cid_basefont[idx].descriptor;
     end   = start + strlen(start);
-    descriptor = parse_pdf_dict(&start, end, NULL);
+    descriptor = texpdf_parse_pdf_dict(&start, end, NULL);
 
     ASSERT(fontdict && descriptor);
   }
@@ -438,13 +438,13 @@ CIDFont_base_open (CIDFont *font, const char *name, CIDSysInfo *cmap_csi, cid_op
     int      supplement;
     pdf_obj *tmp;
 
-    tmp = pdf_lookup_dict(fontdict, "CIDSystemInfo");
+    tmp = texpdf_lookup_dict(fontdict, "CIDSystemInfo");
 
     ASSERT( tmp && pdf_obj_typeof(tmp) == PDF_DICT );
 
-    registry   = pdf_string_value(pdf_lookup_dict(tmp, "Registry"));
-    ordering   = pdf_string_value(pdf_lookup_dict(tmp, "Ordering"));
-    supplement = pdf_number_value(pdf_lookup_dict(tmp, "Supplement"));
+    registry   = texpdf_string_value(texpdf_lookup_dict(tmp, "Registry"));
+    ordering   = texpdf_string_value(texpdf_lookup_dict(tmp, "Ordering"));
+    supplement = pdf_number_value(texpdf_lookup_dict(tmp, "Supplement"));
     if (cmap_csi) { /* NULL for accept any */
       if (strcmp(registry, cmap_csi->registry) ||
           strcmp(ordering, cmap_csi->ordering))
@@ -467,7 +467,7 @@ CIDFont_base_open (CIDFont *font, const char *name, CIDSysInfo *cmap_csi, cid_op
     pdf_obj *tmp;
     char    *type;
 
-    tmp  = pdf_lookup_dict(fontdict, "Subtype");
+    tmp  = texpdf_lookup_dict(fontdict, "Subtype");
     ASSERT( tmp != NULL && pdf_obj_typeof(tmp) == PDF_NAME );
 
     type = pdf_name_value(tmp);
@@ -481,18 +481,18 @@ CIDFont_base_open (CIDFont *font, const char *name, CIDSysInfo *cmap_csi, cid_op
   }
 
   if (cidoptflags & CIDFONT_FORCE_FIXEDPITCH) {
-    if (pdf_lookup_dict(fontdict, "W")) {
-       pdf_remove_dict(fontdict, "W");
+    if (texpdf_lookup_dict(fontdict, "W")) {
+       texpdf_remove_dict(fontdict, "W");
     }
-    if (pdf_lookup_dict(fontdict, "W2")) {
-       pdf_remove_dict(fontdict, "W2");
+    if (texpdf_lookup_dict(fontdict, "W2")) {
+       texpdf_remove_dict(fontdict, "W2");
     }
   }
 
-  pdf_add_dict(fontdict,   pdf_new_name("Type"),     pdf_new_name("Font"));
-  pdf_add_dict(fontdict,   pdf_new_name("BaseFont"), pdf_new_name(fontname));
-  pdf_add_dict(descriptor, pdf_new_name("Type"),     pdf_new_name("FontDescriptor"));
-  pdf_add_dict(descriptor, pdf_new_name("FontName"), pdf_new_name(fontname));
+  texpdf_add_dict(fontdict,   texpdf_new_name("Type"),     texpdf_new_name("Font"));
+  texpdf_add_dict(fontdict,   texpdf_new_name("BaseFont"), texpdf_new_name(fontname));
+  texpdf_add_dict(descriptor, texpdf_new_name("Type"),     texpdf_new_name("FontDescriptor"));
+  texpdf_add_dict(descriptor, texpdf_new_name("FontName"), texpdf_new_name(fontname));
 
   font->fontdict   = fontdict;
   font->descriptor = descriptor;
@@ -712,7 +712,7 @@ get_cidsysinfo (const char *map_name, fontmap_opt *fmap_opt)
   int pdf_ver;
   int i, csi_idx = -1, n, m;
 
-  pdf_ver = pdf_get_version();
+  pdf_ver = texpdf_get_version();
 
   if (!fmap_opt || !fmap_opt->charcoll)
     return NULL;

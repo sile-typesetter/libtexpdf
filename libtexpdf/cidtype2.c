@@ -232,7 +232,7 @@ add_TTCIDHMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
   double   dw;
   int      empty = 1;
 
-  w_array = pdf_new_array();
+  w_array = texpdf_new_array();
   if (g->dw != 0 && g->dw <= g->emsize) {
     dw = PDFUNIT(g->dw);
   } else {
@@ -251,7 +251,7 @@ add_TTCIDHMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
     width = PDFUNIT((g->gd)[idx].advw);
     if (width == dw) {
       if (an_array) {
-	pdf_add_array(w_array, pdf_new_number(start));
+	pdf_add_array(w_array, texpdf_new_number(start));
 	pdf_add_array(w_array, an_array);
 	an_array = NULL;
 	empty = 0;
@@ -259,36 +259,36 @@ add_TTCIDHMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
     } else {
       if (cid != prev + 1) {
 	if (an_array) {
-	  pdf_add_array(w_array, pdf_new_number(start));
+	  pdf_add_array(w_array, texpdf_new_number(start));
 	  pdf_add_array(w_array, an_array);
 	  an_array = NULL;
 	  empty = 0;
 	}
       }
       if (an_array == NULL) {
-	an_array = pdf_new_array();
+	an_array = texpdf_new_array();
 	start = cid;
       }
-      pdf_add_array(an_array, pdf_new_number(width));
+      pdf_add_array(an_array, texpdf_new_number(width));
       prev = cid;
     }
   }
 
   if (an_array) {
-    pdf_add_array(w_array, pdf_new_number(start));
+    pdf_add_array(w_array, texpdf_new_number(start));
     pdf_add_array(w_array, an_array);
     empty = 0;
   }
 
-  pdf_add_dict(fontdict,
-	       pdf_new_name("DW"),
-	       pdf_new_number(dw));
+  texpdf_add_dict(fontdict,
+	       texpdf_new_name("DW"),
+	       texpdf_new_number(dw));
   if (!empty) {
-    pdf_add_dict(fontdict,
-		 pdf_new_name("W"),
+    texpdf_add_dict(fontdict,
+		 texpdf_new_name("W"),
 		 pdf_ref_obj(w_array));
   }
-  pdf_release_obj(w_array);
+  texpdf_release_obj(w_array);
 
   return;
 }
@@ -308,7 +308,7 @@ add_TTCIDVMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
   defaultVertOriginY   = PDFUNIT(g->default_advh - g->default_tsb);
   defaultAdvanceHeight = PDFUNIT(g->default_advh);
 
-  w2_array = pdf_new_array();
+  w2_array = texpdf_new_array();
   for (cid = 0; cid <= last_cid; cid++) {
     USHORT idx;
 #if 0
@@ -338,25 +338,25 @@ add_TTCIDVMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
     if (vertOriginY == defaultVertOriginY &&
 	advanceHeight == defaultAdvanceHeight) {
       if (an_array) {
-	pdf_add_array(w2_array, pdf_new_number(start));
+	pdf_add_array(w2_array, texpdf_new_number(start));
 	pdf_add_array(w2_array, an_array);
 	an_array = NULL;
 	empty = 0;
       }
     } else {
       if (cid != prev + 1 && an_array) {
-	pdf_add_array(w2_array, pdf_new_number(start));
+	pdf_add_array(w2_array, texpdf_new_number(start));
 	pdf_add_array(w2_array, an_array);
 	an_array = NULL;
 	empty = 0;
       }
       if (an_array == NULL) {
-	an_array = pdf_new_array();
+	an_array = texpdf_new_array();
 	start = cid;
       }
-      pdf_add_array(an_array, pdf_new_number(-advanceHeight));
-      pdf_add_array(an_array, pdf_new_number(vertOriginX));
-      pdf_add_array(an_array, pdf_new_number(vertOriginY));
+      pdf_add_array(an_array, texpdf_new_number(-advanceHeight));
+      pdf_add_array(an_array, texpdf_new_number(vertOriginX));
+      pdf_add_array(an_array, texpdf_new_number(vertOriginY));
       prev = cid;
     }
 #else
@@ -368,11 +368,11 @@ add_TTCIDVMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
      */
     if (vertOriginY != defaultVertOriginY ||
 	advanceHeight != defaultAdvanceHeight) {
-      pdf_add_array(w2_array, pdf_new_number(cid));
-      pdf_add_array(w2_array, pdf_new_number(cid));
-      pdf_add_array(w2_array, pdf_new_number(-advanceHeight));
-      pdf_add_array(w2_array, pdf_new_number(vertOriginX));
-      pdf_add_array(w2_array, pdf_new_number(vertOriginY));
+      pdf_add_array(w2_array, texpdf_new_number(cid));
+      pdf_add_array(w2_array, texpdf_new_number(cid));
+      pdf_add_array(w2_array, texpdf_new_number(-advanceHeight));
+      pdf_add_array(w2_array, texpdf_new_number(vertOriginX));
+      pdf_add_array(w2_array, texpdf_new_number(vertOriginY));
       empty = 0;
     }
 #endif
@@ -380,24 +380,24 @@ add_TTCIDVMetrics (pdf_obj *fontdict, struct tt_glyphs *g,
 
 #if 0
   if (an_array) {
-    pdf_add_array(w2_array, pdf_new_number(start));
+    pdf_add_array(w2_array, texpdf_new_number(start));
     pdf_add_array(w2_array, an_array);
     empty = 0;
   }
 #endif
 
   if (defaultVertOriginY != 880 || defaultAdvanceHeight != 1000) {
-    an_array = pdf_new_array();
-    pdf_add_array(an_array, pdf_new_number(defaultVertOriginY));
-    pdf_add_array(an_array, pdf_new_number(-defaultAdvanceHeight));
-    pdf_add_dict(fontdict, pdf_new_name ("DW2"), an_array);
+    an_array = texpdf_new_array();
+    pdf_add_array(an_array, texpdf_new_number(defaultVertOriginY));
+    pdf_add_array(an_array, texpdf_new_number(-defaultAdvanceHeight));
+    texpdf_add_dict(fontdict, texpdf_new_name ("DW2"), an_array);
   }
   if (!empty) {
-    pdf_add_dict(fontdict,
-		 pdf_new_name("W2"),
+    texpdf_add_dict(fontdict,
+		 texpdf_new_name("W2"),
 		 pdf_ref_obj(w2_array));
   }
-  pdf_release_obj(w2_array);
+  texpdf_release_obj(w2_array);
 
   return;
 }
@@ -508,8 +508,8 @@ CIDFont_type2_dofont (CIDFont *font)
   if (!font->indirect)
     return;
 
-  pdf_add_dict(font->fontdict, 
-	       pdf_new_name("FontDescriptor"), pdf_ref_obj(font->descriptor));
+  texpdf_add_dict(font->fontdict, 
+	       texpdf_new_name("FontDescriptor"), pdf_ref_obj(font->descriptor));
 
   if (CIDFont_is_BaseFont(font))
     return;
@@ -520,24 +520,24 @@ CIDFont_type2_dofont (CIDFont *font)
   {
     pdf_obj *tmp;
 
-    tmp = pdf_new_dict ();
-    pdf_add_dict(tmp,
-		 pdf_new_name("Registry"),
-		 pdf_new_string(font->csi->registry, strlen(font->csi->registry)));
-    pdf_add_dict(tmp,
-		 pdf_new_name("Ordering"),
-		 pdf_new_string(font->csi->ordering, strlen(font->csi->ordering)));
-    pdf_add_dict(tmp,
-		 pdf_new_name("Supplement"),
-		 pdf_new_number(font->csi->supplement));
-    pdf_add_dict(font->fontdict, pdf_new_name("CIDSystemInfo"), tmp);
+    tmp = texpdf_new_dict ();
+    texpdf_add_dict(tmp,
+		 texpdf_new_name("Registry"),
+		 texpdf_new_string(font->csi->registry, strlen(font->csi->registry)));
+    texpdf_add_dict(tmp,
+		 texpdf_new_name("Ordering"),
+		 texpdf_new_string(font->csi->ordering, strlen(font->csi->ordering)));
+    texpdf_add_dict(tmp,
+		 texpdf_new_name("Supplement"),
+		 texpdf_new_number(font->csi->supplement));
+    texpdf_add_dict(font->fontdict, texpdf_new_name("CIDSystemInfo"), tmp);
   }
 
   /* Quick exit for non-embedded & fixed-pitch font. */
   if (!CIDFont_get_embedding(font) &&
       (opt_flags & CIDFONT_FORCE_FIXEDPITCH)) {
-    pdf_add_dict(font->fontdict,
-		 pdf_new_name("DW"), pdf_new_number(1000.0));
+    texpdf_add_dict(font->fontdict,
+		 texpdf_new_name("DW"), texpdf_new_number(1000.0));
     return;
   }
 
@@ -843,8 +843,8 @@ CIDFont_type2_dofont (CIDFont *font)
    * DW, W, DW2, and W2
    */
   if (opt_flags & CIDFONT_FORCE_FIXEDPITCH) {
-    pdf_add_dict(font->fontdict,
-		 pdf_new_name("DW"), pdf_new_number(1000.0));
+    texpdf_add_dict(font->fontdict,
+		 texpdf_new_name("DW"), texpdf_new_number(1000.0));
   } else {
     add_TTCIDHMetrics(font->fontdict, glyphs, used_chars, cidtogidmap, last_cid);
     if (v_used_chars)
@@ -889,10 +889,10 @@ CIDFont_type2_dofont (CIDFont *font)
     MESG("[%ld bytes]", pdf_stream_length(fontfile));
   }
 
-  pdf_add_dict(font->descriptor,
-	       pdf_new_name("FontFile2"),
+  texpdf_add_dict(font->descriptor,
+	       texpdf_new_name("FontFile2"),
 	       pdf_ref_obj (fontfile));
-  pdf_release_obj(fontfile);
+  texpdf_release_obj(fontfile);
 
   /*
    * CIDSet
@@ -900,12 +900,12 @@ CIDFont_type2_dofont (CIDFont *font)
   {
     pdf_obj *cidset;
 
-    cidset = pdf_new_stream(STREAM_COMPRESS);
+    cidset = texpdf_new_stream(STREAM_COMPRESS);
     pdf_add_stream(cidset, used_chars, last_cid/8 + 1);
-    pdf_add_dict(font->descriptor,
-		 pdf_new_name("CIDSet"),
+    texpdf_add_dict(font->descriptor,
+		 texpdf_new_name("CIDSet"),
 		 pdf_ref_obj(cidset));
-    pdf_release_obj(cidset);
+    texpdf_release_obj(cidset);
   }
 
   /*
@@ -914,12 +914,12 @@ CIDFont_type2_dofont (CIDFont *font)
   if (cidtogidmap) {
     pdf_obj *c2gmstream;
 
-    c2gmstream = pdf_new_stream(STREAM_COMPRESS);
+    c2gmstream = texpdf_new_stream(STREAM_COMPRESS);
     pdf_add_stream(c2gmstream, cidtogidmap, (last_cid + 1) * 2);
-    pdf_add_dict(font->fontdict,
-                 pdf_new_name("CIDToGIDMap"),
+    texpdf_add_dict(font->fontdict,
+                 texpdf_new_name("CIDToGIDMap"),
                  pdf_ref_obj (c2gmstream));
-    pdf_release_obj(c2gmstream);
+    texpdf_release_obj(c2gmstream);
     RELEASE(cidtogidmap);
   }
   
@@ -1054,13 +1054,13 @@ CIDFont_type2_open (CIDFont *font, const char *name,
     font->csi->supplement = 0;
   }
 
-  font->fontdict = pdf_new_dict();
-  pdf_add_dict(font->fontdict,
-	       pdf_new_name("Type"),
-	       pdf_new_name("Font"));
-  pdf_add_dict(font->fontdict,
-	       pdf_new_name("Subtype"),
-	       pdf_new_name("CIDFontType2"));
+  font->fontdict = texpdf_new_dict();
+  texpdf_add_dict(font->fontdict,
+	       texpdf_new_name("Type"),
+	       texpdf_new_name("Font"));
+  texpdf_add_dict(font->fontdict,
+	       texpdf_new_name("Subtype"),
+	       texpdf_new_name("CIDFontType2"));
 
   font->descriptor = tt_get_fontdesc(sfont, &(opt->embed), opt->stemv, 0, name);
   if (!font->descriptor) {
@@ -1073,12 +1073,12 @@ CIDFont_type2_open (CIDFont *font, const char *name,
     fontname[6] = '+';
   }
 
-  pdf_add_dict(font->descriptor,
-	       pdf_new_name("FontName"),
-	       pdf_new_name(fontname));
-  pdf_add_dict(font->fontdict, 
-	       pdf_new_name("BaseFont"),
-	       pdf_new_name(fontname));
+  texpdf_add_dict(font->descriptor,
+	       texpdf_new_name("FontName"),
+	       texpdf_new_name(fontname));
+  texpdf_add_dict(font->fontdict, 
+	       texpdf_new_name("BaseFont"),
+	       texpdf_new_name(fontname));
 
   sfnt_close(sfont);
   if (fp)

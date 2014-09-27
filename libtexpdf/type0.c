@@ -194,9 +194,9 @@ add_ToUnicode (Type0Font *font)
      */
     tounicode = pdf_read_ToUnicode_file("Adobe-Identity-UCS2");
     if (!tounicode) { /* This should work */
-      tounicode = pdf_new_name("Identity-H");
+      tounicode = texpdf_new_name("Identity-H");
     }
-    pdf_add_dict(font->fontdict, pdf_new_name("ToUnicode"), tounicode);
+    texpdf_add_dict(font->fontdict, texpdf_new_name("ToUnicode"), tounicode);
     return;
   }
 
@@ -233,8 +233,8 @@ add_ToUnicode (Type0Font *font)
   }
 
   if (tounicode) {
-    pdf_add_dict(font->fontdict,
-		 pdf_new_name("ToUnicode"), tounicode);
+    texpdf_add_dict(font->fontdict,
+		 texpdf_new_name("ToUnicode"), tounicode);
   } else {
     WARN("Failed to load ToUnicode CMap for font \"%s\"", fontname);
   }
@@ -247,8 +247,8 @@ Type0Font_set_ToUnicode (Type0Font *font, pdf_obj *cmap_ref)
 {
   ASSERT(font);
 
-  pdf_add_dict(font->fontdict,
-	       pdf_new_name("ToUnicode"), cmap_ref);
+  texpdf_add_dict(font->fontdict,
+	       texpdf_new_name("ToUnicode"), cmap_ref);
 }
 
 static void
@@ -257,7 +257,7 @@ Type0Font_dofont (Type0Font *font)
   if (!font || !font->indirect)
     return;
 
-  if (!pdf_lookup_dict(font->fontdict, "ToUnicode")) { /* FIXME */
+  if (!texpdf_lookup_dict(font->fontdict, "ToUnicode")) { /* FIXME */
     add_ToUnicode(font);
   }
 }
@@ -267,10 +267,10 @@ Type0Font_flush (Type0Font *font)
 {
   if (font) {
     if (font->fontdict)
-      pdf_release_obj(font->fontdict);
+      texpdf_release_obj(font->fontdict);
     font->fontdict = NULL;
     if (font->indirect)
-      pdf_release_obj(font->indirect);
+      texpdf_release_obj(font->indirect);
     font->indirect = NULL;
     if (font->descriptor)
       ERROR("%s: FontDescriptor unexpected for Type0 font.", TYPE0FONT_DEBUG_STR);
@@ -315,9 +315,9 @@ Type0Font_get_resource (Type0Font *font)
   if (!font->indirect) {
     pdf_obj *array;
 
-    array = pdf_new_array();
+    array = texpdf_new_array();
     pdf_add_array(array, CIDFont_get_resource(font->descendant));
-    pdf_add_dict(font->fontdict, pdf_new_name("DescendantFonts"), array);
+    texpdf_add_dict(font->fontdict, texpdf_new_name("DescendantFonts"), array);
     font->indirect = pdf_ref_obj(font->fontdict);
   }
 
@@ -371,7 +371,7 @@ Type0Font_cache_find (const char *map_name, int cmap_id, fontmap_opt *fmap_opt)
   int         cid_id = -1, parent_id = -1, wmode = 0;
   int         pdf_ver;
 
-  pdf_ver = pdf_get_version();
+  pdf_ver = texpdf_get_version();
   if (!map_name || cmap_id < 0 || pdf_ver < 2)
     return -1;
 
@@ -439,9 +439,9 @@ Type0Font_cache_find (const char *map_name, int cmap_id, fontmap_opt *fmap_opt)
   /*
    * Now we start font dictionary.
    */
-  font->fontdict = pdf_new_dict();
-  pdf_add_dict(font->fontdict, pdf_new_name ("Type"),    pdf_new_name ("Font"));
-  pdf_add_dict(font->fontdict, pdf_new_name ("Subtype"), pdf_new_name ("Type0"));
+  font->fontdict = texpdf_new_dict();
+  texpdf_add_dict(font->fontdict, texpdf_new_name ("Type"),    texpdf_new_name ("Font"));
+  texpdf_add_dict(font->fontdict, texpdf_new_name ("Subtype"), texpdf_new_name ("Type0"));
 
   /*
    * Type0 font does not have FontDescriptor because it is not a simple font.
@@ -488,8 +488,8 @@ Type0Font_cache_find (const char *map_name, int cmap_id, fontmap_opt *fmap_opt)
   case CIDFONT_TYPE0:
     font->fontname = NEW(strlen(fontname)+strlen(font->encoding)+2, char);
     sprintf(font->fontname, "%s-%s", fontname, font->encoding);
-    pdf_add_dict(font->fontdict,
-                 pdf_new_name("BaseFont"), pdf_new_name(font->fontname));
+    texpdf_add_dict(font->fontdict,
+                 texpdf_new_name("BaseFont"), texpdf_new_name(font->fontname));
     /*
      * Need used_chars to write W, W2.
      */
@@ -507,8 +507,8 @@ Type0Font_cache_find (const char *map_name, int cmap_id, fontmap_opt *fmap_opt)
      *
      *  Use different used_chars for H and V.
      */
-    pdf_add_dict(font->fontdict,
-                 pdf_new_name("BaseFont"), pdf_new_name(fontname));
+    texpdf_add_dict(font->fontdict,
+                 texpdf_new_name("BaseFont"), texpdf_new_name(fontname));
     font->used_chars = new_used_chars2();
     break;
   default:
@@ -516,8 +516,8 @@ Type0Font_cache_find (const char *map_name, int cmap_id, fontmap_opt *fmap_opt)
     break;
   }
 
-  pdf_add_dict(font->fontdict,
-               pdf_new_name("Encoding"), pdf_new_name(font->encoding));
+  texpdf_add_dict(font->fontdict,
+               texpdf_new_name("Encoding"), texpdf_new_name(font->encoding));
 
   __cache.count++;
 
@@ -603,7 +603,7 @@ end\nend\n\n\
 %%EOF\n\
 "
 
-  stream = pdf_new_stream(STREAM_COMPRESS);
+  stream = texpdf_new_stream(STREAM_COMPRESS);
   pdf_add_stream(stream, CMAP_PART0, strlen(CMAP_PART0));
   pdf_add_stream(stream, CMAP_PART1, strlen(CMAP_PART1));
   pdf_add_stream(stream, "\n100 beginbfrange\n", strlen("\n100 beginbfrange\n"));
@@ -662,6 +662,6 @@ pdf_read_ToUnicode_file (const char *cmap_name)
     }
   }
 
-  return  (res_id < 0 ? NULL : pdf_get_resource_reference(res_id));
+  return  (res_id < 0 ? NULL : texpdf_get_resource_reference(res_id));
 }
 #endif /* !WITHOUT_COMPAT */

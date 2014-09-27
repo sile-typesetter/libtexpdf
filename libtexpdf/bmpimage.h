@@ -28,7 +28,7 @@
 #include "pdfximage.h"
 
 extern int bmp_include_image (pdf_ximage *ximage, FILE *file);
-extern int check_for_bmp     (FILE *file);
+extern int texpdf_check_for_bmp     (FILE *file);
 extern int bmp_get_bbox      (FILE *file, long *width, long *height,
                               double *xdensity, double *ydensity);
 

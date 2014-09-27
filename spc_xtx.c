@@ -64,9 +64,9 @@ spc_handler_xtx_do_transform (double x_user, double y_user, double a, double b, 
   M.e = ((1.0 - M.a) * x_user - M.c * y_user) + e;
   M.f = ((1.0 - M.d) * y_user - M.b * x_user) + f;
 
-  pdf_dev_concat(pdf, &M);
-  pdf_dev_get_fixed_point(&pt);
-  pdf_dev_set_fixed_point(x_user - pt.x, y_user - pt.y);
+  texpdf_dev_concat(pdf, &M);
+  texpdf_dev_get_fixed_point(&pt);
+  texpdf_dev_set_fixed_point(x_user - pt.x, y_user - pt.y);
 
   return  0;
 }
@@ -137,7 +137,7 @@ spc_handler_xtx_rotate (struct spc_env *spe, struct spc_arg *args)
 int
 spc_handler_xtx_gsave (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_dev_gsave(pdf);
+  texpdf_dev_gsave(pdf);
 
   return  0;
 }
@@ -145,7 +145,7 @@ spc_handler_xtx_gsave (struct spc_env *spe, struct spc_arg *args)
 int
 spc_handler_xtx_grestore (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_dev_grestore(pdf);
+  texpdf_dev_grestore(pdf);
 
   /*
    * Unfortunately, the following line is necessary in case
@@ -154,8 +154,8 @@ spc_handler_xtx_grestore (struct spc_env *spe, struct spc_arg *args)
    * we make no assumptions about what fonts. We act like we are
    * starting a new page.
    */
-  pdf_dev_reset_fonts();
-  pdf_dev_reset_color(pdf, 0);
+  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_color(pdf, 0);
 
   return  0;
 }
@@ -210,9 +210,9 @@ spc_handler_xtx_fontmapline (struct spc_env *spe, struct spc_arg *ap)
 
   switch (opchr) {
   case  '-':
-    map_name = parse_ident(&ap->curptr, ap->endptr);
+    map_name = texpdf_parse_ident(&ap->curptr, ap->endptr);
     if (map_name) {
-      pdf_remove_fontmap_record(map_name);
+      texpdf_remove_fontmap_record(map_name);
       RELEASE(map_name);
     } else {
       spc_warn(spe, "Invalid fontmap line: Missing TFM name.");
@@ -226,15 +226,15 @@ spc_handler_xtx_fontmapline (struct spc_env *spe, struct spc_arg *ap)
       *q++ = *p++;
     *q = '\0';
     mrec = NEW(1, fontmap_rec);
-    pdf_init_fontmap_record(mrec);
-    error = pdf_read_fontmap_line(mrec, buffer, (long) (ap->endptr - ap->curptr), is_pdfm_mapline(buffer));
+    texpdf_init_fontmap_record(mrec);
+    error = texpdf_read_fontmap_line(mrec, buffer, (long) (ap->endptr - ap->curptr), is_pdfm_mapline(buffer));
     if (error)
       spc_warn(spe, "Invalid fontmap line.");
     else if (opchr == '+')
-      pdf_append_fontmap_record(mrec->map_name, mrec);
+      texpdf_append_fontmap_record(mrec->map_name, mrec);
     else
-      pdf_insert_fontmap_record(mrec->map_name, mrec);
-    pdf_clear_fontmap_record(mrec);
+      texpdf_insert_fontmap_record(mrec->map_name, mrec);
+    texpdf_clear_fontmap_record(mrec);
     RELEASE(mrec);
     break;
   }
@@ -268,12 +268,12 @@ spc_handler_xtx_fontmapfile (struct spc_env *spe, struct spc_arg *args)
     break;
   }
 
-  mapfile = parse_val_ident(&args->curptr, args->endptr);
+  mapfile = texpdf_parse_val_ident(&args->curptr, args->endptr);
   if (!mapfile) {
     spc_warn(spe, "No fontmap file specified.");
     return  -1;
   } else {
-    error = pdf_load_fontmap_file(mapfile, mode);
+    error = texpdf_load_fontmap_file(mapfile, mode);
   }
 
   return  error;
@@ -300,8 +300,8 @@ spc_handler_xtx_clipoverlay (struct spc_env *spe, struct spc_arg *args)
   skip_white(&args->curptr, args->endptr);
   if (args->curptr >= args->endptr)
     return -1;
-  pdf_dev_grestore(pdf);
-  pdf_dev_gsave(pdf);
+  texpdf_dev_grestore(pdf);
+  texpdf_dev_gsave(pdf);
   if (strncmp(overlay_name, args->curptr, strlen(overlay_name)) != 0
    && strncmp("all", args->curptr, strlen("all")) != 0)
     texpdf_doc_add_page_content(pdf, " 0 0 m W n", 10);
@@ -422,7 +422,7 @@ spc_xtx_setup_handler (struct spc_handler *sph,
   ap->curptr += strlen("x:");
 
   skip_white(&ap->curptr, ap->endptr);
-  q = parse_c_ident(&ap->curptr, ap->endptr);
+  q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
   if (q) {
     for (i = 0;
          i < sizeof(xtx_handlers) / sizeof(struct spc_handler); i++) {

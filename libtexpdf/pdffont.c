@@ -115,7 +115,7 @@ struct pdf_font
 };
 
 static void
-pdf_init_font_struct (pdf_font *font)
+texpdf_init_font_struct (pdf_font *font)
 {
   ASSERT(font);
 
@@ -154,11 +154,11 @@ pdf_flush_font (pdf_font *font)
   if (font->resource && font->reference) {
     if (font->subtype != PDF_FONT_FONTTYPE_TYPE3) {
       if (pdf_font_get_flag(font, PDF_FONT_FLAG_NOEMBED)) {
-	pdf_add_dict(font->resource,
-		     pdf_new_name("BaseFont"), pdf_new_name(font->fontname));
+	texpdf_add_dict(font->resource,
+		     texpdf_new_name("BaseFont"), texpdf_new_name(font->fontname));
 	if (font->descriptor) {
-	  pdf_add_dict(font->descriptor,
-		       pdf_new_name("FontName"), pdf_new_name(font->fontname));
+	  texpdf_add_dict(font->descriptor,
+		       texpdf_new_name("FontName"), texpdf_new_name(font->fontname));
 	}
       } else {
 	if (!font->fontname) {
@@ -167,27 +167,27 @@ pdf_flush_font (pdf_font *font)
 	fontname  = NEW(7+strlen(font->fontname)+1, char);
 	uniqueTag = pdf_font_get_uniqueTag(font);
 	sprintf(fontname, "%6s+%s", uniqueTag, font->fontname);
-	pdf_add_dict(font->resource,
-		     pdf_new_name("BaseFont"), pdf_new_name(fontname));
+	texpdf_add_dict(font->resource,
+		     texpdf_new_name("BaseFont"), texpdf_new_name(fontname));
 	if (font->descriptor) {
-	  pdf_add_dict(font->descriptor,
-		       pdf_new_name("FontName"), pdf_new_name(fontname));
+	  texpdf_add_dict(font->descriptor,
+		       texpdf_new_name("FontName"), texpdf_new_name(fontname));
 	}
 	RELEASE(fontname);
       }
       if (font->descriptor) {
-	pdf_add_dict(font->resource,
-		     pdf_new_name("FontDescriptor"), pdf_ref_obj(font->descriptor));
+	texpdf_add_dict(font->resource,
+		     texpdf_new_name("FontDescriptor"), pdf_ref_obj(font->descriptor));
       }
     }
   }
 
   if (font->resource)
-    pdf_release_obj(font->resource);
+    texpdf_release_obj(font->resource);
   if (font->descriptor)
-    pdf_release_obj(font->descriptor);
+    texpdf_release_obj(font->descriptor);
   if (font->reference)
-    pdf_release_obj(font->reference);
+    texpdf_release_obj(font->reference);
 
   font->reference  = NULL;
   font->resource   = NULL;
@@ -236,7 +236,7 @@ static struct {
 };
 
 void
-pdf_init_fonts (void)
+texpdf_init_fonts (void)
 {
   ASSERT(font_cache.fonts == NULL);  
 
@@ -244,7 +244,7 @@ pdf_init_fonts (void)
   otl_init_conf();
 
   CMap_cache_init();
-  pdf_init_encodings();
+  texpdf_init_encodings();
 
   Type0Font_cache_init();
 
@@ -262,7 +262,7 @@ pdf_init_fonts (void)
 
 
 pdf_obj *
-pdf_get_font_reference (int font_id)
+texpdf_get_font_reference (int font_id)
 {
   pdf_font  *font;
 
@@ -284,7 +284,7 @@ pdf_get_font_reference (int font_id)
 }
 
 char *
-pdf_get_font_usedchars (int font_id)
+texpdf_get_font_usedchars (int font_id)
 {
   pdf_font *font;
 
@@ -306,7 +306,7 @@ pdf_get_font_usedchars (int font_id)
 }
 
 int
-pdf_get_font_wmode (int font_id)
+texpdf_get_font_wmode (int font_id)
 {
   pdf_font *font;
 
@@ -324,7 +324,7 @@ pdf_get_font_wmode (int font_id)
 }
 
 int
-pdf_get_font_subtype (int font_id)
+texpdf_get_font_subtype (int font_id)
 {
   pdf_font *font;
 
@@ -337,7 +337,7 @@ pdf_get_font_subtype (int font_id)
 
 #if 0
 char *
-pdf_get_font_fontname (int font_id)
+texpdf_get_font_fontname (int font_id)
 {
   pdf_font *font;
 
@@ -350,7 +350,7 @@ pdf_get_font_fontname (int font_id)
 #endif /* 0 */
 
 int
-pdf_get_font_encoding (int font_id)
+texpdf_get_font_encoding (int font_id)
 {
   pdf_font *font;
 
@@ -387,7 +387,7 @@ try_load_ToUnicode_CMap (pdf_font *font)
 
   ASSERT(font->map_name);
 
-  mrec = pdf_lookup_fontmap_record(font->map_name);
+  mrec = texpdf_lookup_fontmap_record(font->map_name);
   if (MREC_HAS_TOUNICODE(mrec))
     cmap_name = mrec->opt.tounicode;
   else {
@@ -402,21 +402,21 @@ try_load_ToUnicode_CMap (pdf_font *font)
     if (pdf_obj_typeof(tounicode) != PDF_STREAM)
       ERROR("Object returned by pdf_load_ToUnicode_stream() not stream object! (This must be bug)");
     else if (pdf_stream_length(tounicode) > 0) {
-      pdf_add_dict(fontdict,
-                   pdf_new_name("ToUnicode"),
+      texpdf_add_dict(fontdict,
+                   texpdf_new_name("ToUnicode"),
                    pdf_ref_obj (tounicode)); /* _FIXME_ */
       if (__verbose)
         MESG("pdf_font>> ToUnicode CMap \"%s\" attached to font id=\"%s\".\n",
              cmap_name, font->map_name);
     }
-    pdf_release_obj(tounicode);
+    texpdf_release_obj(tounicode);
   }
 
   return  0;
 }
 
 void
-pdf_close_fonts (void)
+texpdf_close_fonts (void)
 {
   int  font_id;
 
@@ -500,26 +500,26 @@ pdf_close_fonts (void)
     pdf_font *font = GET_FONT(font_id);
 
     if (font->encoding_id >= 0 && font->subtype != PDF_FONT_FONTTYPE_TYPE0) {
-      pdf_obj *enc_obj = pdf_get_encoding_obj(font->encoding_id);
+      pdf_obj *enc_obj = texpdf_get_encoding_obj(font->encoding_id);
       pdf_obj *tounicode;
 
       /* Predefined encodings (and those simplified to them) are embedded
 	 as direct objects, but this is purely a matter of taste. */
       if (enc_obj)
-        pdf_add_dict(font->resource,
-		     pdf_new_name("Encoding"),
+        texpdf_add_dict(font->resource,
+		     texpdf_new_name("Encoding"),
 		     PDF_OBJ_NAMETYPE(enc_obj) ? pdf_link_obj(enc_obj) : pdf_ref_obj(enc_obj));
 
-      if (!pdf_lookup_dict(font->resource, "ToUnicode")
+      if (!texpdf_lookup_dict(font->resource, "ToUnicode")
 	  && (tounicode = pdf_encoding_get_tounicode(font->encoding_id)))
-	pdf_add_dict(font->resource,
-		     pdf_new_name("ToUnicode"), pdf_ref_obj(tounicode));
+	texpdf_add_dict(font->resource,
+		     texpdf_new_name("ToUnicode"), pdf_ref_obj(tounicode));
     } else if (font->subtype == PDF_FONT_FONTTYPE_TRUETYPE) {
       /* encoding_id < 0 means MacRoman here (but not really)
        * We use MacRoman as "default" encoding. */
-      pdf_add_dict(font->resource,
-                   pdf_new_name("Encoding"),
-		   pdf_new_name("MacRomanEncoding"));
+      texpdf_add_dict(font->resource,
+                   texpdf_new_name("Encoding"),
+		   texpdf_new_name("MacRomanEncoding"));
     }
 
     pdf_flush_font(font);
@@ -533,7 +533,7 @@ pdf_close_fonts (void)
   Type0Font_cache_close();
 
   CMap_cache_close();
-  pdf_close_encodings();
+  texpdf_close_encodings();
 
   otl_close_conf();
   agl_close_map (); /* After encoding */
@@ -638,7 +638,7 @@ pdf_font_findresource (const char *tex_name,
 	font_cache.fonts     = RENEW(font_cache.fonts, font_cache.capacity, pdf_font);
       }
       font    = GET_FONT(font_id);
-      pdf_init_font_struct(font);
+      texpdf_init_font_struct(font);
 
       font->font_id     = type0_id;
       font->subtype     = PDF_FONT_FONTTYPE_TYPE0;
@@ -715,7 +715,7 @@ pdf_font_findresource (const char *tex_name,
 
       font = GET_FONT(font_id);
 
-      pdf_init_font_struct(font);
+      texpdf_init_font_struct(font);
 
       font->point_size  = font_scale;
       font->encoding_id = encoding_id;
@@ -800,22 +800,22 @@ pdf_font_get_resource (pdf_font *font)
   ASSERT(font);
 
   if (!font->resource) {
-    font->resource = pdf_new_dict();
-    pdf_add_dict(font->resource,
-		 pdf_new_name("Type"),      pdf_new_name("Font"));
+    font->resource = texpdf_new_dict();
+    texpdf_add_dict(font->resource,
+		 texpdf_new_name("Type"),      texpdf_new_name("Font"));
     switch (font->subtype) {
     case PDF_FONT_FONTTYPE_TYPE1:
     case PDF_FONT_FONTTYPE_TYPE1C:
-      pdf_add_dict(font->resource,
-		   pdf_new_name("Subtype"), pdf_new_name("Type1"));
+      texpdf_add_dict(font->resource,
+		   texpdf_new_name("Subtype"), texpdf_new_name("Type1"));
       break;
     case PDF_FONT_FONTTYPE_TYPE3:
-      pdf_add_dict(font->resource,
-		   pdf_new_name("Subtype"), pdf_new_name("Type3"));
+      texpdf_add_dict(font->resource,
+		   texpdf_new_name("Subtype"), texpdf_new_name("Type3"));
       break;
     case PDF_FONT_FONTTYPE_TRUETYPE:
-      pdf_add_dict(font->resource,
-		   pdf_new_name("Subtype"), pdf_new_name("TrueType"));
+      texpdf_add_dict(font->resource,
+		   texpdf_new_name("Subtype"), texpdf_new_name("TrueType"));
       break;
     default:
       break;
@@ -831,9 +831,9 @@ pdf_font_get_descriptor (pdf_font *font)
   ASSERT(font);
 
   if (!font->descriptor) {
-    font->descriptor = pdf_new_dict();
-    pdf_add_dict(font->descriptor,
-		 pdf_new_name("Type"), pdf_new_name("FontDescriptor"));
+    font->descriptor = texpdf_new_dict();
+    texpdf_add_dict(font->descriptor,
+		 texpdf_new_name("Type"), texpdf_new_name("FontDescriptor"));
   }
 
   return font->descriptor;

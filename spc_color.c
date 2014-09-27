@@ -51,7 +51,7 @@ spc_handler_color_push (struct spc_env *spe, struct spc_arg *args)
 
   error = spc_util_read_colorspec(spe, &colorspec, args, 1);
   if (!error) {
-    pdf_color_push(pdf, &colorspec, &colorspec);
+    texpdf_color_push(pdf, &colorspec, &colorspec);
   }
 
   return  error;
@@ -60,7 +60,7 @@ spc_handler_color_push (struct spc_env *spe, struct spc_arg *args)
 static int
 spc_handler_color_pop  (struct spc_env *spe, struct spc_arg *args)
 {
-  pdf_color_pop(pdf);
+  texpdf_color_pop(pdf);
 
   return  0;
 }
@@ -76,8 +76,8 @@ spc_handler_color_default (struct spc_env *spe, struct spc_arg *args)
 
   error = spc_util_read_colorspec(spe, &colorspec, args, 1);
   if (!error) {
-    pdf_color_clear_stack();
-    pdf_color_set(pdf, &colorspec, &colorspec);
+    texpdf_color_clear_stack();
+    texpdf_color_set(pdf, &colorspec, &colorspec);
   }
 
   return  error;
@@ -122,7 +122,7 @@ spc_color_check_special (const char *buf, long len)
   endptr = p + len;
 
   skip_blank(&p, endptr);
-  q = parse_c_ident(&p, endptr);
+  q = texpdf_parse_c_ident(&p, endptr);
   if (!q)
     return  0;
   else if (!strcmp(q, "color"))
@@ -145,7 +145,7 @@ spc_color_setup_handler (struct spc_handler *sph,
   ASSERT(sph && spe && ap);
 
   skip_blank(&ap->curptr, ap->endptr);
-  q = parse_c_ident(&ap->curptr, ap->endptr);
+  q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
   if (!q)
     return  -1;
   skip_blank(&ap->curptr, ap->endptr);
@@ -158,7 +158,7 @@ spc_color_setup_handler (struct spc_handler *sph,
     RELEASE(q);
     p = ap->curptr;
 
-    q = parse_c_ident(&p, ap->endptr);
+    q = texpdf_parse_c_ident(&p, ap->endptr);
     if (!q)
       return  -1;
     else if (!strcmp(q, "push")) {

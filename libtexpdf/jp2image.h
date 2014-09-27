@@ -26,7 +26,7 @@
 #include "mfileio.h"
 #include "pdfximage.h"
 
-extern int check_for_jp2     (FILE *fp);
+extern int texpdf_check_for_jp2     (FILE *fp);
 extern int jp2_include_image (pdf_ximage *ximage, FILE *fp);
 extern int jp2_get_bbox (FILE *fp, long *width, long *height,
 			double *xdensity, double *ydensity);

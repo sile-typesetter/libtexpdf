@@ -32,22 +32,22 @@ extern void dump (const char *start, const char *end);
 extern void skip_line  (const char **start, const char *end);
 extern void skip_white (const char **start, const char *end);
 
-extern char *parse_number   (const char **start, const char *end);
-extern char *parse_unsigned (const char **start, const char *end);
+extern char *texpdf_parse_number   (const char **start, const char *end);
+extern char *texpdf_parse_unsigned (const char **start, const char *end);
 
-extern char *parse_ident     (const char **start, const char *end);
-extern char *parse_val_ident (const char **start, const char *end);
-extern char *parse_opt_ident (const char **start, const char *end);
+extern char *texpdf_parse_ident     (const char **start, const char *end);
+extern char *texpdf_parse_val_ident (const char **start, const char *end);
+extern char *texpdf_parse_opt_ident (const char **start, const char *end);
 
-extern pdf_obj *parse_pdf_name    (const char **pp, const char *endptr);
-extern pdf_obj *parse_pdf_boolean (const char **pp, const char *endptr);
-extern pdf_obj *parse_pdf_number  (const char **pp, const char *endptr);
-extern pdf_obj *parse_pdf_null    (const char **pp, const char *endptr);
-extern pdf_obj *parse_pdf_string  (const char **pp, const char *endptr);
-extern pdf_obj *parse_pdf_dict    (const char **pp, const char *endptr, pdf_file *pf);
-extern pdf_obj *parse_pdf_array   (const char **pp, const char *endptr, pdf_file *pf);
-extern pdf_obj *parse_pdf_object  (const char **pp, const char *endptr, pdf_file *pf);
+extern pdf_obj *texpdf_parse_pdf_name    (const char **pp, const char *endptr);
+extern pdf_obj *texpdf_parse_pdf_boolean (const char **pp, const char *endptr);
+extern pdf_obj *texpdf_parse_pdf_number  (const char **pp, const char *endptr);
+extern pdf_obj *texpdf_parse_pdf_null    (const char **pp, const char *endptr);
+extern pdf_obj *texpdf_parse_pdf_string  (const char **pp, const char *endptr);
+extern pdf_obj *texpdf_parse_pdf_dict    (const char **pp, const char *endptr, pdf_file *pf);
+extern pdf_obj *texpdf_parse_pdf_array   (const char **pp, const char *endptr, pdf_file *pf);
+extern pdf_obj *texpdf_parse_pdf_object  (const char **pp, const char *endptr, pdf_file *pf);
 
-extern pdf_obj *parse_pdf_tainted_dict (const char **pp, const char *endptr);
+extern pdf_obj *texpdf_parse_texpdf_tainted_dict (const char **pp, const char *endptr);
 
 #endif /* _PDFPARSE_H_ */

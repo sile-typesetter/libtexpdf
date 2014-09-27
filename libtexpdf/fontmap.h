@@ -82,22 +82,22 @@ typedef struct fontmap_rec {
 
 extern void         pdf_fontmap_set_verbose   (void);
 
-extern void         pdf_init_fontmaps         (void);
+extern void         texpdf_init_fontmaps         (void);
 #if 0
 extern void         pdf_clear_fontmaps        (void);
 #endif
-extern void         pdf_close_fontmaps        (void);
+extern void         texpdf_close_fontmaps        (void);
 
-extern void         pdf_init_fontmap_record   (fontmap_rec *mrec);
-extern void         pdf_clear_fontmap_record  (fontmap_rec *mrec);
+extern void         texpdf_init_fontmap_record   (fontmap_rec *mrec);
+extern void         texpdf_clear_fontmap_record  (fontmap_rec *mrec);
 
-extern int          pdf_load_fontmap_file     (const char  *filename, int mode);
-extern int          pdf_read_fontmap_line     (fontmap_rec *mrec, const char *mline, long mline_strlen, int format);
+extern int          texpdf_load_fontmap_file     (const char  *filename, int mode);
+extern int          texpdf_read_fontmap_line     (fontmap_rec *mrec, const char *mline, long mline_strlen, int format);
 
-extern int          pdf_append_fontmap_record (const char  *kp, const fontmap_rec *mrec);
-extern int          pdf_remove_fontmap_record (const char  *kp);
-extern int          pdf_insert_fontmap_record (const char  *kp, const fontmap_rec *mrec);
-extern fontmap_rec *pdf_lookup_fontmap_record (const char  *kp);
+extern int          texpdf_append_fontmap_record (const char  *kp, const fontmap_rec *mrec);
+extern int          texpdf_remove_fontmap_record (const char  *kp);
+extern int          texpdf_insert_fontmap_record (const char  *kp, const fontmap_rec *mrec);
+extern fontmap_rec *texpdf_lookup_fontmap_record (const char  *kp);
 
 extern int          is_pdfm_mapline           (const char  *mline);
 

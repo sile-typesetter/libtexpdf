@@ -169,13 +169,13 @@ spc_lookup_reference (const char *key)
   /* xpos and ypos must be position in device space here. */
   case  K_OBJ__XPOS:
     cp.x = dvi_dev_xpos(); cp.y = 0.0;
-    pdf_dev_transform(&cp, NULL);
-    value = pdf_new_number(ROUND(cp.x, .01));
+    texpdf_dev_transform(&cp, NULL);
+    value = texpdf_new_number(ROUND(cp.x, .01));
     break;
   case  K_OBJ__YPOS:
     cp.x = 0.0; cp.y = dvi_dev_ypos();
-    pdf_dev_transform(&cp, NULL);
-    value = pdf_new_number(ROUND(cp.y, .01));
+    texpdf_dev_transform(&cp, NULL);
+    value = texpdf_new_number(ROUND(cp.y, .01));
     break;
   case  K_OBJ__THISPAGE:
     value = texpdf_doc_this_page_ref(pdf);
@@ -205,7 +205,7 @@ spc_lookup_reference (const char *key)
     if (ispageref(key))
       value = texpdf_doc_ref_page(pdf, atoi(key + 4));
     else {
-      value = pdf_names_lookup_reference(named_objects, key, strlen(key));
+      value = texpdf_names_lookup_reference(named_objects, key, strlen(key));
     }
     break;
   }
@@ -233,13 +233,13 @@ spc_lookup_object (const char *key)
   switch (k) {
   case  K_OBJ__XPOS:
     cp.x = dvi_dev_xpos(); cp.y = 0.0;
-    pdf_dev_transform(&cp, NULL);
-    value = pdf_new_number(ROUND(cp.x, .01));
+    texpdf_dev_transform(&cp, NULL);
+    value = texpdf_new_number(ROUND(cp.x, .01));
     break;
   case  K_OBJ__YPOS:
     cp.x = 0.0; cp.y = dvi_dev_ypos();
-    pdf_dev_transform(&cp, NULL);
-    value = pdf_new_number(ROUND(cp.y, .01));
+    texpdf_dev_transform(&cp, NULL);
+    value = texpdf_new_number(ROUND(cp.y, .01));
     break;
   case  K_OBJ__THISPAGE:
     value = texpdf_doc_this_page(pdf);
@@ -260,7 +260,7 @@ spc_lookup_object (const char *key)
     value = texpdf_doc_docinfo(pdf);
     break;
   default:
-    value = pdf_names_lookup_object(named_objects, key, strlen(key));
+    value = texpdf_names_lookup_object(named_objects, key, strlen(key));
     break;
   }
 
@@ -281,20 +281,20 @@ spc_push_object (const char *key, pdf_obj *value)
   if (!key || !value)
     return;
 
-  pdf_names_add_object(named_objects, key, strlen(key), value);
+  texpdf_names_add_object(named_objects, key, strlen(key), value);
 }
 
 void
 spc_flush_object (const char *key)
 {
-  pdf_names_close_object(named_objects, key, strlen(key));
+  texpdf_names_close_object(named_objects, key, strlen(key));
 }
 
 void
 spc_clear_objects (void)
 {
-  pdf_delete_name_tree(&named_objects);
-  named_objects = pdf_new_name_tree();
+  texpdf_delete_name_tree(&named_objects);
+  named_objects = texpdf_new_name_tree();
 }
 
 
@@ -464,7 +464,7 @@ spc_exec_at_begin_document (void)
 
   ASSERT(!named_objects);
 
-  named_objects = pdf_new_name_tree();
+  named_objects = texpdf_new_name_tree();
 
   for (i = 0; known_specials[i].key != NULL; i++) {
     if (known_specials[i].bodhk_func) {
@@ -488,7 +488,7 @@ spc_exec_at_end_document (void)
   }
 
   if (named_objects) {
-    pdf_delete_name_tree(&named_objects);
+    texpdf_delete_name_tree(&named_objects);
   }
 
   return error;
@@ -504,7 +504,7 @@ print_error (const char *name, struct spc_env *spe, struct spc_arg *ap)
   pdf_coord c;
 
   c.x = spe->x_user; c.y = spe->y_user;
-  pdf_dev_transform(&c, NULL);
+  texpdf_dev_transform(&c, NULL);
 
   if (ap->command && name) {
     WARN("Interpreting special command %s (%s) failed.", ap->command, name);

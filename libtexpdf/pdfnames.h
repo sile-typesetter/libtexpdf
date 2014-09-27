@@ -28,20 +28,20 @@
 #include "pdfobj.h"
 
 /* Not actually tree... */
-extern struct ht_table *pdf_new_name_tree    (void);
-extern void             pdf_delete_name_tree (struct ht_table **names);
+extern struct ht_table *texpdf_new_name_tree    (void);
+extern void             texpdf_delete_name_tree (struct ht_table **names);
 
-extern int      pdf_names_add_object       (struct ht_table *names,
+extern int      texpdf_names_add_object       (struct ht_table *names,
 					    const void *key, int keylen, pdf_obj *object);
-extern pdf_obj *pdf_names_lookup_reference (struct ht_table *names,
+extern pdf_obj *texpdf_names_lookup_reference (struct ht_table *names,
 					    const void *key, int keylen);
-extern pdf_obj *pdf_names_lookup_object    (struct ht_table *names, 
+extern pdf_obj *texpdf_names_lookup_object    (struct ht_table *names, 
 					    const void *key, int keylen);
-extern int      pdf_names_close_object     (struct ht_table *names,
+extern int      texpdf_names_close_object     (struct ht_table *names,
 					    const void *key, int keylen);
 
 /* Really create name tree... */
-extern pdf_obj *pdf_names_create_tree      (struct ht_table *names,
+extern pdf_obj *texpdf_names_create_tree      (struct ht_table *names,
 					    long *count,
 					    struct ht_table *filter);
 

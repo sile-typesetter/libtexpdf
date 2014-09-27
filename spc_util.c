@@ -47,7 +47,7 @@ skip_blank (const char **pp, const char *endptr)
 
 
 /* From pdfcolor.c */
-static int pdf_color_namedcolor (pdf_color *color, const char *colorname);
+static int texpdf_color_namedcolor (pdf_color *color, const char *colorname);
 
 int
 spc_util_read_numbers (double *values, int num_values, struct spc_arg *args)
@@ -59,7 +59,7 @@ spc_util_read_numbers (double *values, int num_values, struct spc_arg *args)
   for (count = 0;
        count < num_values &&
        args->curptr < args->endptr; ) {
-    q = parse_float_decimal(&args->curptr, args->endptr);
+    q = texpdf_parse_float_decimal(&args->curptr, args->endptr);
     if (!q)
       break;
     else {
@@ -98,7 +98,7 @@ rgb_color_from_hsv (pdf_color *color, double h, double s, double v)
     case  6: r = v ; g = v1; b = v2; break;
     }
   }
-  pdf_color_rgbcolor(color, r, g, b);
+  texpdf_color_rgbcolor(color, r, g, b);
 }
 
 static int
@@ -109,7 +109,7 @@ spc_read_color_color (struct spc_env *spe, pdf_color *colorspec, struct spc_arg 
   int      nc;
   int      error = 0;
 
-  q = parse_c_ident(&ap->curptr, ap->endptr);
+  q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
   if (!q) {
     spc_warn(spe, "No valid color specified?");
     return  -1;
@@ -122,7 +122,7 @@ spc_read_color_color (struct spc_env *spe, pdf_color *colorspec, struct spc_arg 
       spc_warn(spe, "Invalid value for RGB color specification.");
       error = -1;
     } else {
-      pdf_color_rgbcolor(colorspec, cv[0], cv[1], cv[2]);
+      texpdf_color_rgbcolor(colorspec, cv[0], cv[1], cv[2]);
     }
   } else if (!strcmp(q, "cmyk")) { /* Handle cmyk color */
     nc = spc_util_read_numbers(cv, 4, ap);
@@ -130,7 +130,7 @@ spc_read_color_color (struct spc_env *spe, pdf_color *colorspec, struct spc_arg 
       spc_warn(spe, "Invalid value for CMYK color specification.");
       error = -1;
     } else {
-      pdf_color_cmykcolor(colorspec, cv[0], cv[1], cv[2], cv[3]);
+      texpdf_color_cmykcolor(colorspec, cv[0], cv[1], cv[2], cv[3]);
     }
   } else if (!strcmp(q, "gray")) { /* Handle gray */
     nc = spc_util_read_numbers(cv, 1, ap);
@@ -138,7 +138,7 @@ spc_read_color_color (struct spc_env *spe, pdf_color *colorspec, struct spc_arg 
       spc_warn(spe, "Invalid value for gray color specification.");
       error = -1;
     } else {
-      pdf_color_graycolor(colorspec, cv[0]);
+      texpdf_color_graycolor(colorspec, cv[0]);
     }
   } else if (!strcmp(q, "hsb")) {
     nc = spc_util_read_numbers(cv, 3, ap);
@@ -152,7 +152,7 @@ spc_read_color_color (struct spc_env *spe, pdf_color *colorspec, struct spc_arg 
                colorspec->values[0], colorspec->values[1], colorspec->values[2]);
     }
   } else { /* Must be a "named" color */
-    error = pdf_color_namedcolor(colorspec, q);
+    error = texpdf_color_namedcolor(colorspec, q);
     if (error)
       spc_warn(spe, "Unrecognized color name: %s", q);
   }
@@ -185,22 +185,22 @@ spc_read_color_pdf (struct spc_env *spe, pdf_color *colorspec, struct spc_arg *a
   nc = spc_util_read_numbers(cv, 4, ap);
   switch (nc) {
   case  1:
-    pdf_color_graycolor(colorspec, cv[0]);
+    texpdf_color_graycolor(colorspec, cv[0]);
     break;
   case  3:
-    pdf_color_rgbcolor (colorspec, cv[0], cv[1], cv[2]);
+    texpdf_color_rgbcolor (colorspec, cv[0], cv[1], cv[2]);
     break;
   case  4:
-    pdf_color_cmykcolor(colorspec, cv[0], cv[1], cv[2], cv[3]);
+    texpdf_color_cmykcolor(colorspec, cv[0], cv[1], cv[2], cv[3]);
     break;
   default:
     /* Try to read the color names defined in dvipsname.def */
-    q = parse_c_ident(&ap->curptr, ap->endptr);
+    q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
     if (!q) {
       spc_warn(spe, "No valid color specified?");
       return  -1;
     }
-    error = pdf_color_namedcolor(colorspec, q);
+    error = texpdf_color_namedcolor(colorspec, q);
     if (error)
       spc_warn(spe, "Unrecognized color name: %s, keep the current color", q);
     RELEASE(q);
@@ -250,7 +250,7 @@ spc_util_read_pdfcolor (struct spc_env *spe, pdf_color *colorspec, struct spc_ar
   }
   error = spc_read_color_pdf(spe, colorspec, ap);
   if (error < 0 && defaultcolor) {
-    pdf_color_copycolor(colorspec, defaultcolor);
+    texpdf_color_copycolor(colorspec, defaultcolor);
     error = 0;
   }
   return error;
@@ -274,7 +274,7 @@ spc_util_read_length (struct spc_env *spe, double *vp /* ret. */, struct spc_arg
   };
   int     k, error = 0;
 
-  q = parse_float_decimal(&ap->curptr, ap->endptr);
+  q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
   if (!q)
     return  -1;
 
@@ -282,7 +282,7 @@ spc_util_read_length (struct spc_env *spe, double *vp /* ret. */, struct spc_arg
   RELEASE(q);
 
   skip_white(&ap->curptr, ap->endptr);
-  q = parse_c_ident(&ap->curptr, ap->endptr);
+  q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
   if (q) {
     char *qq = q;
     if (strlen(q) >= strlen("true") &&
@@ -293,7 +293,7 @@ spc_util_read_length (struct spc_env *spe, double *vp /* ret. */, struct spc_arg
       if (!*q) {
         RELEASE(qq);
         skip_white(&ap->curptr, ap->endptr);
-        qq = q = parse_c_ident(&ap->curptr, ap->endptr);
+        qq = q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
       }
     }
 
@@ -381,7 +381,7 @@ spc_read_dimtrns_dvips (struct spc_env *spe, transform_info *t, struct spc_arg *
     char  *kp, *vp;
     int    k;
 
-    kp = parse_c_ident(&ap->curptr, ap->endptr);
+    kp = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
     if (!kp)
       break;
 
@@ -410,7 +410,7 @@ spc_read_dimtrns_dvips (struct spc_env *spe, transform_info *t, struct spc_arg *
       char  qchr = ap->curptr[0];
       ap->curptr++;
       skip_blank(&ap->curptr, ap->endptr);
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
       skip_blank(&ap->curptr, ap->endptr);
       if (vp && qchr != ap->curptr[0]) {
         spc_warn(spe, "Syntax error in dimension/transformation specification.");
@@ -419,7 +419,7 @@ spc_read_dimtrns_dvips (struct spc_env *spe, transform_info *t, struct spc_arg *
       }
       ap->curptr++;
     } else {
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
     }
     if (!error && !vp) {
       spc_warn(spe, "Missing value for dimension/transformation: %s", kp);
@@ -529,7 +529,7 @@ spc_read_dimtrns_pdfm (struct spc_env *spe, transform_info *p, struct spc_arg *a
     char  *kp, *vp;
     int    k;
 
-    kp = parse_c_ident(&ap->curptr, ap->endptr);
+    kp = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
     if (!kp)
       break;
 
@@ -549,7 +549,7 @@ spc_read_dimtrns_pdfm (struct spc_env *spe, transform_info *p, struct spc_arg *a
       p->flags |= INFO_HAS_HEIGHT;
       break;
     case  K_TRN__SCALE:
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
       if (!vp)
         error = -1;
       else {
@@ -559,7 +559,7 @@ spc_read_dimtrns_pdfm (struct spc_env *spe, transform_info *p, struct spc_arg *a
       }
       break;
     case  K_TRN__XSCALE:
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
       if (!vp)
         error = -1;
       else {
@@ -569,7 +569,7 @@ spc_read_dimtrns_pdfm (struct spc_env *spe, transform_info *p, struct spc_arg *a
       }
       break;
     case  K_TRN__YSCALE:
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
       if (!vp)
         error = -1;
       else {
@@ -579,7 +579,7 @@ spc_read_dimtrns_pdfm (struct spc_env *spe, transform_info *p, struct spc_arg *a
       }
       break;
     case  K_TRN__ROTATE:
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
       if (!vp)
         error = -1;
       else {
@@ -614,7 +614,7 @@ spc_read_dimtrns_pdfm (struct spc_env *spe, transform_info *p, struct spc_arg *a
       }
       break;
     case  K__CLIP:
-      vp = parse_float_decimal(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
       if (!vp)
         error = -1;
       else {
@@ -785,12 +785,12 @@ static struct colordef_
 
 
 static int
-pdf_color_namedcolor (pdf_color *color, const char *name)
+texpdf_color_namedcolor (pdf_color *color, const char *name)
 {
   int   i;
   for (i = 0; colordefs[i].key; i++) {
     if (!strcmp(colordefs[i].key, name)) {
-      pdf_color_copycolor(color, &colordefs[i].color);
+      texpdf_color_copycolor(color, &colordefs[i].color);
       return  0;
     }
   }

@@ -778,7 +778,7 @@ dvi_locate_font (const char *tfm_name, spt_t ptsize)
    */
   cur_id = num_loaded_fonts++;
 
-  mrec = pdf_lookup_fontmap_record(tfm_name);
+  mrec = texpdf_lookup_fontmap_record(tfm_name);
   /* Load subfont mapping table */
   if (mrec && mrec->charmap.sfd_name && mrec->charmap.subfont_id) {
     subfont_id = sfd_load_record(mrec->charmap.sfd_name, mrec->charmap.subfont_id);
@@ -830,7 +830,7 @@ dvi_locate_font (const char *tfm_name, spt_t ptsize)
    */
   else if (subfont_id >= 0 && mrec->map_name)
   {
-    fontmap_rec  *mrec1 = pdf_lookup_fontmap_record(mrec->map_name);
+    fontmap_rec  *mrec1 = texpdf_lookup_fontmap_record(mrec->map_name);
     /* enc_name=NULL should be used only for 'built-in' encoding.
      * Please fix this!
      */
@@ -866,11 +866,11 @@ dvi_locate_font (const char *tfm_name, spt_t ptsize)
   }
 
   /* We need ptsize for PK font creation. */
-  font_id = pdf_dev_locate_font(name, ptsize);
+  font_id = texpdf_dev_locate_font(name, ptsize);
   if (font_id < 0) {
     WARN("Could not locate a virtual/physical font for TFM \"%s\".", tfm_name);
     if (mrec && mrec->map_name) { /* has map_name */
-      fontmap_rec  *mrec1 = pdf_lookup_fontmap_record(mrec->map_name);
+      fontmap_rec  *mrec1 = texpdf_lookup_fontmap_record(mrec->map_name);
       WARN(">> This font is mapped to an intermediate 16-bit font \"%s\" with SFD charmap=<%s,%s>,",
            mrec->map_name, mrec->charmap.sfd_name, mrec->charmap.subfont_id);
       if (!mrec1)
@@ -914,16 +914,16 @@ dvi_locate_native_font (const char *filename, uint32_t index,
   cur_id = num_loaded_fonts++;
 
   sprintf(fontmap_key, "%s/%u/%c/%d/%d/%d", filename, index, layout_dir == 0 ? 'H' : 'V', extend, slant, embolden);
-  mrec = pdf_lookup_fontmap_record(fontmap_key);
+  mrec = texpdf_lookup_fontmap_record(fontmap_key);
   if (mrec == NULL) {
     if (pdf_load_native_font(filename, index, layout_dir, extend, slant, embolden) == -1) {
       ERROR("Cannot proceed without the \"native\" font: %s", filename);
     }
-    mrec = pdf_lookup_fontmap_record(fontmap_key);
+    mrec = texpdf_lookup_fontmap_record(fontmap_key);
     /* FIXME: would be more efficient if pdf_load_native_font returned the mrec ptr (or NULL for error)
               so we could avoid doing a second lookup for the item we just inserted */
   }
-  loaded_fonts[cur_id].font_id = pdf_dev_locate_font(fontmap_key, ptsize);
+  loaded_fonts[cur_id].font_id = texpdf_dev_locate_font(fontmap_key, ptsize);
   loaded_fonts[cur_id].size    = ptsize;
   loaded_fonts[cur_id].type    = NATIVE;
   free(fontmap_key);
@@ -1018,7 +1018,7 @@ dvi_set (int32_t ch)
    */ 
   font  = &loaded_fonts[current_font];
 
-  width = tfm_get_fw_width(font->tfm_id, ch);
+  width = texpdf_tfm_get_fw_width(font->tfm_id, ch);
   width = sqxfw(font->size, width);
 
   if (lr_mode >= SKIMMING) {
@@ -1036,33 +1036,33 @@ dvi_set (int32_t ch)
       wbuf[1] =  UTF32toUTF16HS(ch)       & 0xff;
       wbuf[2] = (UTF32toUTF16LS(ch) >> 8) & 0xff;
       wbuf[3] =  UTF32toUTF16LS(ch)       & 0xff;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 4,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 4,
 			 width, font->font_id, 2);
     } else if (ch > 255) { /* _FIXME_ */
       wbuf[0] = (ch >> 8) & 0xff;
       wbuf[1] =  ch & 0xff;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else if (font->subfont_id >= 0) {
       unsigned short uch = lookup_sfd_record(font->subfont_id, (unsigned char) ch);
       wbuf[0] = (uch >> 8) & 0xff;
       wbuf[1] =  uch & 0xff;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else {
       wbuf[0] = (unsigned char) ch;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 1,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 1,
 			 width, font->font_id, 1);
     }
     if (dvi_is_tracking_boxes()) {
       pdf_rect rect;
 
-      height = tfm_get_fw_height(font->tfm_id, ch);
-      depth  = tfm_get_fw_depth (font->tfm_id, ch);
+      height = texpdf_tfm_get_fw_height(font->tfm_id, ch);
+      depth  = texpdf_tfm_get_fw_depth (font->tfm_id, ch);
       height = sqxfw(font->size, height);
       depth  = sqxfw(font->size, depth);
 
-      pdf_dev_set_rect  (&rect, dvi_state.h, -dvi_state.v,
+      texpdf_dev_set_rect  (&rect, dvi_state.h, -dvi_state.v,
 			 width, height, depth);
       texpdf_doc_expand_box(pdf, &rect);
     }
@@ -1097,7 +1097,7 @@ dvi_put (int32_t ch)
 
   switch (font->type) {
   case  PHYSICAL:
-    width = tfm_get_fw_width(font->tfm_id, ch);
+    width = texpdf_tfm_get_fw_width(font->tfm_id, ch);
     width = sqxfw(font->size, width);
 
     /* Treat a single character as a one byte string and use the
@@ -1108,12 +1108,12 @@ dvi_put (int32_t ch)
       wbuf[1] =  UTF32toUTF16HS(ch)       & 0xff;
       wbuf[2] = (UTF32toUTF16LS(ch) >> 8) & 0xff;
       wbuf[3] =  UTF32toUTF16LS(ch)       & 0xff;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 4,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 4,
 			 width, font->font_id, 2);
     } else if (ch > 255) { /* _FIXME_ */
       wbuf[0] = (ch >> 8) & 0xff;
       wbuf[1] =  ch & 0xff;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else if (font->subfont_id >= 0) {
       unsigned int uch;
@@ -1121,22 +1121,22 @@ dvi_put (int32_t ch)
       uch = lookup_sfd_record(font->subfont_id, (unsigned char) ch);
       wbuf[0] = (uch >> 8) & 0xff;
       wbuf[1] =  uch & 0xff;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 2,
 			 width, font->font_id, 2);
     } else {
       wbuf[0] = (unsigned char) ch;
-      pdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 1,
+      texpdf_dev_set_string(pdf, dvi_state.h, -dvi_state.v, wbuf, 1,
 			 width, font->font_id, 1);
     }
     if (dvi_is_tracking_boxes()) {
       pdf_rect rect;
 
-      height = tfm_get_fw_height(font->tfm_id, ch);
-      depth  = tfm_get_fw_depth (font->tfm_id, ch);
+      height = texpdf_tfm_get_fw_height(font->tfm_id, ch);
+      depth  = texpdf_tfm_get_fw_depth (font->tfm_id, ch);
       height = sqxfw(font->size, height);
       depth  = sqxfw(font->size, depth);
 
-      pdf_dev_set_rect  (&rect, dvi_state.h, -dvi_state.v,
+      texpdf_dev_set_rect  (&rect, dvi_state.h, -dvi_state.v,
 			 width, height, depth);
       texpdf_doc_expand_box(pdf, &rect);
     }
@@ -1163,13 +1163,13 @@ dvi_rule (int32_t width, int32_t height)
 
     switch (dvi_state.d) {
     case 0:
-      pdf_dev_set_rule(pdf, dvi_state.h, -dvi_state.v,  width, height);
+      texpdf_dev_set_rule(pdf, dvi_state.h, -dvi_state.v,  width, height);
       break;
     case 1:
-      pdf_dev_set_rule(pdf, dvi_state.h, -dvi_state.v - width, height, width);
+      texpdf_dev_set_rule(pdf, dvi_state.h, -dvi_state.v - width, height, width);
       break;
     case 3: 
-      pdf_dev_set_rule(pdf, dvi_state.h - height, -dvi_state.v , height, width);
+      texpdf_dev_set_rule(pdf, dvi_state.h - height, -dvi_state.v , height, width);
       break;
     }
   }
@@ -1181,7 +1181,7 @@ dvi_dir (unsigned char dir)
   if (verbose)
     fprintf(stderr, "  > dvi_dir %d\n", dir);
   dvi_state.d = dir;
-  pdf_dev_set_dirmode(dvi_state.d); /* 0: horizontal, 1,3: vertical */
+  texpdf_dev_set_dirmode(dvi_state.d); /* 0: horizontal, 1,3: vertical */
 }
 
 static void
@@ -1244,7 +1244,7 @@ dvi_pop (void)
 
   dvi_state = dvi_stack[--dvi_stack_depth];
   do_moveto(dvi_state.h, dvi_state.v);
-  pdf_dev_set_dirmode(dvi_state.d); /* 0: horizontal, 1,3: vertical */
+  texpdf_dev_set_dirmode(dvi_state.d); /* 0: horizontal, 1,3: vertical */
 }
 
 
@@ -1422,7 +1422,7 @@ static void
 do_dir (void)
 {
   dvi_state.d = get_buffered_unsigned_byte();
-  pdf_dev_set_dirmode(dvi_state.d); /* 0: horizontal, 1,3: vertical */
+  texpdf_dev_set_dirmode(dvi_state.d); /* 0: horizontal, 1,3: vertical */
 }
 
 static void
@@ -1548,11 +1548,11 @@ do_glyphs (void)
 
   if (font->rgba_color != 0xffffffff) {
     pdf_color color;
-    pdf_color_rgbcolor(&color,
+    texpdf_color_rgbcolor(&color,
       (double)((unsigned char)(font->rgba_color >> 24) & 0xff) / 255,
       (double)((unsigned char)(font->rgba_color >> 16) & 0xff) / 255,
       (double)((unsigned char)(font->rgba_color >>  8) & 0xff) / 255);
-    pdf_color_push(pdf, &color, &color);
+    texpdf_color_push(pdf, &color, &color);
   }
 
   for (i = 0; i < slen; i++) {
@@ -1575,19 +1575,19 @@ do_glyphs (void)
         pdf_rect rect;
         height = (double)font->size * (double)font->ft_face->ascender / (double)font->ft_face->units_per_EM;
         depth  = (double)font->size * -(double)font->ft_face->descender / (double)font->ft_face->units_per_EM;
-        pdf_dev_set_rect(&rect, dvi_state.h + xloc[i], -dvi_state.v - yloc[i], glyph_width, height, depth);
+        texpdf_dev_set_rect(&rect, dvi_state.h + xloc[i], -dvi_state.v - yloc[i], glyph_width, height, depth);
         texpdf_doc_expand_box(pdf, &rect);
       }
     }
 
     wbuf[0] = glyph_id >> 8;
     wbuf[1] = glyph_id & 0xff;
-    pdf_dev_set_string(pdf, dvi_state.h + xloc[i], -dvi_state.v - yloc[i], wbuf, 2,
+    texpdf_dev_set_string(pdf, dvi_state.h + xloc[i], -dvi_state.v - yloc[i], wbuf, 2,
                        glyph_width, font->font_id, -1);
   }
 
   if (font->rgba_color != 0xffffffff) {
-    pdf_color_pop(pdf);
+    texpdf_color_pop(pdf);
   }
   RELEASE(xloc);
   RELEASE(yloc);
@@ -1935,7 +1935,7 @@ read_length (double *vp, double mag, const char **pp, const char *endptr)
   };
   int     k, error = 0;
 
-  q = parse_float_decimal(&p, endptr);
+  q = texpdf_parse_float_decimal(&p, endptr);
   if (!q) {
     *vp = 0.0; *pp = p;
     return  -1;
@@ -1945,7 +1945,7 @@ read_length (double *vp, double mag, const char **pp, const char *endptr)
   RELEASE(q);
 
   skip_white(&p, endptr);
-  q = parse_c_ident(&p, endptr);
+  q = texpdf_parse_c_ident(&p, endptr);
   if (q) {
     char *qq = q; /* remember this for RELEASE, because q may be advanced */
     if (strlen(q) >= strlen("true") &&
@@ -1956,7 +1956,7 @@ read_length (double *vp, double mag, const char **pp, const char *endptr)
     if (strlen(q) == 0) { /* "true" was a separate word from the units */
       RELEASE(qq);
       skip_white(&p, endptr);
-      qq = q = parse_c_ident(&p, endptr);
+      qq = q = texpdf_parse_c_ident(&p, endptr);
     }
     if (q) {
       for (k = 0; _ukeys[k] && strcmp(_ukeys[k], q); k++);
@@ -1999,14 +1999,14 @@ scan_special (double *wd, double *ht, double *xo, double *yo, char *lm,
 
   skip_white(&p, endptr);
 
-  q = parse_c_ident(&p, endptr);
+  q = texpdf_parse_c_ident(&p, endptr);
   if (q && !strcmp(q, "pdf")) {
     skip_white(&p, endptr);
     if (p < endptr && *p == ':') {
       p++;
       skip_white(&p, endptr);
       RELEASE(q);
-      q = parse_c_ident(&p, endptr); ns_pdf = 1;
+      q = texpdf_parse_c_ident(&p, endptr); ns_pdf = 1;
     }
   }
   else if (q && !strcmp(q, "x")) {
@@ -2015,7 +2015,7 @@ scan_special (double *wd, double *ht, double *xo, double *yo, char *lm,
       p++;
       skip_white(&p, endptr);
       RELEASE(q);
-      q = parse_c_ident(&p, endptr);
+      q = texpdf_parse_c_ident(&p, endptr);
     }
   }
   skip_white(&p, endptr);
@@ -2025,7 +2025,7 @@ scan_special (double *wd, double *ht, double *xo, double *yo, char *lm,
       *lm = 1;
     } else if (ns_pdf && !strcmp(q, "pagesize")) {
       while (!error && p < endptr) {
-        char  *kp = parse_c_ident(&p, endptr);
+        char  *kp = texpdf_parse_c_ident(&p, endptr);
         if (!kp)
           break;
         else {
@@ -2090,7 +2090,7 @@ scan_special (double *wd, double *ht, double *xo, double *yo, char *lm,
       char *kv;
       if (*p == '=') p++;
       skip_white(&p, endptr);
-      kv = parse_float_decimal(&p, endptr);
+      kv = texpdf_parse_float_decimal(&p, endptr);
       if (kv) {
         *minorversion = (unsigned)strtol(kv, NULL, 10);
         RELEASE(kv);
@@ -2099,38 +2099,38 @@ scan_special (double *wd, double *ht, double *xo, double *yo, char *lm,
       *do_enc = 1;
       *owner_pw = *user_pw = 0;
       while (!error && p < endptr) {
-        char  *kp = parse_c_ident(&p, endptr);
+        char  *kp = texpdf_parse_c_ident(&p, endptr);
         if (!kp)
           break;
         else {
 	  pdf_obj *obj;
           skip_white(&p, endptr);
           if (!strcmp(kp, "ownerpw")) {
-            if ((obj = parse_pdf_string(&p, endptr))) {
-	      strncpy(owner_pw, pdf_string_value(obj), MAX_PWD_LEN); 
-	      pdf_release_obj(obj);
+            if ((obj = texpdf_parse_pdf_string(&p, endptr))) {
+	      strncpy(owner_pw, texpdf_string_value(obj), MAX_PWD_LEN); 
+	      texpdf_release_obj(obj);
 	    } else
 	      error = -1;
           } else if (!strcmp(kp, "userpw")) {
-            if ((obj = parse_pdf_string(&p, endptr))) {
-	      strncpy(user_pw, pdf_string_value(obj), MAX_PWD_LEN);
-	      pdf_release_obj(obj);
+            if ((obj = texpdf_parse_pdf_string(&p, endptr))) {
+	      strncpy(user_pw, texpdf_string_value(obj), MAX_PWD_LEN);
+	      texpdf_release_obj(obj);
 	    } else
 	      error = -1;
           } else if (!strcmp(kp, "length")) {
-            if ((obj = parse_pdf_number(&p, endptr)) && PDF_OBJ_NUMBERTYPE(obj)) {
+            if ((obj = texpdf_parse_pdf_number(&p, endptr)) && PDF_OBJ_NUMBERTYPE(obj)) {
 	      *key_bits = (unsigned) pdf_number_value(obj);
 	    } else
 	      error = -1;
 	    if (obj)
-	      pdf_release_obj(obj);
+	      texpdf_release_obj(obj);
           } else if (!strcmp(kp, "perm")) {
-            if ((obj = parse_pdf_number(&p, endptr)) && PDF_OBJ_NUMBERTYPE(obj)) {
+            if ((obj = texpdf_parse_pdf_number(&p, endptr)) && PDF_OBJ_NUMBERTYPE(obj)) {
 	      *permission = (unsigned) pdf_number_value(obj);
 	    } else
 	      error = -1;
 	    if (obj)
-	      pdf_release_obj(obj);
+	      texpdf_release_obj(obj);
           } else
 	    error = -1;
           RELEASE(kp);

@@ -27,8 +27,8 @@
 
 extern void      pdf_encoding_set_verbose    (void);
 
-extern void      pdf_init_encodings          (void);
-extern void      pdf_close_encodings         (void);
+extern void      texpdf_init_encodings          (void);
+extern void      texpdf_close_encodings         (void);
 
 /* Creates Encoding resource and ToUnicode CMap 
  * for all non-predefined encodings.
@@ -42,7 +42,7 @@ extern int       pdf_encoding_findresource   (const char *enc_name);
 
 /* Returns the Encoding resource object.
  */
-extern pdf_obj  *pdf_get_encoding_obj        (int enc_id);
+extern pdf_obj  *texpdf_get_encoding_obj        (int enc_id);
 
 extern int       pdf_encoding_is_predefined  (int enc_id);
 extern void      pdf_encoding_used_by_type3  (int enc_id);

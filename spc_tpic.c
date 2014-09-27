@@ -43,7 +43,7 @@
  * device (in this case PDF stream) coordinates.
  */
 
-#define MI2DEV (0.072/pdf_dev_scale())
+#define MI2DEV (0.072/texpdf_dev_scale())
 
 /*
  * Value for 'sh' command 'g' is interpreted as
@@ -110,18 +110,18 @@ create_xgstate (double a /* alpha */, int f_ais /* alpha is shape */)
 {
   pdf_obj  *dict;
 
-  dict = pdf_new_dict();
-  pdf_add_dict(dict,
-               pdf_new_name("Type"),
-               pdf_new_name("ExtGState"));
+  dict = texpdf_new_dict();
+  texpdf_add_dict(dict,
+               texpdf_new_name("Type"),
+               texpdf_new_name("ExtGState"));
   if (f_ais) {
-    pdf_add_dict(dict,
-                 pdf_new_name("AIS"),
-                 pdf_new_boolean(1));
+    texpdf_add_dict(dict,
+                 texpdf_new_name("AIS"),
+                 texpdf_new_boolean(1));
   }
-  pdf_add_dict(dict,
-               pdf_new_name("ca"),
-               pdf_new_number(a));
+  texpdf_add_dict(dict,
+               texpdf_new_name("ca"),
+               texpdf_new_number(a));
 
   return  dict;
 }
@@ -135,10 +135,10 @@ check_resourcestatus (const char *category, const char *resname)
   if (!dict1)
     return  0;
 
-  dict2 = pdf_lookup_dict(dict1, category);
+  dict2 = texpdf_lookup_dict(dict1, category);
   if (dict2 &&
       pdf_obj_typeof(dict2) == PDF_DICT) {
-    if (pdf_lookup_dict(dict2, resname))
+    if (texpdf_lookup_dict(dict2, resname))
       return  1;
   }
   return  0;
@@ -149,20 +149,20 @@ set_linestyle (double pn, double da)
 {
   double  dp[2]; /* dash pattern */
 
-  pdf_dev_setlinejoin(pdf, 1);
-  pdf_dev_setmiterlimit(pdf, 1.4);
-  pdf_dev_setlinewidth(pdf, pn);
+  texpdf_dev_setlinejoin(pdf, 1);
+  texpdf_dev_setmiterlimit(pdf, 1.4);
+  texpdf_dev_setlinewidth(pdf, pn);
   if (da > 0.0) {
     dp[0] =  da * 72.0;
-    pdf_dev_setdash(pdf, 1, dp, 0);
-    pdf_dev_setlinecap(pdf, 0);
+    texpdf_dev_setdash(pdf, 1, dp, 0);
+    texpdf_dev_setlinecap(pdf, 0);
   } else if (da < 0.0) {
     dp[0] =  pn;
     dp[1] = -da * 72.0;
-    pdf_dev_setdash(pdf, 2, dp, 0);
-    pdf_dev_setlinecap(pdf, 1);
+    texpdf_dev_setdash(pdf, 2, dp, 0);
+    texpdf_dev_setlinecap(pdf, 1);
   } else {
-    pdf_dev_setlinecap(pdf, 0);
+    texpdf_dev_setlinecap(pdf, 0);
   }
 
   return  0;
@@ -183,7 +183,7 @@ set_fillstyle (double g, double a, int f_ais)
       dict = create_xgstate(ROUND(0.01 * alp, 0.01), f_ais);
       texpdf_doc_add_page_resource(pdf, "ExtGState",
                                 resname, pdf_ref_obj(dict));
-      pdf_release_obj(dict);
+      texpdf_release_obj(dict);
     }
     len += sprintf(buf + len, " /%s gs", resname);
 
@@ -193,9 +193,9 @@ set_fillstyle (double g, double a, int f_ais)
   {
     pdf_color *sc, *fc, new_fc;
 
-    pdf_color_get_current (&sc, &fc); /* get stroking and fill colors */
-    pdf_color_brighten_color(&new_fc, fc, g);
-    pdf_dev_set_nonstrokingcolor(pdf, &new_fc);
+    texpdf_color_get_current (&sc, &fc); /* get stroking and fill colors */
+    texpdf_color_brighten_color(&new_fc, fc, g);
+    texpdf_dev_set_nonstrokingcolor(pdf, &new_fc);
   }
 
   return  0;
@@ -211,7 +211,7 @@ set_styles (struct spc_tpic_ *tp,
   pdf_tmatrix M;
 
   pdf_setmatrix (&M, 1.0, 0.0, 0.0, -1.0, c->x, c->y);
-  pdf_dev_concat(pdf, &M);
+  texpdf_dev_concat(pdf, &M);
 
   if (f_vp)
     set_linestyle(pn, da);
@@ -239,9 +239,9 @@ showpath (int f_vp, int f_fs) /* visible_path, fill_shape */
 {
   if (f_vp) {
     if (f_fs)
-      pdf_dev_flushpath(pdf, 'b', PDF_FILL_RULE_NONZERO);
+      texpdf_dev_flushpath(pdf, 'b', PDF_FILL_RULE_NONZERO);
     else {
-      pdf_dev_flushpath(pdf, 'S', PDF_FILL_RULE_NONZERO);
+      texpdf_dev_flushpath(pdf, 'S', PDF_FILL_RULE_NONZERO);
     }
   } else {
     /*
@@ -249,9 +249,9 @@ showpath (int f_vp, int f_fs) /* visible_path, fill_shape */
      * path (a path without path-painting operator applied)?
      */
     if (f_fs)
-      pdf_dev_flushpath(pdf, 'f', PDF_FILL_RULE_NONZERO);
+      texpdf_dev_flushpath(pdf, 'f', PDF_FILL_RULE_NONZERO);
     else {
-      pdf_dev_newpath(pdf);
+      texpdf_dev_newpath(pdf);
     }
   }
 }
@@ -276,17 +276,17 @@ tpic__polyline (struct spc_tpic_ *tp,
   f_vp  = (pn > 0.0) ? f_vp : 0;
 
   if (f_vp || f_fs) {
-    pdf_dev_gsave(pdf);
+    texpdf_dev_gsave(pdf);
 
     set_styles(tp, c, f_fs, f_vp, pn, da);
 
-    pdf_dev_moveto(tp->points[0].x, tp->points[0].y);
+    texpdf_dev_moveto(tp->points[0].x, tp->points[0].y);
     for (i = 0; i < tp->num_points; i++)
-      pdf_dev_lineto(tp->points[i].x, tp->points[i].y);
+      texpdf_dev_lineto(tp->points[i].x, tp->points[i].y);
 
     showpath(f_vp, f_fs);
 
-    pdf_dev_grestore(pdf);
+    texpdf_dev_grestore(pdf);
   }
 
   tpic__clear(tp);
@@ -329,15 +329,15 @@ tpic__spline (struct spc_tpic_ *tp,
   f_vp  = (pn > 0.0) ? f_vp : 0;
 
   if (f_vp || f_fs) {
-    pdf_dev_gsave(pdf);
+    texpdf_dev_gsave(pdf);
 
     set_styles(tp, c, f_fs, f_vp, pn, da);
 
-    pdf_dev_moveto(tp->points[0].x, tp->points[0].y);
+    texpdf_dev_moveto(tp->points[0].x, tp->points[0].y);
 
     v[0] = 0.5 * (tp->points[0].x + tp->points[1].x);
     v[1] = 0.5 * (tp->points[0].y + tp->points[1].y);
-    pdf_dev_lineto(v[0], v[1]);
+    texpdf_dev_lineto(v[0], v[1]);
     for (i = 1; i < tp->num_points - 1; i++) {
       /* B-spline control points */
       v[0] = 0.5 * (tp->points[i-1].x + tp->points[i].x);
@@ -346,13 +346,13 @@ tpic__spline (struct spc_tpic_ *tp,
       v[3] = tp->points[i].y;
       v[4] = 0.5 * (tp->points[i].x + tp->points[i+1].x);
       v[5] = 0.5 * (tp->points[i].y + tp->points[i+1].y);
-      pdf_dev_bspline(v[0], v[1], v[2], v[3], v[4], v[5]);
+      texpdf_dev_bspline(v[0], v[1], v[2], v[3], v[4], v[5]);
     }
-    pdf_dev_lineto(tp->points[i].x, tp->points[i].y);
+    texpdf_dev_lineto(tp->points[i].x, tp->points[i].y);
 
     showpath(f_vp, f_fs);
 
-    pdf_dev_grestore(pdf);
+    texpdf_dev_grestore(pdf);
   }
   tpic__clear(tp);
 
@@ -373,15 +373,15 @@ tpic__arc (struct spc_tpic_ *tp,
   f_vp  = (pn > 0.0) ? f_vp : 0;
 
   if (f_vp || f_fs) {
-    pdf_dev_gsave(pdf);
+    texpdf_dev_gsave(pdf);
 
     set_styles(tp, c, f_fs, f_vp, pn, da);
 
-    pdf_dev_arcx(v[0], v[1], v[2], v[3], v[4], v[5], +1, 0.0);
+    texpdf_dev_arcx(v[0], v[1], v[2], v[3], v[4], v[5], +1, 0.0);
 
     showpath(f_vp, f_fs);
 
-    pdf_dev_grestore(pdf);
+    texpdf_dev_grestore(pdf);
   }
   tpic__clear(tp);
 
@@ -409,7 +409,7 @@ spc_handler_tpic_pn (struct spc_env *spe,
   ASSERT(spe && ap && tp);
 
   skip_blank(&ap->curptr, ap->endptr);
-  q = parse_float_decimal(&ap->curptr, ap->endptr);
+  q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
   if (!q) {
     spc_warn(spe, "Invalid pen size specified?");
     return -1;
@@ -434,7 +434,7 @@ spc_handler_tpic_pa (struct spc_env *spe,
   skip_blank(&ap->curptr, ap->endptr);
   for (i = 0;
        i < 2 && ap->curptr < ap->endptr; i++) {
-    q = parse_float_decimal(&ap->curptr, ap->endptr);
+    q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
     if (!q) {
       spc_warn(spe, "Missing numbers for TPIC \"pa\" command.");
       return  -1;
@@ -512,7 +512,7 @@ spc_handler_tpic_da (struct spc_env *spe,
   ASSERT(spe && ap && tp);
 
   skip_blank(&ap->curptr, ap->endptr);
-  q = parse_float_decimal(&ap->curptr, ap->endptr);
+  q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
   if (q) {
     da = atof(q);
     RELEASE(q);
@@ -540,7 +540,7 @@ spc_handler_tpic_dt (struct spc_env *spe,
   ASSERT(spe && ap && tp);
 
   skip_blank(&ap->curptr, ap->endptr);
-  q = parse_float_decimal(&ap->curptr, ap->endptr);
+  q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
   if (q) {
     da = -atof(q);
     RELEASE(q);
@@ -568,7 +568,7 @@ spc_handler_tpic_sp (struct spc_env *spe,
   ASSERT(spe && ap && tp);
 
   skip_blank(&ap->curptr, ap->endptr);
-  q = parse_float_decimal(&ap->curptr, ap->endptr);
+  q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
   if (q) {
     da = atof(q);
     RELEASE(q);
@@ -599,7 +599,7 @@ spc_handler_tpic_ar (struct spc_env *spe,
   skip_blank(&ap->curptr, ap->endptr);
   for (i = 0;
        i < 6 && ap->curptr < ap->endptr; i++) {
-    q = parse_float_decimal(&ap->curptr, ap->endptr);
+    q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
     if (!q) {
       spc_warn(spe, "Invalid args. in TPIC \"ar\" command.");
       return  -1;
@@ -639,7 +639,7 @@ spc_handler_tpic_ia (struct spc_env *spe,
   skip_blank(&ap->curptr, ap->endptr);
   for (i = 0;
        i < 6 && ap->curptr < ap->endptr; i++) {
-    q = parse_float_decimal(&ap->curptr, ap->endptr);
+    q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
     if (!q) {
       spc_warn(spe, "Invalid args. in TPIC \"ia\" command.");
       return  -1;
@@ -676,7 +676,7 @@ spc_handler_tpic_sh (struct spc_env *spe,
   tp->fill_color = 0.5;
 
   skip_blank(&ap->curptr, ap->endptr);
-  q = parse_float_decimal(&ap->curptr, ap->endptr);
+  q = texpdf_parse_float_decimal(&ap->curptr, ap->endptr);
   if (q) {
     double g = atof(q);
     RELEASE(q);
@@ -749,7 +749,7 @@ spc_handler_tpic__init (struct spc_env *spe, void *dp)
   tp->num_points = 0;
   tp->max_points = 0;
 
-  if (tp->mode.fill != TPIC_MODE__FILL_SOLID && pdf_get_version() < 4) {
+  if (tp->mode.fill != TPIC_MODE__FILL_SOLID && texpdf_get_version() < 4) {
       spc_warn(spe, "Tpic shading support requires PDF version 1.4.");
     tp->mode.fill = TPIC_MODE__FILL_SOLID;
   }
@@ -848,11 +848,11 @@ spc_parse_kvpairs (struct spc_arg *ap)
   char    *kp, *vp;
   int      error = 0;
 
-  dict = pdf_new_dict();
+  dict = texpdf_new_dict();
 
   skip_blank(&ap->curptr, ap->endptr);
   while (!error && ap->curptr < ap->endptr) {
-    kp = parse_val_ident(&ap->curptr, ap->endptr);
+    kp = texpdf_parse_val_ident(&ap->curptr, ap->endptr);
     if (!kp)
       break;
     skip_blank(&ap->curptr, ap->endptr);
@@ -865,20 +865,20 @@ spc_parse_kvpairs (struct spc_arg *ap)
         error = -1;
         break;
       }
-      vp = parse_c_string(&ap->curptr, ap->endptr);
+      vp = texpdf_parse_c_string(&ap->curptr, ap->endptr);
       if (!vp)
         error = -1;
       else {
-        pdf_add_dict(dict,
-                     pdf_new_name(kp),
-                     pdf_new_string(vp, strlen(vp) + 1)); /* NULL terminate */
+        texpdf_add_dict(dict,
+                     texpdf_new_name(kp),
+                     texpdf_new_string(vp, strlen(vp) + 1)); /* NULL terminate */
         RELEASE(vp);
       }
     } else {
       /* Treated as 'flag' */
-      pdf_add_dict(dict,
-                   pdf_new_name(kp),
-                   pdf_new_boolean(1));
+      texpdf_add_dict(dict,
+                   texpdf_new_name(kp),
+                   texpdf_new_boolean(1));
     }
     RELEASE(kp);
     if (!error)
@@ -886,7 +886,7 @@ spc_parse_kvpairs (struct spc_arg *ap)
   }
 
   if (error) {
-    pdf_release_obj(dict);
+    texpdf_release_obj(dict);
     dict = NULL;
   }
 
@@ -908,7 +908,7 @@ tpic_filter_getopts (pdf_obj *kp, pdf_obj *vp, void *dp)
       WARN("Invalid value for TPIC option fill-mode...");
       error = -1;
     } else {
-      v = pdf_string_value(vp);
+      v = texpdf_string_value(vp);
       if (!strcmp(v, "shape"))
         tp->mode.fill = TPIC_MODE__FILL_SHAPE;
       else if (!strcmp(v, "opacity"))
@@ -939,10 +939,10 @@ spc_handler_tpic__setopts (struct spc_env *spe,
   dict  = spc_parse_kvpairs(ap);
   if (!dict)
     return  -1;
-  error = pdf_foreach_dict(dict, tpic_filter_getopts, tp);
+  error = texpdf_foreach_dict(dict, tpic_filter_getopts, tp);
   if (!error) {
     if (tp->mode.fill != TPIC_MODE__FILL_SOLID &&
-        pdf_get_version() < 4) {
+        texpdf_get_version() < 4) {
       spc_warn(spe, "Transparent fill mode requires PDF version 1.4.");
       tp->mode.fill = TPIC_MODE__FILL_SOLID;
     }
@@ -989,7 +989,7 @@ spc_tpic_check_special (const char *buf, long len)
     hasnsp = 1;
   }
 #endif
-  q = parse_c_ident(&p, endptr);
+  q = texpdf_parse_c_ident(&p, endptr);
 
   if (!q)
     istpic = 0;
@@ -1031,7 +1031,7 @@ spc_tpic_setup_handler (struct spc_handler *sph,
     hasnsp = 1;
   }
 #endif
-  q = parse_c_ident(&ap->curptr, ap->endptr);
+  q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
 
   if (!q)
     error = -1;

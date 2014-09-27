@@ -96,7 +96,7 @@ bt_release_tree (struct bt_node *tree)
 }
 
 static struct bt_node *
-parse_expr (const char **pp, const char *endptr)
+texpdf_parse_expr (const char **pp, const char *endptr)
 {
   struct bt_node *root, *curr;
   
@@ -118,7 +118,7 @@ parse_expr (const char **pp, const char *endptr)
       if (*pp < endptr) {
         struct bt_node *expr;
 
-        expr = parse_expr(pp, endptr);
+        expr = texpdf_parse_expr(pp, endptr);
         if (!expr) {
             WARN("Syntax error: %s\n", *pp);
             return NULL;
@@ -309,7 +309,7 @@ otl_parse_optstring (otl_opt *opt, const char *optstr)
   if (optstr) {
     p      = optstr;
     endptr = p + strlen(optstr);
-    opt->rule = parse_expr(&p, endptr);
+    opt->rule = texpdf_parse_expr(&p, endptr);
   }
 
   return 0;

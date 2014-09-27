@@ -34,7 +34,7 @@
 #endif
 
 /* From psimage.h */
-static int  check_for_ps    (FILE *fp);
+static int  texpdf_check_for_ps    (FILE *fp);
 static int  ps_include_page (pdf_ximage *ximage, const char *file_name);
 
 
@@ -55,7 +55,7 @@ struct attr_
   pdf_rect bbox;
 };
 
-struct pdf_ximage_
+struct texpdf_ximage_
 {
   char        *ident;
   char         res_name[16];
@@ -85,7 +85,7 @@ static struct opt_ _opts = {
   0, NULL
 };
 
-void pdf_ximage_set_verbose (void) { _opts.verbose++; }
+void texpdf_ximage_set_verbose (void) { _opts.verbose++; }
 
 
 struct ic_
@@ -99,7 +99,7 @@ static struct ic_  _ic = {
 };
 
 static void
-pdf_init_ximage_struct (pdf_ximage *I,
+texpdf_init_ximage_struct (pdf_ximage *I,
 			const char *ident, const char *filename,
 			long page_no, pdf_obj *dict)
 {
@@ -130,7 +130,7 @@ pdf_init_ximage_struct (pdf_ximage *I,
 }
 
 static void
-pdf_set_ximage_tempfile (pdf_ximage *I, const char *filename)
+texpdf_set_ximage_tempfile (pdf_ximage *I, const char *filename)
 {
   if (I->filename)
     RELEASE(I->filename);
@@ -147,17 +147,17 @@ pdf_clean_ximage_struct (pdf_ximage *I)
   if (I->filename)
     RELEASE(I->filename);
   if (I->reference)
-    pdf_release_obj(I->reference);
+    texpdf_release_obj(I->reference);
   if (I->resource)
-    pdf_release_obj(I->resource);
+    texpdf_release_obj(I->resource);
   if (I->attr_dict)
-    pdf_release_obj(I->attr_dict);
-  pdf_init_ximage_struct(I, NULL, NULL, 0, NULL);
+    texpdf_release_obj(I->attr_dict);
+  texpdf_init_ximage_struct(I, NULL, NULL, 0, NULL);
 }
 
 
 void
-pdf_init_images (void)
+texpdf_init_images (void)
 {
   struct ic_ *ic = &_ic;
   ic->count    = 0;
@@ -166,7 +166,7 @@ pdf_init_images (void)
 }
 
 void
-pdf_close_images (void)
+texpdf_close_images (void)
 {
   struct ic_ *ic = &_ic;
   if (ic->ximages) {
@@ -209,28 +209,28 @@ source_image_type (FILE *fp)
    * Make sure we check for PS *after* checking for MP since
    * MP is a special case of PS.
    */
-  if (check_for_jpeg(fp))
+  if (texpdf_check_for_jpeg(fp))
   {
     format = IMAGE_TYPE_JPEG;
   }
-  else if (check_for_jp2(fp))
+  else if (texpdf_check_for_jp2(fp))
   {
     format = IMAGE_TYPE_JP2;
   }
 #ifdef  HAVE_LIBPNG
-  else if (check_for_png(fp))
+  else if (texpdf_check_for_png(fp))
   {
     format = IMAGE_TYPE_PNG;
   }
 #endif
-  else if (check_for_bmp(fp))
+  else if (texpdf_check_for_bmp(fp))
   {
     format = IMAGE_TYPE_BMP;
-  } else if (check_for_pdf(fp)) {
+  } else if (texpdf_check_for_pdf(fp)) {
     format = IMAGE_TYPE_PDF;
-  } else if (check_for_mp(fp)) {
+  } else if (texpdf_check_for_mp(fp)) {
     format = IMAGE_TYPE_MPS;
-  } else if (check_for_ps(fp)) {
+  } else if (texpdf_check_for_ps(fp)) {
     format = IMAGE_TYPE_EPS;
   } else {
     format = IMAGE_TYPE_UNKNOWN;
@@ -255,7 +255,7 @@ load_image (const char *ident, const char *fullname, int format, FILE  *fp,
   }
 
   I  = &ic->ximages[id];
-  pdf_init_ximage_struct(I, ident, fullname, page_no, dict);
+  texpdf_init_ximage_struct(I, ident, fullname, page_no, dict);
 
   switch (format) {
   case  IMAGE_TYPE_JPEG:
@@ -341,7 +341,7 @@ load_image (const char *ident, const char *fullname, int format, FILE  *fp,
 #define dpx_fclose(f)  (MFCLOSE((f)))
 
 int
-pdf_ximage_findresource (pdf_doc *p, const char *ident, long page_no, pdf_obj *dict)
+texpdf_ximage_findresource (pdf_doc *p, const char *ident, long page_no, pdf_obj *dict)
 {
   struct ic_ *ic = &_ic;
   int         id = -1;
@@ -430,7 +430,7 @@ pdf_ximage_findresource (pdf_doc *p, const char *ident, long page_no, pdf_obj *d
  *                Default value: the identity matrix [1 0 0 1 0 0].
  */
 void
-pdf_ximage_init_form_info (xform_info *info)
+texpdf_ximage_init_form_info (xform_info *info)
 {
   info->flags    = 0;
   info->bbox.llx = 0;
@@ -476,7 +476,7 @@ pdf_ximage_init_form_info (xform_info *info)
  *                determined in the process of decoding the JPEG2000 image.
  */
 void
-pdf_ximage_init_image_info (ximage_info *info)
+texpdf_ximage_init_image_info (ximage_info *info)
 {
   info->flags  = 0;
   info->width  = 0;
@@ -488,7 +488,7 @@ pdf_ximage_init_image_info (ximage_info *info)
 }
 
 void
-pdf_ximage_set_image (pdf_ximage *I, void *image_info, pdf_obj *resource)
+texpdf_ximage_set_image (pdf_ximage *I, void *image_info, pdf_obj *resource)
 {
   pdf_obj     *dict;
   ximage_info *info = image_info;
@@ -505,23 +505,23 @@ pdf_ximage_set_image (pdf_ximage *I, void *image_info, pdf_obj *resource)
 
   I->reference = pdf_ref_obj(resource);
 
-  dict = pdf_stream_dict(resource);
-  pdf_add_dict(dict, pdf_new_name("Type"),    pdf_new_name("XObject"));
-  pdf_add_dict(dict, pdf_new_name("Subtype"), pdf_new_name("Image"));
-  pdf_add_dict(dict, pdf_new_name("Width"),   pdf_new_number(info->width));
-  pdf_add_dict(dict, pdf_new_name("Height"),  pdf_new_number(info->height));
+  dict = texpdf_stream_dict(resource);
+  texpdf_add_dict(dict, texpdf_new_name("Type"),    texpdf_new_name("XObject"));
+  texpdf_add_dict(dict, texpdf_new_name("Subtype"), texpdf_new_name("Image"));
+  texpdf_add_dict(dict, texpdf_new_name("Width"),   texpdf_new_number(info->width));
+  texpdf_add_dict(dict, texpdf_new_name("Height"),  texpdf_new_number(info->height));
   if (info->bits_per_component > 0) /* Ignored for JPXDecode filter. FIXME */
-	pdf_add_dict(dict, pdf_new_name("BitsPerComponent"),
-                     pdf_new_number(info->bits_per_component));
+	texpdf_add_dict(dict, texpdf_new_name("BitsPerComponent"),
+                     texpdf_new_number(info->bits_per_component));
   if (I->attr_dict)
-    pdf_merge_dict(dict, I->attr_dict);
+    texpdf_merge_dict(dict, I->attr_dict);
 
-  pdf_release_obj(resource); /* Caller don't know we are using reference. */
+  texpdf_release_obj(resource); /* Caller don't know we are using reference. */
   I->resource  = NULL;
 }
 
 void
-pdf_ximage_set_form (pdf_ximage *I, void *form_info, pdf_obj *resource)
+texpdf_ximage_set_form (pdf_ximage *I, void *form_info, pdf_obj *resource)
 {
   xform_info *info = form_info;
 
@@ -534,12 +534,12 @@ pdf_ximage_set_form (pdf_ximage *I, void *form_info, pdf_obj *resource)
 
   I->reference = pdf_ref_obj(resource);
 
-  pdf_release_obj(resource); /* Caller don't know we are using reference. */
+  texpdf_release_obj(resource); /* Caller don't know we are using reference. */
   I->resource  = NULL;
 }
 
 long
-pdf_ximage_get_page (pdf_ximage *I)
+texpdf_ximage_get_page (pdf_ximage *I)
 {
   return I->page_no;
 }
@@ -552,7 +552,7 @@ pdf_ximage_get_page (pdf_ximage *I)
 #define GET_IMAGE(c,n) (&((c)->ximages[(n)]))
 
 pdf_obj *
-pdf_ximage_get_reference (int id)
+texpdf_ximage_get_reference (int id)
 {
   struct ic_ *ic = &_ic;
   pdf_ximage *I;
@@ -568,7 +568,7 @@ pdf_ximage_get_reference (int id)
 
 /* called from pdfdoc.c only for late binding */
 int
-pdf_ximage_defineresource (const char *ident,
+texpdf_ximage_defineresource (const char *ident,
 			   int subtype, void *info, pdf_obj *resource)
 {
   struct ic_ *ic = &_ic;
@@ -583,15 +583,15 @@ pdf_ximage_defineresource (const char *ident,
 
   I = &ic->ximages[id];
 
-  pdf_init_ximage_struct(I, ident, NULL, 0, NULL);
+  texpdf_init_ximage_struct(I, ident, NULL, 0, NULL);
 
   switch (subtype) {
   case PDF_XOBJECT_TYPE_IMAGE:
-    pdf_ximage_set_image(I, info, resource);
+    texpdf_ximage_set_image(I, info, resource);
     sprintf(I->res_name, "Im%d", id);
     break;
   case PDF_XOBJECT_TYPE_FORM:
-    pdf_ximage_set_form (I, info, resource);
+    texpdf_ximage_set_form (I, info, resource);
     sprintf(I->res_name, "Fm%d", id);
     break;
   default:
@@ -604,7 +604,7 @@ pdf_ximage_defineresource (const char *ident,
 
 
 char *
-pdf_ximage_get_resname (int id)
+texpdf_ximage_get_resname (int id)
 {
   struct ic_ *ic = &_ic;
   pdf_ximage *I;
@@ -617,7 +617,7 @@ pdf_ximage_get_resname (int id)
 }
 
 int
-pdf_ximage_get_subtype (int id)
+texpdf_ximage_get_subtype (int id)
 {
   struct ic_ *ic = &_ic;
   pdf_ximage *I;
@@ -630,7 +630,7 @@ pdf_ximage_get_subtype (int id)
 }
 
 void
-pdf_ximage_set_attr (int id, long width, long height, double xdensity, double ydensity, double llx, double lly, double urx, double ury)
+texpdf_ximage_set_attr (int id, long width, long height, double xdensity, double ydensity, double llx, double lly, double urx, double ury)
 {
   struct ic_ *ic = &_ic;
   pdf_ximage *I;
@@ -770,7 +770,7 @@ scale_to_fit_F (pdf_tmatrix    *T,
 
 /* called from pdfdev.c and spc_html.c */
 int
-pdf_ximage_scale_image (int            id,
+texpdf_ximage_scale_image (int            id,
                         pdf_tmatrix    *M, /* return value for trans matrix */
                         pdf_rect       *r, /* return value for clipping */
                         transform_info *p  /* argument from specials */
@@ -914,7 +914,7 @@ ps_include_page (pdf_ximage *ximage, const char *filename)
       MESG("pdf_image>> ...");
     }
     error = dpx_file_apply_filter(distiller_template, filename, temp,
-                               (unsigned char) pdf_get_version());
+                               (unsigned char) texpdf_get_version());
     if (error) {
       WARN("Image format conversion for \"%s\" failed...", filename);
       dpx_delete_temp_file(temp, true);
@@ -928,14 +928,14 @@ ps_include_page (pdf_ximage *ximage, const char *filename)
     dpx_delete_temp_file(temp, true);
     return  -1;
   }
-  pdf_set_ximage_tempfile(ximage, temp);
+  texpdf_set_ximage_tempfile(ximage, temp);
 #if 0
   error = pdf_include_page(ximage, fp, 0, pdfbox_crop);
 #endif
   error = pdf_include_page(ximage, fp, temp);
   MFCLOSE(fp);
 
-  /* See pdf_close_images for why we cannot delete temporary files here. */
+  /* See texpdf_close_images for why we cannot delete temporary files here. */
 
   RELEASE(temp);
 
@@ -950,7 +950,7 @@ ps_include_page (pdf_ximage *ximage, const char *filename)
   return  error;
 }
 
-static int check_for_ps (FILE *image_file) 
+static int texpdf_check_for_ps (FILE *image_file) 
 {
   rewind (image_file);
   mfgets (work_buffer, WORK_BUFFER_SIZE, image_file);

@@ -102,13 +102,13 @@ spc_handler_postscriptbox (struct spc_env *spe, struct spc_arg *ap)
   }
   MFCLOSE(fp);
 
-  form_id = pdf_ximage_findresource(pdf, filename, 0, NULL);
+  form_id = texpdf_ximage_findresource(pdf, filename, 0, NULL);
   if (form_id < 0) {
     spc_warn(spe, "Failed to load image file: %s", filename);
     return  -1;
   }
 
-  pdf_dev_put_image(pdf, form_id, &ti, spe->x_user, spe->y_user,dvi_is_tracking_boxes());
+  texpdf_dev_put_image(pdf, form_id, &ti, spe->x_user, spe->y_user,dvi_is_tracking_boxes());
 
   return  0;
 }

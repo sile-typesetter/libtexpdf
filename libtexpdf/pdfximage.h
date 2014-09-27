@@ -49,47 +49,47 @@ typedef struct {
   pdf_tmatrix matrix;
 } xform_info;
 
-typedef struct pdf_ximage_ pdf_ximage;
+typedef struct texpdf_ximage_ pdf_ximage;
 
-extern void     pdf_ximage_set_verbose    (void);
+extern void     texpdf_ximage_set_verbose    (void);
 
-extern void     pdf_init_images           (void);
-extern void     pdf_close_images          (void);
+extern void     texpdf_init_images           (void);
+extern void     texpdf_close_images          (void);
 
-extern char    *pdf_ximage_get_resname    (int xobj_id);
-extern pdf_obj *pdf_ximage_get_reference  (int xobj_id);
+extern char    *texpdf_ximage_get_resname    (int xobj_id);
+extern pdf_obj *texpdf_ximage_get_reference  (int xobj_id);
 
 
-extern int      pdf_ximage_findresource   (pdf_doc *p, const char *ident, long page_no,
+extern int      texpdf_ximage_findresource   (pdf_doc *p, const char *ident, long page_no,
                                            pdf_obj *dict);
-extern int      pdf_ximage_defineresource (const char *ident, int subtype,
+extern int      texpdf_ximage_defineresource (const char *ident, int subtype,
                                            void *cdata, pdf_obj *resource);
 
 /* Called by pngimage, jpegimage, epdf, mpost, etc. */
-extern void pdf_ximage_init_image_info (ximage_info *info);
-extern void pdf_ximage_init_form_info  (xform_info  *info);
-extern void pdf_ximage_set_image (pdf_ximage *ximage, void *info, pdf_obj *resource);
-extern void pdf_ximage_set_form  (pdf_ximage *ximage, void *info, pdf_obj *resource);
-extern long pdf_ximage_get_page  (pdf_ximage *I);
+extern void texpdf_ximage_init_image_info (ximage_info *info);
+extern void texpdf_ximage_init_form_info  (xform_info  *info);
+extern void texpdf_ximage_set_image (pdf_ximage *ximage, void *info, pdf_obj *resource);
+extern void texpdf_ximage_set_form  (pdf_ximage *ximage, void *info, pdf_obj *resource);
+extern long texpdf_ximage_get_page  (pdf_ximage *I);
 
 /* from pdfximage.c */
 extern void set_distiller_template (char *s);
 extern char *get_distiller_template (void);
 
 extern int
-pdf_ximage_scale_image (int            id,
+texpdf_ximage_scale_image (int            id,
                         pdf_tmatrix    *M, /* ret */
                         pdf_rect       *r, /* ret */
                         transform_info *p  /* arg */
                        );
 
 /* from dvipdfmx.c */
-extern void pdf_ximage_disable_ebb (void);
+extern void texpdf_ximage_disable_ebb (void);
 
 /* from spc_pdfm.c */
-extern int      pdf_ximage_get_subtype    (int xobj_id);
+extern int      texpdf_ximage_get_subtype    (int xobj_id);
 extern void
-pdf_ximage_set_attr (int xobj_id,
+texpdf_ximage_set_attr (int xobj_id,
                      long width, long height, double xdensity, double ydensity,
                      double llx, double lly, double urx, double ury);
 

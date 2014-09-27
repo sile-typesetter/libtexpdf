@@ -82,7 +82,7 @@ if ((s)) { \
 }
 
 static int
-parse_key_val (const char **pp, const char *endptr, char **kp, char **vp)
+texpdf_parse_key_val (const char **pp, const char *endptr, char **kp, char **vp)
 {
   const char *q, *p;
   char  *k, *v;
@@ -128,9 +128,9 @@ parse_key_val (const char **pp, const char *endptr, char **kp, char **vp)
         v = NEW(n + 1, char);
         memcpy(v, q, n); v[n] = '\0';
 #if  0
-        pdf_add_dict(t->attr,
-                     pdf_new_name(k),
-                     pdf_new_string(v, n));
+        texpdf_add_dict(t->attr,
+                     texpdf_new_name(k),
+                     texpdf_new_string(v, n));
         RELEASE(v);
 #endif
         p++;
@@ -182,12 +182,12 @@ read_html_tag (char *name, pdf_obj *attr, int *type, const char **pp, const char
   for ( ; p < endptr && isspace((unsigned char)*p); p++);
   while (p < endptr && !error && *p != '/' && *p != '>') {
     char  *kp = NULL, *vp = NULL;
-    error = parse_key_val(&p, endptr, &kp, &vp);
+    error = texpdf_parse_key_val(&p, endptr, &kp, &vp);
     if (!error) {
       downcasify(kp);
-      pdf_add_dict(attr,
-                   pdf_new_name(kp),
-                   pdf_new_string(vp, strlen(vp) + 1)); /* include trailing NULL here!!! */
+      texpdf_add_dict(attr,
+                   texpdf_new_name(kp),
+                   texpdf_new_string(vp, strlen(vp) + 1)); /* include trailing NULL here!!! */
       RELEASE(kp);
       RELEASE(vp);
     }
@@ -238,7 +238,7 @@ spc_handler_html__clean (struct spc_env *spe, void *dp)
     spc_warn(spe, "Unclosed html anchor found.");
 
   if (sd->link_dict)
-    pdf_release_obj(sd->link_dict);
+    texpdf_release_obj(sd->link_dict);
 
   sd->pending_type = -1;
   sd->baseurl      = NULL;
@@ -308,39 +308,39 @@ html_open_link (struct spc_env *spe, const char *name, struct spc_html_ *sd)
   ASSERT( name );
   ASSERT( sd->link_dict == NULL ); /* Should be checked somewhere else */
 
-  sd->link_dict = pdf_new_dict();
-  pdf_add_dict(sd->link_dict,
-	       pdf_new_name("Type"),    pdf_new_name ("Annot"));
-  pdf_add_dict(sd->link_dict,
-	       pdf_new_name("Subtype"), pdf_new_name ("Link"));
+  sd->link_dict = texpdf_new_dict();
+  texpdf_add_dict(sd->link_dict,
+	       texpdf_new_name("Type"),    texpdf_new_name ("Annot"));
+  texpdf_add_dict(sd->link_dict,
+	       texpdf_new_name("Subtype"), texpdf_new_name ("Link"));
 
-  color = pdf_new_array ();
-  pdf_add_array(color, pdf_new_number(0.0));
-  pdf_add_array(color, pdf_new_number(0.0));
-  pdf_add_array(color, pdf_new_number(1.0));
-  pdf_add_dict(sd->link_dict, pdf_new_name("C"), color);
+  color = texpdf_new_array ();
+  pdf_add_array(color, texpdf_new_number(0.0));
+  pdf_add_array(color, texpdf_new_number(0.0));
+  pdf_add_array(color, texpdf_new_number(1.0));
+  texpdf_add_dict(sd->link_dict, texpdf_new_name("C"), color);
 
   url = fqurl(sd->baseurl, name);
   if (url[0] == '#') {
     /* url++; causes memory leak in RELEASE(url) */
-    pdf_add_dict(sd->link_dict,
-		 pdf_new_name("Dest"),
-		 pdf_new_string(url+1, strlen(url+1)));
+    texpdf_add_dict(sd->link_dict,
+		 texpdf_new_name("Dest"),
+		 texpdf_new_string(url+1, strlen(url+1)));
   } else { /* Assume this is URL */
-    pdf_obj  *action = pdf_new_dict();
-    pdf_add_dict(action,
-		 pdf_new_name("Type"),
-		 pdf_new_name("Action"));
-    pdf_add_dict(action,
-		 pdf_new_name("S"),
-		 pdf_new_name("URI"));
-    pdf_add_dict(action,
-		 pdf_new_name("URI"),
-		 pdf_new_string(url, strlen(url)));
-    pdf_add_dict(sd->link_dict,
-		 pdf_new_name("A"),
+    pdf_obj  *action = texpdf_new_dict();
+    texpdf_add_dict(action,
+		 texpdf_new_name("Type"),
+		 texpdf_new_name("Action"));
+    texpdf_add_dict(action,
+		 texpdf_new_name("S"),
+		 texpdf_new_name("URI"));
+    texpdf_add_dict(action,
+		 texpdf_new_name("URI"),
+		 texpdf_new_string(url, strlen(url)));
+    texpdf_add_dict(sd->link_dict,
+		 texpdf_new_name("A"),
 		 pdf_link_obj(action));
-    pdf_release_obj(action);
+    texpdf_release_obj(action);
   }
   RELEASE(url);
 
@@ -359,17 +359,17 @@ html_open_dest (struct spc_env *spe, const char *name, struct spc_html_ *sd)
   pdf_coord  cp;
 
   cp.x = spe->x_user; cp.y = spe->y_user;
-  pdf_dev_transform(&cp, NULL);
+  texpdf_dev_transform(&cp, NULL);
 
   page_ref = texpdf_doc_this_page_ref(pdf);
   ASSERT( page_ref ); /* Otherwise must be bug */
 
-  array = pdf_new_array();
+  array = texpdf_new_array();
   pdf_add_array(array, page_ref);
-  pdf_add_array(array, pdf_new_name("XYZ"));
-  pdf_add_array(array, pdf_new_null());
-  pdf_add_array(array, pdf_new_number(cp.y + 24.0));
-  pdf_add_array(array, pdf_new_null());
+  pdf_add_array(array, texpdf_new_name("XYZ"));
+  pdf_add_array(array, texpdf_new_null());
+  pdf_add_array(array, texpdf_new_number(cp.y + 24.0));
+  pdf_add_array(array, texpdf_new_null());
 
   error = texpdf_doc_add_names(pdf, "Dests",
 			    name, strlen(name),
@@ -396,15 +396,15 @@ spc_html__anchor_open (struct spc_env *spe, pdf_obj *attr, struct spc_html_ *sd)
     return  -1;
   }
 
-  href = pdf_lookup_dict(attr, "href");
-  name = pdf_lookup_dict(attr, "name");
+  href = texpdf_lookup_dict(attr, "href");
+  name = texpdf_lookup_dict(attr, "name");
   if (href && name) {
     spc_warn(spe, "Sorry, you can't have both \"href\" and \"name\" in anchor tag...");
     error = -1;
   } else if (href) {
-    error = html_open_link(spe, pdf_string_value(href), sd);
+    error = html_open_link(spe, texpdf_string_value(href), sd);
   } else if (name) { /* name */
-    error = html_open_dest(spe, pdf_string_value(name), sd);
+    error = html_open_dest(spe, texpdf_string_value(name), sd);
   } else {
     spc_warn(spe, "You should have \"href\" or \"name\" in anchor tag!");
     error = -1;
@@ -422,7 +422,7 @@ spc_html__anchor_close (struct spc_env *spe, struct spc_html_ *sd)
   case  ANCHOR_TYPE_HREF:
     if (sd->link_dict) {
       spc_end_annot(spe);
-      pdf_release_obj(sd->link_dict);
+      texpdf_release_obj(sd->link_dict);
       sd->link_dict    = NULL;
       sd->pending_type = -1;
     } else {
@@ -448,13 +448,13 @@ spc_html__base_empty (struct spc_env *spe, pdf_obj *attr, struct spc_html_ *sd)
   pdf_obj *href;
   char    *vp;
 
-  href = pdf_lookup_dict(attr, "href");
+  href = texpdf_lookup_dict(attr, "href");
   if (!href) {
     spc_warn(spe, "\"href\" not found for \"base\" tag!");
     return  -1;
   }
 
-  vp = (char *) pdf_string_value(href);
+  vp = (char *) texpdf_string_value(href);
   if (sd->baseurl) {
     spc_warn(spe, "\"baseurl\" changed: \"%s\" --> \"%s\"", sd->baseurl, vp);
     RELEASE(sd->baseurl);
@@ -489,7 +489,7 @@ atopt (const char *a)
   };
   int     k;
 
-  q = parse_float_decimal(&p, p + strlen(p));
+  q = texpdf_parse_float_decimal(&p, p + strlen(p));
   if (!q) {
     WARN("Invalid length value: %s (%c)", a, *p);
     return  0.0;
@@ -498,7 +498,7 @@ atopt (const char *a)
   v = atof(q);
   RELEASE(q);
 
-  q = parse_c_ident(&p, p + strlen(p));
+  q = texpdf_parse_c_ident(&p, p + strlen(p));
   if (q) {
     for (k = 0; _ukeys[k] && strcmp(_ukeys[k], q); k++);
     switch (k) {
@@ -526,18 +526,18 @@ create_xgstate (double a /* alpha */, int f_ais /* alpha is shape */)
 {
   pdf_obj  *dict;
 
-  dict = pdf_new_dict();
-  pdf_add_dict(dict,
-               pdf_new_name("Type"),
-               pdf_new_name("ExtGState"));
+  dict = texpdf_new_dict();
+  texpdf_add_dict(dict,
+               texpdf_new_name("Type"),
+               texpdf_new_name("ExtGState"));
   if (f_ais) {
-    pdf_add_dict(dict,
-                 pdf_new_name("AIS"),
-                 pdf_new_boolean(1));
+    texpdf_add_dict(dict,
+                 texpdf_new_name("AIS"),
+                 texpdf_new_boolean(1));
   }
-  pdf_add_dict(dict,
-               pdf_new_name("ca"),
-               pdf_new_number(a));
+  texpdf_add_dict(dict,
+               texpdf_new_name("ca"),
+               texpdf_new_number(a));
 
   return  dict;
 }
@@ -551,10 +551,10 @@ check_resourcestatus (const char *category, const char *resname)
   if (!dict1)
     return  0;
 
-  dict2 = pdf_lookup_dict(dict1, category);
+  dict2 = texpdf_lookup_dict(dict1, category);
   if (dict2 &&
       pdf_obj_typeof(dict2) == PDF_DICT) {
-    if (pdf_lookup_dict(dict2, resname))
+    if (texpdf_lookup_dict(dict2, resname))
       return  1;
   }
   return  0;
@@ -578,39 +578,39 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
 
   spc_warn(spe, "html \"img\" tag found (not completed, plese don't use!).");
 
-  src = pdf_lookup_dict(attr, "src");
+  src = texpdf_lookup_dict(attr, "src");
   if (!src) {
     spc_warn(spe, "\"src\" attribute not found for \"img\" tag!");
     return  -1;
   }
 
   transform_info_clear(&ti);
-  obj = pdf_lookup_dict(attr, "width");
+  obj = texpdf_lookup_dict(attr, "width");
   if (obj) {
-    ti.width  = atopt(pdf_string_value(obj));
+    ti.width  = atopt(texpdf_string_value(obj));
     ti.flags |= INFO_HAS_WIDTH;
   }
-  obj = pdf_lookup_dict(attr, "height");
+  obj = texpdf_lookup_dict(attr, "height");
   if (obj) {
-    ti.height = atopt(pdf_string_value(obj));
+    ti.height = atopt(texpdf_string_value(obj));
     ti.flags |= INFO_HAS_HEIGHT;
   }
 
 #ifdef  ENABLE_HTML_SVG_OPACITY
-  obj = pdf_lookup_dict(attr, "svg:opacity");
+  obj = texpdf_lookup_dict(attr, "svg:opacity");
   if (obj) {
-    alpha = atof(pdf_string_value(obj));
+    alpha = atof(texpdf_string_value(obj));
     if (alpha < 0.0 || alpha > 1.0) {
-      spc_warn(spe, "Invalid opacity value: %s", pdf_string_value(obj));
+      spc_warn(spe, "Invalid opacity value: %s", texpdf_string_value(obj));
       alpha = 1.0;
     }
   }
 #endif /* ENABLE_HTML_SVG_OPCAITY */
 
 #ifdef  ENABLE_HTML_SVG_TRANSFORM
-  obj = pdf_lookup_dict(attr, "svg:transform");
+  obj = texpdf_lookup_dict(attr, "svg:transform");
   if (obj) {
-    const char *p = pdf_string_value(obj);
+    const char *p = texpdf_string_value(obj);
     pdf_tmatrix  N;
     for ( ; *p && isspace((unsigned char)*p); p++);
     while (*p && !error) {
@@ -632,9 +632,9 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
     return  error;
   }
 
-  id = pdf_ximage_findresource(pdf, pdf_string_value(src), 0, NULL);
+  id = texpdf_ximage_findresource(pdf, texpdf_string_value(src), 0, NULL);
   if (id < 0) {
-    spc_warn(spe, "Could not find/load image: %s", pdf_string_value(src)); 
+    spc_warn(spe, "Could not find/load image: %s", texpdf_string_value(src)); 
     error = -1;
   } else {
 #if defined(ENABLE_HTML_SVG_TRANSFORM) || defined(ENABLE_HTML_SVG_OPACITY)
@@ -644,7 +644,7 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
 
       graphics_mode(pdf);
 
-      pdf_dev_gsave(pdf);
+      texpdf_dev_gsave(pdf);
 
 #ifdef  ENABLE_HTML_SVG_OPACITY
       {
@@ -657,7 +657,7 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
             dict = create_xgstate(round_at(0.01 * a, 0.01), 0);
             texpdf_doc_add_page_resource(pdf, "ExtGState",
                                       res_name, pdf_ref_obj(dict));
-            pdf_release_obj(dict);
+            texpdf_release_obj(dict);
           }
           texpdf_doc_add_page_content(pdf, " /", 2);  /* op: */
           texpdf_doc_add_page_content(pdf, res_name, strlen(res_name));  /* op: */
@@ -667,25 +667,25 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
       }
 #endif /* ENABLE_HTML_SVG_OPACITY */
 
-      pdf_ximage_scale_image(id, &M1, &r, &ti);
+      texpdf_ximage_scale_image(id, &M1, &r, &ti);
       pdf_concatmatrix(&M, &M1);
-      pdf_dev_concat(pdf, &M);
+      texpdf_dev_concat(pdf, &M);
 
-      pdf_dev_rectclip(pdf, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
+      texpdf_dev_rectclip(pdf, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
 
-      res_name = pdf_ximage_get_resname(id);
+      res_name = texpdf_ximage_get_resname(id);
       texpdf_doc_add_page_content(pdf, " /", 2);  /* op: */
       texpdf_doc_add_page_content(pdf, res_name, strlen(res_name));  /* op: */
       texpdf_doc_add_page_content(pdf, " Do", 3);  /* op: Do */
 
-      pdf_dev_grestore(pdf);
+      texpdf_dev_grestore(pdf);
 
       texpdf_doc_add_page_resource(pdf, "XObject",
                                 res_name,
-                                pdf_ximage_get_reference(id));
+                                texpdf_ximage_get_reference(id));
     }
 #else
-    pdf_dev_put_image(id, &ti, spe->x_user, spe->y_user);
+    texpdf_dev_put_image(id, &ti, spe->x_user, spe->y_user);
 #endif /* ENABLE_HTML_SVG_XXX */
   }
 
@@ -712,10 +712,10 @@ spc_handler_html_default (struct spc_env *spe, struct spc_arg *ap)
   if (ap->curptr >= ap->endptr)
     return  0;
 
-  attr  = pdf_new_dict();
+  attr  = texpdf_new_dict();
   error = read_html_tag(name, attr, &type, &ap->curptr, ap->endptr);
   if (error) {
-    pdf_release_obj(attr);
+    texpdf_release_obj(attr);
     return  error;
   }
   if (!strcmp(name, "a")) {
@@ -746,7 +746,7 @@ spc_handler_html_default (struct spc_env *spe, struct spc_arg *ap)
       error = spc_html__img_empty(spe, attr);
     }
   }
-  pdf_release_obj(attr);
+  texpdf_release_obj(attr);
 
   for ( ; ap->curptr < ap->endptr && isspace((unsigned char)ap->curptr[0]); ap->curptr++);
 
@@ -782,7 +782,7 @@ cvt_a_to_tmatrix (pdf_tmatrix *M, const char *ptr, const char **nextptr)
 
   for ( ; *p && isspace((unsigned char)*p); p++);
 
-  q = parse_c_ident(&p, p + strlen(p));
+  q = texpdf_parse_c_ident(&p, p + strlen(p));
   if (!q)
     return -1;
   /* parsed transformation key */
@@ -795,7 +795,7 @@ cvt_a_to_tmatrix (pdf_tmatrix *M, const char *ptr, const char **nextptr)
     return  -1;
   for (++p; *p && isspace((unsigned char)*p); p++);
   for (n = 0; n < 6 && *p && *p != ')'; n++) {
-    q = parse_float_decimal(&p, p + strlen(p));
+    q = texpdf_parse_float_decimal(&p, p + strlen(p));
     if (!q)
       break;
     else {

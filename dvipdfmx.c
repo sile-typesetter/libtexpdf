@@ -238,7 +238,7 @@ read_length (double *vp, const char **pp, const char *endptr)
   };
   int     k, error = 0;
 
-  q = parse_float_decimal(&p, endptr);
+  q = texpdf_parse_float_decimal(&p, endptr);
   if (!q) {
     *vp = 0.0; *pp = p;
     return  -1;
@@ -248,7 +248,7 @@ read_length (double *vp, const char **pp, const char *endptr)
   RELEASE(q);
 
   skip_white(&p, endptr);
-  q = parse_c_ident(&p, endptr);
+  q = texpdf_parse_c_ident(&p, endptr);
   if (q) {
     char *qq = q;
     if (strlen(q) >= strlen("true") &&
@@ -258,7 +258,7 @@ read_length (double *vp, const char **pp, const char *endptr)
     if (strlen(q) == 0) {
       RELEASE(qq);
       skip_white(&p, endptr);
-      qq = q = parse_c_ident(&p, endptr);
+      qq = q = texpdf_parse_c_ident(&p, endptr);
     }
     if (q) {
       for (k = 0; _ukeys[k] && strcmp(_ukeys[k], q); k++);
@@ -334,7 +334,7 @@ select_pages (const char *pagespec)
     page_ranges[num_page_ranges].last  = 0;
 
     for ( ; *p && isspace((unsigned char)*p); p++);
-    q = parse_unsigned(&p, p + strlen(p)); /* Can't be signed. */
+    q = texpdf_parse_unsigned(&p, p + strlen(p)); /* Can't be signed. */
     if (q) { /* '-' is allowed here */
       page_ranges[num_page_ranges].first = atoi(q) - 1;
       page_ranges[num_page_ranges].last  = page_ranges[num_page_ranges].first;
@@ -346,7 +346,7 @@ select_pages (const char *pagespec)
       for (++p; *p && isspace((unsigned char)*p); p++);
       page_ranges[num_page_ranges].last = -1;
       if (*p) {
-        q = parse_unsigned(&p, p + strlen(p));
+        q = texpdf_parse_unsigned(&p, p + strlen(p));
         if (q) {
           page_ranges[num_page_ranges].last = atoi(q) - 1;
           RELEASE(q);
@@ -401,9 +401,9 @@ set_verbose (int argc, char *argv[])
 
     for (i = 0; i < verbose; i++) {
       dvi_set_verbose();
-      pdf_dev_set_verbose();
+      texpdf_dev_set_verbose();
       texpdf_doc_set_verbose();
-      pdf_enc_set_verbose();
+      texpdf_enc_set_verbose();
       pdf_obj_set_verbose();
       pdf_fontmap_set_verbose();
       dpx_file_set_verbose();
@@ -511,9 +511,9 @@ do_args (int argc, char *argv[])
       case 'f':
         CHECK_ARG(1, "fontmap file name");
         if (opt_flags & OPT_FONTMAP_FIRST_MATCH)
-          pdf_load_fontmap_file(argv[1], FONTMAP_RMODE_APPEND);
+          texpdf_load_fontmap_file(argv[1], FONTMAP_RMODE_APPEND);
         else
-          pdf_load_fontmap_file(argv[1], FONTMAP_RMODE_REPLACE);
+          texpdf_load_fontmap_file(argv[1], FONTMAP_RMODE_REPLACE);
         POP_ARG();
         break;
       case 'i':
@@ -544,7 +544,7 @@ do_args (int argc, char *argv[])
                ver_minor, PDF_VERSION_MAX);
           ver_minor = PDF_VERSION_MAX;
         }
-        pdf_set_version((unsigned) ver_minor);
+        texpdf_set_version((unsigned) ver_minor);
       }
       break;
       case 'z':
@@ -559,7 +559,7 @@ do_args (int argc, char *argv[])
           level = atoi(argv[1]);
           POP_ARG();
         }
-        pdf_set_compression(level);
+        texpdf_set_compression(level);
       }
       break;
       case 'd':
@@ -681,7 +681,7 @@ read_config_file (const char *config)
       continue;
     /* Build up an argument list as if it were passed on the command
        line */
-    if ((option = parse_ident (&start, end))) {
+    if ((option = texpdf_parse_ident (&start, end))) {
       argc = 1;
       argv[0] = NEW (strlen(option)+2, char);
       strcpy (argv[0]+1, option);
@@ -691,10 +691,10 @@ read_config_file (const char *config)
       if (start < end) {
         argc += 1;
         if (*start == '"') {
-          argv[1] = parse_c_string (&start, end);
+          argv[1] = texpdf_parse_c_string (&start, end);
         }
         else
-          argv[1] = parse_ident (&start, end);
+          argv[1] = texpdf_parse_ident (&start, end);
       }
     }
     do_args (argc, argv);
@@ -719,8 +719,8 @@ system_default (void)
 void
 error_cleanup (void)
 {
-  pdf_close_images();  /* delete temporary files */
-  pdf_error_cleanup();
+  texpdf_close_images();  /* delete temporary files */
+  texpdf_error_cleanup();
   if (pdf_filename) {
     remove(pdf_filename);
     fprintf(stderr, "\nOutput file removed.\n");
@@ -946,7 +946,7 @@ main (int argc, char *argv[])
   if (really_quiet)
     shut_up(really_quiet);
 
-  pdf_init_fontmaps(); /* This must come before parsing options... */
+  texpdf_init_fontmaps(); /* This must come before parsing options... */
 
   read_config_file(DPX_CONFIG_FILE);
 
@@ -976,12 +976,12 @@ main (int argc, char *argv[])
   MESG("%s -> %s\n", dvi_filename ? dvi_filename : "stdin",
                      pdf_filename ? pdf_filename : "stdout");
 
-  pdf_enc_compute_id_string(dvi_filename, pdf_filename);
+  texpdf_enc_compute_id_string(dvi_filename, pdf_filename);
   if (do_encryption) {
-    if (key_bits > 40 && pdf_get_version() < 4)
+    if (key_bits > 40 && texpdf_get_version() < 4)
       ERROR("Chosen key length requires at least PDF 1.4. "
             "Use \"-V 4\" to change.");
-    pdf_enc_set_passwd(key_bits, permission, NULL, NULL);
+    texpdf_enc_set_passwd(key_bits, permission, NULL, NULL);
   }
 
   if (mp_mode) {
@@ -1006,22 +1006,22 @@ main (int argc, char *argv[])
       if (do_encryption) {
 	if (key_bits < 40 || key_bits > 128 || (key_bits & 0x7))
 	  ERROR("Invalid encryption key length specified: %u", key_bits);
-	else if (key_bits > 40 && pdf_get_version() < 4)
+	else if (key_bits > 40 && texpdf_get_version() < 4)
 	  ERROR("Chosen key length requires at least PDF 1.4. "
 		"Use \"-V 4\" to change.");
 	do_encryption = 1;
-	pdf_enc_set_passwd(key_bits, permission, owner_pw, user_pw);
+	texpdf_enc_set_passwd(key_bits, permission, owner_pw, user_pw);
       }
     }
     if (ver_minor >= PDF_VERSION_MIN && ver_minor <= PDF_VERSION_MAX) {
-      pdf_set_version(ver_minor);
+      texpdf_set_version(ver_minor);
     }
     if (landscape_mode) {
       SWAP(paper_width, paper_height);
     }
   }
 
-  pdf_files_init();
+  texpdf_files_init();
 
   /* Set default paper size here so that all page's can inherite it.
    * annot_grow:    Margin of annotation.
@@ -1034,7 +1034,7 @@ main (int argc, char *argv[])
   /* Ignore_colors placed here since
    * they are considered as device's capacity.
    */
-  pdf_init_device(pdf, dvi2pts, pdfdecimaldigits, ignore_colors);
+  texpdf_init_device(pdf, dvi2pts, pdfdecimaldigits, ignore_colors);
   texpdf_doc_set_creator(pdf, dvi_comment());
 
   if (manual_thumbnails)
@@ -1053,14 +1053,14 @@ main (int argc, char *argv[])
     do_dvi_pages();
   }
 
-  pdf_files_close();
+  texpdf_files_close();
 
   /* Order of close... */
-  pdf_close_device  ();
-  /* pdf_close_document flushes XObject (image) and other resources. */
+  texpdf_close_device  ();
+  /* texpdf_close_document flushes XObject (image) and other resources. */
   texpdf_close_document(pdf);
 
-  pdf_close_fontmaps(); /* pdf_font may depend on fontmap. */
+  texpdf_close_fontmaps(); /* pdf_font may depend on fontmap. */
 
   if (!mp_mode)
     dvi_close();

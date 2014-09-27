@@ -29,7 +29,7 @@ otl_conf_set_verbose (void)
 }
 
 static pdf_obj *
-parse_uc_coverage (pdf_obj *gclass, const char **pp, const char *endptr)
+texpdf_parse_uc_coverage (pdf_obj *gclass, const char **pp, const char *endptr)
 {
   pdf_obj *coverage;
   pdf_obj *value;
@@ -42,7 +42,7 @@ parse_uc_coverage (pdf_obj *gclass, const char **pp, const char *endptr)
   if (**pp == '[')
     (*pp)++;
 
-  coverage = pdf_new_array();
+  coverage = texpdf_new_array();
 
   while (*pp < endptr) {
     skip_white(pp, endptr);
@@ -59,44 +59,44 @@ parse_uc_coverage (pdf_obj *gclass, const char **pp, const char *endptr)
 	int      i, size;
 
 	(*pp)++;
-	glyphclass = parse_c_ident(pp, endptr);
-	cvalues = pdf_lookup_dict(gclass, glyphclass);
+	glyphclass = texpdf_parse_c_ident(pp, endptr);
+	cvalues = texpdf_lookup_dict(gclass, glyphclass);
 	if (!cvalues)
 	  ERROR("%s not defined...", glyphclass);
 	size    = pdf_array_length(cvalues);
 	for (i = 0; i < size; i++) {
 	  pdf_add_array(coverage,
-			pdf_link_obj(pdf_get_array(cvalues, i)));
+			pdf_link_obj(texpdf_get_array(cvalues, i)));
 	}
       }
       break;
     default:
-      glyphname  = parse_c_ident(pp, endptr);
+      glyphname  = texpdf_parse_c_ident(pp, endptr);
       if (!glyphname)
 	ERROR("Invalid Unicode character specified.");
 
       skip_white(pp, endptr);
       if (*pp + 1 < endptr && **pp == '-') {
-	value = pdf_new_array();
+	value = texpdf_new_array();
 
 	if (agl_get_unicodes(glyphname, &ucv, 1) != 1)
 	  ERROR("Invalid Unicode char: %s", glyphname);
-	pdf_add_array(value, pdf_new_number(ucv));
+	pdf_add_array(value, texpdf_new_number(ucv));
 	RELEASE(glyphname);
 
 	(*pp)++; skip_white(pp, endptr);
-	glyphname = parse_c_ident(pp, endptr);
+	glyphname = texpdf_parse_c_ident(pp, endptr);
 	if (!glyphname)
 	  ERROR("Invalid Unicode char: %s", glyphname);
 	if (agl_get_unicodes(glyphname, &ucv, 1) != 1)
 	  ERROR("Invalid Unicode char: %s", glyphname);
-	pdf_add_array(value, pdf_new_number(ucv));
+	pdf_add_array(value, texpdf_new_number(ucv));
 	RELEASE(glyphname);
 
       } else {
 	if (agl_get_unicodes(glyphname, &ucv, 1) != 1)
 	  ERROR("Invalid Unicode char: %s", glyphname);
-	value = pdf_new_number(ucv);
+	value = texpdf_new_number(ucv);
 	RELEASE(glyphname);
       }
       pdf_add_array(coverage, value);
@@ -108,7 +108,7 @@ parse_uc_coverage (pdf_obj *gclass, const char **pp, const char *endptr)
   return coverage;
 }
 
-static pdf_obj *parse_block (pdf_obj *gclass, const char **pp, const char *endptr);
+static pdf_obj *texpdf_parse_block (pdf_obj *gclass, const char **pp, const char *endptr);
 
 static void
 add_rule (pdf_obj *rule, pdf_obj *gclass,
@@ -120,7 +120,7 @@ add_rule (pdf_obj *rule, pdf_obj *gclass,
   int      i, n_unicodes;
 
   if (first[0] == '@') {
-    glyph1 = pdf_lookup_dict(gclass, &first[1]);
+    glyph1 = texpdf_lookup_dict(gclass, &first[1]);
     if (!glyph1) {
       WARN("No glyph class \"%s\" found.", &first[1]);
       return;
@@ -138,14 +138,14 @@ add_rule (pdf_obj *rule, pdf_obj *gclass,
 	   first);
       return;
     }
-    glyph1 = pdf_new_array();
+    glyph1 = texpdf_new_array();
 
     if (verbose > VERBOSE_LEVEL_MIN) {
       MESG("otl_conf>> Output glyph sequence: %s ->", first);
     }
 
     for (i = 0; i < n_unicodes; i++) {
-      pdf_add_array(glyph1, pdf_new_number(unicodes[i]));
+      pdf_add_array(glyph1, texpdf_new_number(unicodes[i]));
 
       if (verbose > VERBOSE_LEVEL_MIN) {
 	if (unicodes[i] < 0x10000) {
@@ -162,7 +162,7 @@ add_rule (pdf_obj *rule, pdf_obj *gclass,
   }
 
   if (second[0] == '@') {
-    glyph2 = pdf_lookup_dict(gclass, &second[1]);
+    glyph2 = texpdf_lookup_dict(gclass, &second[1]);
     if (!glyph2) {
       WARN("No glyph class \"%s\" found.", &second[1]);
       return;
@@ -188,9 +188,9 @@ add_rule (pdf_obj *rule, pdf_obj *gclass,
 	MESG("otl_conf>> Input glyph sequence: %s ->", second);
     }
 
-    glyph2 = pdf_new_array();
+    glyph2 = texpdf_new_array();
     for (i = 0; i < n_unicodes; i++) {
-      pdf_add_array(glyph2, pdf_new_number(unicodes[i]));
+      pdf_add_array(glyph2, texpdf_new_number(unicodes[i]));
 
       if (verbose > VERBOSE_LEVEL_MIN) {
 	if (unicodes[i] < 0x10000) {
@@ -207,16 +207,16 @@ add_rule (pdf_obj *rule, pdf_obj *gclass,
 
   /* OK */
   if (suffix) {
-    pdf_add_array(rule, pdf_new_string(suffix, strlen(suffix)));
+    pdf_add_array(rule, texpdf_new_string(suffix, strlen(suffix)));
   } else {
-    pdf_add_array(rule, pdf_new_null());
+    pdf_add_array(rule, texpdf_new_null());
   }
   pdf_add_array(rule, glyph1);
   pdf_add_array(rule, glyph2);
 }
 
 static pdf_obj *
-parse_substrule (pdf_obj *gclass, const char **pp, const char *endptr)
+texpdf_parse_substrule (pdf_obj *gclass, const char **pp, const char *endptr)
 {
   pdf_obj *substrule;
   char    *token;
@@ -229,7 +229,7 @@ parse_substrule (pdf_obj *gclass, const char **pp, const char *endptr)
   if (*pp >= endptr)
     return NULL;
 
-  substrule = pdf_new_array();
+  substrule = texpdf_new_array();
   while (*pp < endptr && **pp != '}') {
     skip_white(pp, endptr);
     if (*pp >= endptr)
@@ -250,7 +250,7 @@ parse_substrule (pdf_obj *gclass, const char **pp, const char *endptr)
     }
 
     skip_white(pp, endptr);
-    token = parse_c_ident(pp, endptr);
+    token = texpdf_parse_c_ident(pp, endptr);
     if (!token)
       break;
 
@@ -259,25 +259,25 @@ parse_substrule (pdf_obj *gclass, const char **pp, const char *endptr)
 
       skip_white(pp, endptr);
 
-      first = parse_c_ident(pp, endptr);
+      first = texpdf_parse_c_ident(pp, endptr);
       if (!first)
 	ERROR("Syntax error (1)");
 
       skip_white(pp, endptr);
-      tmp = parse_c_ident(pp, endptr);
+      tmp = texpdf_parse_c_ident(pp, endptr);
       if (strcmp(tmp, "by") && strcmp(tmp, "to"))
 	ERROR("Syntax error (2): %s", *pp);
 
       skip_white(pp, endptr);
-      second = parse_c_ident(pp, endptr); /* allows @ */
+      second = texpdf_parse_c_ident(pp, endptr); /* allows @ */
       if (!second)
 	ERROR("Syntax error (3)");
 
       /* (assign|substitute) tag dst src */
-      pdf_add_array(substrule, pdf_new_name(token));
+      pdf_add_array(substrule, texpdf_new_name(token));
       if (*pp + 1 < endptr && **pp == '.') {
 	(*pp)++;
-	suffix = parse_c_ident(pp, endptr);
+	suffix = texpdf_parse_c_ident(pp, endptr);
       } else {
 	suffix = NULL;
       }
@@ -301,7 +301,7 @@ parse_substrule (pdf_obj *gclass, const char **pp, const char *endptr)
 }
 
 static pdf_obj *
-parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
+texpdf_parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
 {
   pdf_obj *rule;
   char    *token, *tmp;
@@ -314,7 +314,7 @@ parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
   if (*pp >= endptr)
     return NULL;
 
-  rule   = pdf_new_dict();
+  rule   = texpdf_new_dict();
   while (*pp < endptr && **pp != '}') {
     skip_white(pp, endptr);
     if (*pp >= endptr)
@@ -334,7 +334,7 @@ parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
     }
 
     skip_white(pp, endptr);
-    token = parse_c_ident(pp, endptr);
+    token = texpdf_parse_c_ident(pp, endptr);
     if (!token)
       break;
 
@@ -355,9 +355,9 @@ parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
 	    tmp[i] = **pp;
 	  (*pp)++;
 	}
-	pdf_add_dict(rule,
-		     pdf_new_name(token),
-		     pdf_new_string(tmp, strlen(tmp)));
+	texpdf_add_dict(rule,
+		     texpdf_new_name(token),
+		     texpdf_new_string(tmp, strlen(tmp)));
 
 	if (verbose > VERBOSE_LEVEL_MIN) {
 	  MESG("otl_conf>> Current %s set to \"%s\"\n", token, tmp);
@@ -368,23 +368,23 @@ parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
     } else if (!strcmp(token, "option")) {
       pdf_obj *opt_dict, *opt_rule;
 
-      opt_dict = pdf_lookup_dict(rule, "option");
+      opt_dict = texpdf_lookup_dict(rule, "option");
       if (!opt_dict) {
-	opt_dict = pdf_new_dict();
-	pdf_add_dict(rule,
-		     pdf_new_name("option"), opt_dict);
+	opt_dict = texpdf_new_dict();
+	texpdf_add_dict(rule,
+		     texpdf_new_name("option"), opt_dict);
       }
 
       skip_white(pp, endptr);
-      tmp = parse_c_ident(pp, endptr);
+      tmp = texpdf_parse_c_ident(pp, endptr);
 
       if (verbose > VERBOSE_LEVEL_MIN) {
 	MESG("otl_conf>> Reading option \"%s\"\n", tmp);
       }
 
       skip_white(pp, endptr);
-      opt_rule = parse_block(gclass, pp, endptr);
-      pdf_add_dict(opt_dict, pdf_new_name(tmp), opt_rule);
+      opt_rule = texpdf_parse_block(gclass, pp, endptr);
+      texpdf_add_dict(opt_dict, texpdf_new_name(tmp), opt_rule);
 
       RELEASE(tmp);
     } else if (!strcmp(token, "prefered") ||
@@ -400,13 +400,13 @@ parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
       if (*pp >= endptr || **pp != '{')
 	ERROR("Syntax error (1)");
 
-      rule_block = parse_substrule(gclass, pp, endptr);
-      subst = pdf_lookup_dict(rule, "rule");
+      rule_block = texpdf_parse_substrule(gclass, pp, endptr);
+      subst = texpdf_lookup_dict(rule, "rule");
       if (!subst) {
-	subst = pdf_new_array();
-	pdf_add_dict(rule, pdf_new_name("rule"), subst);
+	subst = texpdf_new_array();
+	texpdf_add_dict(rule, texpdf_new_name("rule"), subst);
       }
-      pdf_add_array(subst, pdf_new_number(token[0]));
+      pdf_add_array(subst, texpdf_new_number(token[0]));
       pdf_add_array(subst, rule_block);
     } else if (token[0] == '@') {
       pdf_obj *coverage;
@@ -419,12 +419,12 @@ parse_block (pdf_obj *gclass, const char **pp, const char *endptr)
 	MESG("otl_conf>> Glyph class \"%s\"\n", token);
       }
 
-      coverage = parse_uc_coverage(gclass, pp, endptr);
+      coverage = texpdf_parse_uc_coverage(gclass, pp, endptr);
       if (!coverage)
 	ERROR("No valid Unicode characters...");
 
-      pdf_add_dict(gclass,
-		   pdf_new_name(&token[1]), coverage);
+      texpdf_add_dict(gclass,
+		   texpdf_new_name(&token[1]), coverage);
     }
     RELEASE(token);
     skip_white(pp, endptr);
@@ -476,9 +476,9 @@ otl_read_conf (const char *conf_name)
   }
   
   pp     = wbuf;
-  gclass = pdf_new_dict();
-  rule   = parse_block(gclass, &pp, endptr);
-  pdf_release_obj(gclass);
+  gclass = texpdf_new_dict();
+  rule   = texpdf_parse_block(gclass, &pp, endptr);
+  texpdf_release_obj(gclass);
 
   RELEASE(wbuf);
 
@@ -497,31 +497,31 @@ otl_find_conf (const char *conf_name)
   return  NULL;
 
   if (otl_confs)
-    rule = pdf_lookup_dict(otl_confs, conf_name);
+    rule = texpdf_lookup_dict(otl_confs, conf_name);
   else {
-    otl_confs = pdf_new_dict();
+    otl_confs = texpdf_new_dict();
     rule = NULL;
   }
 
   if (!rule) {
     rule = otl_read_conf(conf_name);
     if (rule) {
-      pdf_add_dict(otl_confs,
-		   pdf_new_name(conf_name), rule);
-      script   = pdf_lookup_dict(rule, "script");
-      language = pdf_lookup_dict(rule, "language");
-      options  = pdf_lookup_dict(rule, "option");
+      texpdf_add_dict(otl_confs,
+		   texpdf_new_name(conf_name), rule);
+      script   = texpdf_lookup_dict(rule, "script");
+      language = texpdf_lookup_dict(rule, "language");
+      options  = texpdf_lookup_dict(rule, "option");
       if (!script) {
-	script = pdf_new_string("*", 1);
-	pdf_add_dict(rule,
-		     pdf_new_name("script"),
+	script = texpdf_new_string("*", 1);
+	texpdf_add_dict(rule,
+		     texpdf_new_name("script"),
 		     script);
 	WARN("Script unspecified in \"%s\"...", conf_name);
       }
       if (!language) {
-	language = pdf_new_string("dflt", 4);
-	pdf_add_dict(rule,
-		     pdf_new_name("language"),
+	language = texpdf_new_string("dflt", 4);
+	texpdf_add_dict(rule,
+		     texpdf_new_name("language"),
 		     language);
 	WARN("Language unspecified in \"%s\"...", conf_name);
       }
@@ -533,18 +533,18 @@ otl_find_conf (const char *conf_name)
 	optkeys  = pdf_dict_keys(options);
 	num_opts = pdf_array_length(optkeys);
 	for (i = 0; i < num_opts; i++) {
-	  key = pdf_get_array(optkeys, i);
-	  opt = pdf_lookup_dict(options, pdf_name_value(key));
-	  if (!pdf_lookup_dict(opt, "script"))
-	    pdf_add_dict(opt,
-			 pdf_new_name("script"),
+	  key = texpdf_get_array(optkeys, i);
+	  opt = texpdf_lookup_dict(options, pdf_name_value(key));
+	  if (!texpdf_lookup_dict(opt, "script"))
+	    texpdf_add_dict(opt,
+			 texpdf_new_name("script"),
 			 pdf_link_obj(script));
-	  if (!pdf_lookup_dict(opt, "language"))
-	    pdf_add_dict(opt,
-			 pdf_new_name("language"),
+	  if (!texpdf_lookup_dict(opt, "language"))
+	    texpdf_add_dict(opt,
+			 texpdf_new_name("language"),
 			 pdf_link_obj(language));
 	}
-	pdf_release_obj(optkeys);
+	texpdf_release_obj(optkeys);
       }
 
     }
@@ -561,9 +561,9 @@ otl_conf_get_script (pdf_obj *conf)
 
   ASSERT(conf);
 
-  script = pdf_lookup_dict(conf, "script");
+  script = texpdf_lookup_dict(conf, "script");
 
-  return pdf_string_value(script);
+  return texpdf_string_value(script);
 }
 
 char *
@@ -573,16 +573,16 @@ otl_conf_get_language (pdf_obj *conf)
 
   ASSERT(conf);
 
-  language = pdf_lookup_dict(conf, "language");
+  language = texpdf_lookup_dict(conf, "language");
 
-  return pdf_string_value(language);
+  return texpdf_string_value(language);
 }
 
 pdf_obj *
 otl_conf_get_rule (pdf_obj *conf)
 {
   ASSERT(conf);
-  return pdf_lookup_dict(conf, "rule");
+  return texpdf_lookup_dict(conf, "rule");
 }
 
 pdf_obj *
@@ -593,9 +593,9 @@ otl_conf_find_opt (pdf_obj *conf, const char *opt_tag)
 
   ASSERT(conf);
 
-  options = pdf_lookup_dict(conf, "option");
+  options = texpdf_lookup_dict(conf, "option");
   if (options && opt_tag)
-    opt_conf = pdf_lookup_dict(options, opt_tag);
+    opt_conf = texpdf_lookup_dict(options, opt_tag);
   else
     opt_conf = NULL;
 
@@ -606,17 +606,17 @@ void
 otl_init_conf (void)
 {
   if (otl_confs)
-    pdf_release_obj(otl_confs);
-  otl_confs = pdf_new_dict();
+    texpdf_release_obj(otl_confs);
+  otl_confs = texpdf_new_dict();
 
   if (verbose > VERBOSE_LEVEL_MIN + 10) {
-    pdf_release_obj(pdf_ref_obj(otl_confs));
+    texpdf_release_obj(pdf_ref_obj(otl_confs));
   }
 }
 
 void
 otl_close_conf (void)
 {
-  pdf_release_obj(otl_confs);
+  texpdf_release_obj(otl_confs);
   otl_confs = NULL;
 }

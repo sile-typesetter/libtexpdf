@@ -393,7 +393,7 @@ sfd_load_record (const char *sfd_name, const char *subfont_id)
     if (*p == 0)
       continue; /* empty line */
 
-    /* q = parse_ident(&p, p + strlen(p)); */
+    /* q = texpdf_parse_ident(&p, p + strlen(p)); */
     for (q = p; *p && !isspace((unsigned char)*p); p++);
     *p = '\0'; p++;
     if (!strcmp(q, subfont_id)) {

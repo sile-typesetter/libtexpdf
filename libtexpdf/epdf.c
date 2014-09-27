@@ -99,8 +99,8 @@ rect_equal (pdf_obj *rect1, pdf_obj *rect2)
   if (!rect1 || !rect2)
     return 0;
   for (i = 0; i < 4; i++) {
-    if (pdf_number_value(pdf_get_array(rect1, i)) !=
-	pdf_number_value(pdf_get_array(rect2, i)))
+    if (pdf_number_value(texpdf_get_array(rect1, i)) !=
+	pdf_number_value(texpdf_get_array(rect2, i)))
       return 0;
   }
 
@@ -108,7 +108,7 @@ rect_equal (pdf_obj *rect1, pdf_obj *rect2)
 }
 
 static pdf_obj*
-pdf_get_page_obj (pdf_file *pf, long page_no,
+texpdf_get_page_obj (pdf_file *pf, long page_no,
                   pdf_obj **ret_bbox, pdf_obj **ret_resources)
 {
   pdf_obj *page_tree;
@@ -125,32 +125,32 @@ pdf_get_page_obj (pdf_file *pf, long page_no,
 
     trailer = pdf_file_get_trailer(pf);
 
-    if (pdf_lookup_dict(trailer, "Encrypt")) {
+    if (texpdf_lookup_dict(trailer, "Encrypt")) {
       WARN("This PDF document is encrypted.");
-      pdf_release_obj(trailer);
+      texpdf_release_obj(trailer);
       return NULL;
     }
 
-    catalog = pdf_deref_obj(pdf_lookup_dict(trailer, "Root"));
+    catalog = pdf_deref_obj(texpdf_lookup_dict(trailer, "Root"));
     if (!PDF_OBJ_DICTTYPE(catalog)) {
       WARN("Can't read document catalog.");
-      pdf_release_obj(trailer);
+      texpdf_release_obj(trailer);
       if (catalog)
-	pdf_release_obj(catalog);
+	texpdf_release_obj(catalog);
       return NULL;
     }
-    pdf_release_obj(trailer);
+    texpdf_release_obj(trailer);
 
-    markinfo = pdf_deref_obj(pdf_lookup_dict(catalog, "MarkInfo"));
+    markinfo = pdf_deref_obj(texpdf_lookup_dict(catalog, "MarkInfo"));
     if (markinfo) {
-      tmp = pdf_lookup_dict(markinfo, "Marked");
+      tmp = texpdf_lookup_dict(markinfo, "Marked");
       if (PDF_OBJ_BOOLEANTYPE(tmp) && pdf_boolean_value(tmp))
 	WARN("File contains tagged PDF. Ignoring tags.");
-      pdf_release_obj(markinfo);
+      texpdf_release_obj(markinfo);
     }
 
-    page_tree = pdf_deref_obj(pdf_lookup_dict(catalog, "Pages"));
-    pdf_release_obj(catalog);
+    page_tree = pdf_deref_obj(texpdf_lookup_dict(catalog, "Pages"));
+    texpdf_release_obj(catalog);
   }
   if (!page_tree) {
     WARN("Page tree not found.");
@@ -161,11 +161,11 @@ pdf_get_page_obj (pdf_file *pf, long page_no,
    * Negative page numbers are counted from the back.
    */
   {
-    long count = pdf_number_value(pdf_lookup_dict(page_tree, "Count"));
+    long count = pdf_number_value(texpdf_lookup_dict(page_tree, "Count"));
     page_idx = page_no + (page_no >= 0 ? -1 : count);
     if (page_idx < 0 || page_idx >= count) {
 	WARN("Page %ld does not exist.", page_no);
-	pdf_release_obj(page_tree);
+	texpdf_release_obj(page_tree);
 	return NULL;
       }
     page_no = page_idx+1;
@@ -180,61 +180,61 @@ pdf_get_page_obj (pdf_file *pf, long page_no,
     pdf_obj *crop_box = NULL;
     pdf_obj *tmp;
 
-    tmp = pdf_lookup_dict(page_tree, "Resources");
-    resources = tmp ? pdf_deref_obj(tmp) : pdf_new_dict();
+    tmp = texpdf_lookup_dict(page_tree, "Resources");
+    resources = tmp ? pdf_deref_obj(tmp) : texpdf_new_dict();
 
     while (1) {
       long kids_length, i;
  
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "MediaBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "MediaBox")))) {
 	if (bbox)
-	  pdf_release_obj(bbox);
+	  texpdf_release_obj(bbox);
 	bbox = tmp;
       }
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "BleedBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "BleedBox")))) {
         if (!rect_equal(tmp, bbox)) {
 	  if (bbox)
-	    pdf_release_obj(bbox);
+	    texpdf_release_obj(bbox);
 	  bbox = tmp;
         } else
-          pdf_release_obj(tmp);
+          texpdf_release_obj(tmp);
       }
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "TrimBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "TrimBox")))) {
         if (!rect_equal(tmp, bbox)) {
 	  if (bbox)
-	    pdf_release_obj(bbox);
+	    texpdf_release_obj(bbox);
 	  bbox = tmp;
         } else
-          pdf_release_obj(tmp);
+          texpdf_release_obj(tmp);
       }
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "ArtBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "ArtBox")))) {
         if (!rect_equal(tmp, bbox)) {
 	  if (bbox)
-	    pdf_release_obj(bbox);
+	    texpdf_release_obj(bbox);
 	  bbox = tmp;
         } else
-          pdf_release_obj(tmp);
+          texpdf_release_obj(tmp);
       }
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "CropBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "CropBox")))) {
 	if (crop_box)
-	  pdf_release_obj(crop_box);
+	  texpdf_release_obj(crop_box);
 	crop_box = tmp;
       }
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Rotate")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Rotate")))) {
 	if (rotate)
-	  pdf_release_obj(rotate);
+	  texpdf_release_obj(rotate);
 	rotate = tmp;
       }
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Resources")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Resources")))) {
 #if 0
-	pdf_merge_dict(tmp, resources);
+	texpdf_merge_dict(tmp, resources);
 #endif
 	if (resources)
-	  pdf_release_obj(resources);
+	  texpdf_release_obj(resources);
 	resources = tmp;
       }
 
-      kids_ref = pdf_lookup_dict(page_tree, "Kids");
+      kids_ref = texpdf_lookup_dict(page_tree, "Kids");
       if (!kids_ref)
 	break;
       kids = pdf_deref_obj(kids_ref);
@@ -243,14 +243,14 @@ pdf_get_page_obj (pdf_file *pf, long page_no,
       for (i = 0; i < kids_length; i++) {
 	long count;
 
-	pdf_release_obj(page_tree);
-	page_tree = pdf_deref_obj(pdf_get_array(kids, i));
+	texpdf_release_obj(page_tree);
+	page_tree = pdf_deref_obj(texpdf_get_array(kids, i));
 
-	tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Count"));
+	tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Count"));
 	if (tmp) {
 	  /* Pages object */
 	  count = pdf_number_value(tmp);
-	  pdf_release_obj(tmp);
+	  texpdf_release_obj(tmp);
 	} else
 	  /* Page object */
 	  count = 1;
@@ -261,40 +261,40 @@ pdf_get_page_obj (pdf_file *pf, long page_no,
 	page_idx -= count;
       }
       
-      pdf_release_obj(kids);
+      texpdf_release_obj(kids);
 
       if (i == kids_length) {
 	WARN("Page %ld not found! Broken PDF file?", page_no);
 	if (bbox)
-	  pdf_release_obj(bbox);
+	  texpdf_release_obj(bbox);
 	if (crop_box)
-	  pdf_release_obj(crop_box);
+	  texpdf_release_obj(crop_box);
 	if (rotate)
-	  pdf_release_obj(rotate);
-	pdf_release_obj(resources);
-	pdf_release_obj(page_tree);
+	  texpdf_release_obj(rotate);
+	texpdf_release_obj(resources);
+	texpdf_release_obj(page_tree);
 	return NULL;
       }
     }
     if (crop_box) {
-      pdf_release_obj(bbox);
+      texpdf_release_obj(bbox);
       bbox = crop_box;
     }
   }
 
   if (!bbox) {
     WARN("No BoundingBox information available.");
-    pdf_release_obj(page_tree);
-    pdf_release_obj(resources);
+    texpdf_release_obj(page_tree);
+    texpdf_release_obj(resources);
     if (rotate)
-      pdf_release_obj(rotate);
+      texpdf_release_obj(rotate);
     return NULL;
   }
 
   if (rotate) {
     if (pdf_number_value(rotate) != 0.0)
       WARN("<< /Rotate %d >> found. (Not supported yet)",  (int)pdf_number_value(rotate));
-    pdf_release_obj(rotate);
+    texpdf_release_obj(rotate);
     rotate = NULL;
   }
   
@@ -307,65 +307,65 @@ pdf_get_page_obj (pdf_file *pf, long page_no,
 }
 
 static pdf_obj*
-pdf_get_page_content (pdf_obj* page)
+texpdf_get_page_content (pdf_obj* page)
 {
   pdf_obj *contents, *content_new;
 
-  contents = pdf_deref_obj(pdf_lookup_dict(page, "Contents"));
+  contents = pdf_deref_obj(texpdf_lookup_dict(page, "Contents"));
   if (!contents)
     return NULL;
 
   if (pdf_obj_typeof(contents) == PDF_NULL) {
     /* empty page */
-    pdf_release_obj(contents);
+    texpdf_release_obj(contents);
     /* TODO: better don't include anything if the page is empty */
-    contents = pdf_new_stream(0);
+    contents = texpdf_new_stream(0);
   } else if (PDF_OBJ_ARRAYTYPE(contents)) {
     /*
      * Concatenate all content streams.
      */
     pdf_obj *content_seg;
     int      idx = 0;
-    content_new = pdf_new_stream(STREAM_COMPRESS);
+    content_new = texpdf_new_stream(STREAM_COMPRESS);
     for (;;) {
-      content_seg = pdf_deref_obj(pdf_get_array(contents, idx));
+      content_seg = pdf_deref_obj(texpdf_get_array(contents, idx));
       if (!content_seg)
 	break;
       else if (PDF_OBJ_NULLTYPE(content_seg)) {
 	/* Silently ignore. */
       }  else if (!PDF_OBJ_STREAMTYPE(content_seg)) {
 	WARN("Page content not a stream object. Broken PDF file?");
-        pdf_release_obj(content_seg);
-	pdf_release_obj(content_new);
-        pdf_release_obj(contents);
+        texpdf_release_obj(content_seg);
+	texpdf_release_obj(content_new);
+        texpdf_release_obj(contents);
 	return NULL;
       } else if (pdf_concat_stream(content_new, content_seg) < 0) {
 	WARN("Could not handle content stream with multiple segments.");
-        pdf_release_obj(content_seg);
-	pdf_release_obj(content_new);
-        pdf_release_obj(contents);
+        texpdf_release_obj(content_seg);
+	texpdf_release_obj(content_new);
+        texpdf_release_obj(contents);
 	return NULL;
       }
-      pdf_release_obj(content_seg);
+      texpdf_release_obj(content_seg);
       idx++;
     }
-    pdf_release_obj(contents);
+    texpdf_release_obj(contents);
     contents = content_new;
   } else {
     if (!PDF_OBJ_STREAMTYPE(contents)) {
       WARN("Page content not a stream object. Broken PDF file?");
-      pdf_release_obj(contents);
+      texpdf_release_obj(contents);
       return NULL;
     }
     /* Flate the contents if necessary. */
-    content_new = pdf_new_stream(STREAM_COMPRESS);
+    content_new = texpdf_new_stream(STREAM_COMPRESS);
     if (pdf_concat_stream(content_new, contents) < 0) {
       WARN("Could not handle a content stream.");
-      pdf_release_obj(contents);
-      pdf_release_obj(content_new);
+      texpdf_release_obj(contents);
+      texpdf_release_obj(content_new);
       return NULL;
     }
-    pdf_release_obj(contents);
+    texpdf_release_obj(contents);
     contents = content_new;
   }
 
@@ -385,15 +385,15 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
   if (!pf)
     return -1;
 
-  if (pdf_file_get_version(pf) > pdf_get_version())
+  if (pdf_file_get_version(pf) > texpdf_get_version())
     goto too_recent;
 
-  pdf_ximage_init_form_info(&info);
+  texpdf_ximage_init_form_info(&info);
 
   /*
    * Get Page.
    */
-  page_no = pdf_ximage_get_page(ximage);
+  page_no = texpdf_ximage_get_page(ximage);
   if (page_no == 0)
     page_no = 1;
 
@@ -402,21 +402,21 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
     goto error_silent;
 
   catalog = pdf_file_get_catalog(pf);
-  markinfo = pdf_deref_obj(pdf_lookup_dict(catalog, "MarkInfo"));
+  markinfo = pdf_deref_obj(texpdf_lookup_dict(catalog, "MarkInfo"));
   if (markinfo) {
-    pdf_obj *tmp = pdf_deref_obj(pdf_lookup_dict(markinfo, "Marked"));
-    pdf_release_obj(markinfo);
+    pdf_obj *tmp = pdf_deref_obj(texpdf_lookup_dict(markinfo, "Marked"));
+    texpdf_release_obj(markinfo);
     if (!PDF_OBJ_BOOLEANTYPE(tmp)) {
       if (tmp)
-	pdf_release_obj(tmp);
+	texpdf_release_obj(tmp);
       goto error;
     } else if (pdf_boolean_value(tmp))
       WARN("File contains tagged PDF. Ignoring tags.");
-    pdf_release_obj(tmp);
+    texpdf_release_obj(tmp);
   }
 
-  contents = pdf_deref_obj(pdf_lookup_dict(page, "Contents"));
-  pdf_release_obj(page);
+  contents = pdf_deref_obj(texpdf_lookup_dict(page, "Contents"));
+  texpdf_release_obj(page);
   page = NULL;
 
   /*
@@ -429,7 +429,7 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
       /*
        * Empty page
        */
-      content_new = pdf_new_stream(0);
+      content_new = texpdf_new_stream(0);
       /* TODO: better don't include anything if the page is empty */
     } else if (PDF_OBJ_STREAMTYPE(contents)) {
       /* 
@@ -442,22 +442,22 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
        * Concatenate all content streams.
        */
       int idx, len = pdf_array_length(contents);
-      content_new = pdf_new_stream(STREAM_COMPRESS);
+      content_new = texpdf_new_stream(STREAM_COMPRESS);
       for (idx = 0; idx < len; idx++) {
-	pdf_obj *content_seg = pdf_deref_obj(pdf_get_array(contents, idx));
+	pdf_obj *content_seg = pdf_deref_obj(texpdf_get_array(contents, idx));
 	if (!PDF_OBJ_STREAMTYPE(content_seg) ||
 	    pdf_concat_stream(content_new, content_seg) < 0) {
-	  pdf_release_obj(content_seg);
-	  pdf_release_obj(content_new);
+	  texpdf_release_obj(content_seg);
+	  texpdf_release_obj(content_new);
 	  goto error;
 	}
-	pdf_release_obj(content_seg);
+	texpdf_release_obj(content_seg);
       }
     } else
       goto error;
 
     if (contents)
-      pdf_release_obj(contents);
+      texpdf_release_obj(contents);
     contents = content_new;
   }
 
@@ -467,43 +467,43 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
   {
     pdf_obj *contents_dict, *bbox, *matrix;
 
-    contents_dict = pdf_stream_dict(contents);
-    pdf_add_dict(contents_dict,
-		 pdf_new_name("Type"), 
-		 pdf_new_name("XObject"));
-    pdf_add_dict(contents_dict,
-		 pdf_new_name("Subtype"),
-		 pdf_new_name("Form"));
-    pdf_add_dict(contents_dict,
-		 pdf_new_name("FormType"),
-		 pdf_new_number(1.0));
+    contents_dict = texpdf_stream_dict(contents);
+    texpdf_add_dict(contents_dict,
+		 texpdf_new_name("Type"), 
+		 texpdf_new_name("XObject"));
+    texpdf_add_dict(contents_dict,
+		 texpdf_new_name("Subtype"),
+		 texpdf_new_name("Form"));
+    texpdf_add_dict(contents_dict,
+		 texpdf_new_name("FormType"),
+		 texpdf_new_number(1.0));
 
-    bbox = pdf_new_array();
-    pdf_add_array(bbox, pdf_new_number(info.bbox.llx));
-    pdf_add_array(bbox, pdf_new_number(info.bbox.lly));
-    pdf_add_array(bbox, pdf_new_number(info.bbox.urx));
-    pdf_add_array(bbox, pdf_new_number(info.bbox.ury));
+    bbox = texpdf_new_array();
+    pdf_add_array(bbox, texpdf_new_number(info.bbox.llx));
+    pdf_add_array(bbox, texpdf_new_number(info.bbox.lly));
+    pdf_add_array(bbox, texpdf_new_number(info.bbox.urx));
+    pdf_add_array(bbox, texpdf_new_number(info.bbox.ury));
 
-    pdf_add_dict(contents_dict, pdf_new_name("BBox"), bbox);
+    texpdf_add_dict(contents_dict, texpdf_new_name("BBox"), bbox);
 
-    matrix = pdf_new_array();
-    pdf_add_array(matrix, pdf_new_number(1.0));
-    pdf_add_array(matrix, pdf_new_number(0.0));
-    pdf_add_array(matrix, pdf_new_number(0.0));
-    pdf_add_array(matrix, pdf_new_number(1.0));
-    pdf_add_array(matrix, pdf_new_number(0.0));
-    pdf_add_array(matrix, pdf_new_number(0.0));
+    matrix = texpdf_new_array();
+    pdf_add_array(matrix, texpdf_new_number(1.0));
+    pdf_add_array(matrix, texpdf_new_number(0.0));
+    pdf_add_array(matrix, texpdf_new_number(0.0));
+    pdf_add_array(matrix, texpdf_new_number(1.0));
+    pdf_add_array(matrix, texpdf_new_number(0.0));
+    pdf_add_array(matrix, texpdf_new_number(0.0));
 
-    pdf_add_dict(contents_dict, pdf_new_name("Matrix"), matrix);
+    texpdf_add_dict(contents_dict, texpdf_new_name("Matrix"), matrix);
 
-    pdf_add_dict(contents_dict, pdf_new_name("Resources"),
+    texpdf_add_dict(contents_dict, texpdf_new_name("Resources"),
                  pdf_import_object(resources));
-    pdf_release_obj(resources);
+    texpdf_release_obj(resources);
   }
 
   pdf_close(pf);
 
-  pdf_ximage_set_form(ximage, &info, contents);
+  texpdf_ximage_set_form(ximage, &info, contents);
 
   return 0;
 
@@ -511,13 +511,13 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
   WARN("Cannot parse document. Broken PDF file?");
  error_silent:
   if (resources)
-    pdf_release_obj(resources);
+    texpdf_release_obj(resources);
   if (markinfo)
-    pdf_release_obj(markinfo);
+    texpdf_release_obj(markinfo);
   if (page)
-    pdf_release_obj(page);
+    texpdf_release_obj(page);
   if (contents)
-    pdf_release_obj(contents);
+    texpdf_release_obj(contents);
 
   pdf_close(pf);
 
@@ -616,17 +616,17 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
   if (!pf)
     return -1;
 
-  pdf_dev_currentmatrix(&M);
+  texpdf_dev_currentmatrix(&M);
   pdf_invertmatrix(&M);
   M.e += x_user; M.f += y_user;
-  page_tree = pdf_get_page_obj (pf, pageNo, NULL, NULL);
+  page_tree = texpdf_get_page_obj (pf, pageNo, NULL, NULL);
   if (!page_tree) {
     pdf_close(pf);
     return -1;
   }
 
-  contents = pdf_get_page_content(page_tree);
-  pdf_release_obj(page_tree);
+  contents = texpdf_get_page_content(page_tree);
+  texpdf_release_obj(page_tree);
   if (!contents) {
     pdf_close(pf);
     return -1;
@@ -651,7 +651,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
         depth++;
       if (*clip_path == 'Q')
 	depth--;
-      parse_ident(&clip_path, end_path);
+      texpdf_parse_ident(&clip_path, end_path);
       continue;
     } else if (*clip_path == '-'
 	    || *clip_path == '+'
@@ -661,7 +661,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
       clip_path = temp;
     } else if (*clip_path == '[') {
       /* Ignore, but put a dummy value on the stack (in case of d operator) */
-      parse_pdf_array(&clip_path, end_path, pf);
+      texpdf_parse_pdf_array(&clip_path, end_path, pf);
       stack[++top] = 0;
     } else if (*clip_path == '/') {
       if  (strncmp("/DeviceGray",	clip_path, 11) == 0
@@ -682,9 +682,9 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
       }
       else {
         clip_path++;
-        parse_ident(&clip_path, end_path);
+        texpdf_parse_ident(&clip_path, end_path);
 	skip_white(&clip_path, end_path);
-	token = parse_ident(&clip_path, end_path);
+	token = texpdf_parse_ident(&clip_path, end_path);
         if (strcmp(token, "gs") == 0) {
 	  continue;
 	}
@@ -695,7 +695,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
       pdf_tmatrix T;
       pdf_coord  p0, p1, p2, p3;
 
-      token = parse_ident(&clip_path, end_path);
+      token = texpdf_parse_ident(&clip_path, end_path);
       for (j = 0; j < sizeof(pdf_operators) / sizeof(pdf_operators[0]); j++)
         if (strcmp(token, pdf_operators[j].token) == 0)
 	  break;
@@ -719,12 +719,12 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
 	    return -1;
 	  break;
 	case OP_CLOSEandCLIP:
-	  pdf_dev_closepath();
+	  texpdf_dev_closepath();
 	case OP_CLIP:
 #if 0
-	  pdf_dev_clip();
+	  texpdf_dev_clip();
 #else
-	  pdf_dev_flushpath(p, 'W', PDF_FILL_RULE_NONZERO);
+	  texpdf_dev_flushpath(p, 'W', PDF_FILL_RULE_NONZERO);
 #endif
 	  break;
 	case OP_CONCATMATRIX:
@@ -752,22 +752,22 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
 	    pdf_tmatrix M0;
 	    M0.a = M.a; M0.b = M.b; M0.c = M.c; M0.d = M.d;
 	    M0.e = 0; M0.f = 0;
-	    pdf_dev_transform(&p0, &M);
-	    pdf_dev_transform(&p1, &M0);
-	    pdf_dev_rectadd(p, p0.x, p0.y, p1.x, p1.y);
+	    texpdf_dev_transform(&p0, &M);
+	    texpdf_dev_transform(&p1, &M0);
+	    texpdf_dev_rectadd(p, p0.x, p0.y, p1.x, p1.y);
 	  } else {
 	    p2.x = p0.x + p1.x; p2.y = p0.y + p1.y;
 	    p3.x = p0.x; p3.y = p0.y + p1.y;
 	    p1.x += p0.x; p1.y = p0.y;
-	    pdf_dev_transform(&p0, &M);
-	    pdf_dev_transform(&p1, &M);
-	    pdf_dev_transform(&p2, &M);
-	    pdf_dev_transform(&p3, &M);
-	    pdf_dev_moveto(p0.x, p0.y);
-	    pdf_dev_lineto(p1.x, p1.y);
-	    pdf_dev_lineto(p2.x, p2.y);
-	    pdf_dev_lineto(p3.x, p3.y);
-	    pdf_dev_closepath();
+	    texpdf_dev_transform(&p0, &M);
+	    texpdf_dev_transform(&p1, &M);
+	    texpdf_dev_transform(&p2, &M);
+	    texpdf_dev_transform(&p3, &M);
+	    texpdf_dev_moveto(p0.x, p0.y);
+	    texpdf_dev_lineto(p1.x, p1.y);
+	    texpdf_dev_lineto(p2.x, p2.y);
+	    texpdf_dev_lineto(p3.x, p3.y);
+	    texpdf_dev_closepath();
 	  }
 	  break;
 	case OP_CURVETO:
@@ -775,33 +775,33 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
 	    return -1;
 	  p0.y = stack[top--];
 	  p0.x = stack[top--];
-	  pdf_dev_transform(&p0, &M);
+	  texpdf_dev_transform(&p0, &M);
 	  p1.y = stack[top--];
 	  p1.x = stack[top--];
-	  pdf_dev_transform(&p1, &M);
+	  texpdf_dev_transform(&p1, &M);
 	  p2.y = stack[top--];
 	  p2.x = stack[top--];
-	  pdf_dev_transform(&p2, &M);
-	  pdf_dev_curveto(p2.x, p2.y, p1.x, p1.y, p0.x, p0.y);
+	  texpdf_dev_transform(&p2, &M);
+	  texpdf_dev_curveto(p2.x, p2.y, p1.x, p1.y, p0.x, p0.y);
 	  break;
 	case OP_CLOSEPATH:
-	  pdf_dev_closepath();
+	  texpdf_dev_closepath();
 	  break;
 	case OP_LINETO:
 	  if (top < 1)
 	    return -1;
 	  p0.y = stack[top--];
 	  p0.x = stack[top--];
-	  pdf_dev_transform(&p0, &M);
-	  pdf_dev_lineto(p0.x, p0.y);
+	  texpdf_dev_transform(&p0, &M);
+	  texpdf_dev_lineto(p0.x, p0.y);
 	  break;
 	case OP_MOVETO:
 	  if (top < 1)
 	    return -1;
 	  p0.y = stack[top--];
 	  p0.x = stack[top--];
-	  pdf_dev_transform(&p0, &M);
-	  pdf_dev_moveto(p0.x, p0.y);
+	  texpdf_dev_transform(&p0, &M);
+	  texpdf_dev_moveto(p0.x, p0.y);
 	  break;
 	case OP_NOOP:
 	  texpdf_doc_add_page_content(p, " n", 2);
@@ -817,22 +817,22 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
 	    return -1;
 	  p0.y = stack[top--];
 	  p0.x = stack[top--];
-	  pdf_dev_transform(&p0, &M);
+	  texpdf_dev_transform(&p0, &M);
 	  p1.y = stack[top--];
 	  p1.x = stack[top--];
-	  pdf_dev_transform(&p1, &M);
-	  pdf_dev_vcurveto(p1.x, p1.y, p0.x, p0.y);
+	  texpdf_dev_transform(&p1, &M);
+	  texpdf_dev_vcurveto(p1.x, p1.y, p0.x, p0.y);
 	  break;
 	case OP_CURVETO2:
 	  if (top < 3)
 	    return -1;
 	  p0.y = stack[top--];
 	  p0.x = stack[top--];
-	  pdf_dev_transform(&p0, &M);
+	  texpdf_dev_transform(&p0, &M);
 	  p1.y = stack[top--];
 	  p1.x = stack[top--];
-	  pdf_dev_transform(&p1, &M);
-	  pdf_dev_ycurveto(p1.x, p1.y, p0.x, p0.y);
+	  texpdf_dev_transform(&p1, &M);
+	  texpdf_dev_ycurveto(p1.x, p1.y, p0.x, p0.y);
 	  break;
 	default:
 	  return -1;
@@ -841,7 +841,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
   }
   free(save_path);
 
-  pdf_release_obj(contents);
+  texpdf_release_obj(contents);
   pdf_close(pf);
 
   return 0;
@@ -904,14 +904,14 @@ concat_stream (pdf_obj *dst, pdf_obj *src)
 
   stream_data   = pdf_stream_dataptr(src);
   stream_length = pdf_stream_length (src);
-  stream_dict   = pdf_stream_dict   (src);
+  stream_dict   = texpdf_stream_dict   (src);
 
-  if (pdf_lookup_dict(stream_dict, "DecodeParms")) {
+  if (texpdf_lookup_dict(stream_dict, "DecodeParms")) {
     WARN("DecodeParams not supported.");
     return -1;
   }
 
-  filter = pdf_lookup_dict(stream_dict, "Filter");
+  filter = texpdf_lookup_dict(stream_dict, "Filter");
   if (!filter) {
     pdf_add_stream(dst, stream_data, stream_length);
     return 0;
@@ -931,7 +931,7 @@ concat_stream (pdf_obj *dst, pdf_obj *src)
 	WARN("Multiple DecodeFilter not supported.");
 	return -1;
       } else {
-	filter_name = pdf_name_value(pdf_get_array(filter, 0));
+	filter_name = pdf_name_value(texpdf_get_array(filter, 0));
 	if (filter_name && !strcmp(filter_name, "FlateDecode"))
 	  return add_stream_flate(dst, stream_data, stream_length);
 	else {

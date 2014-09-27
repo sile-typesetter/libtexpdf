@@ -432,7 +432,7 @@ sfnt_create_FontFile_stream (sfnt *sfont)
 
   ASSERT(sfont && sfont->directory);
 
-  stream = pdf_new_stream(STREAM_COMPRESS);
+  stream = texpdf_new_stream(STREAM_COMPRESS);
 
   td  = sfont->directory;
 
@@ -481,7 +481,7 @@ sfnt_create_FontFile_stream (sfnt *sfont)
       if (!td->tables[i].data) {
 	if (!sfont->stream)
 	{
-	  pdf_release_obj(stream);
+	  texpdf_release_obj(stream);
 	  ERROR("Font file not opened or already closed...");
 	  return NULL;
 	}
@@ -491,7 +491,7 @@ sfnt_create_FontFile_stream (sfnt *sfont)
 	while (length > 0) {
 	  nb_read = sfnt_read(wbuf, MIN(length, 1024), sfont);
 	  if (nb_read < 0) {
-	    pdf_release_obj(stream);
+	    texpdf_release_obj(stream);
 	    ERROR("Reading file failed...");
 	    return NULL;
 	  } else if (nb_read > 0) {
@@ -510,10 +510,10 @@ sfnt_create_FontFile_stream (sfnt *sfont)
     }
   }
 
-  stream_dict = pdf_stream_dict(stream);
-  pdf_add_dict(stream_dict,
-	       pdf_new_name("Length1"),
-	       pdf_new_number(offset));
+  stream_dict = texpdf_stream_dict(stream);
+  texpdf_add_dict(stream_dict,
+	       texpdf_new_name("Length1"),
+	       texpdf_new_number(offset));
 
   return stream;
 }

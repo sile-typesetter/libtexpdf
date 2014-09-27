@@ -27,7 +27,7 @@
 
 static int verbose = 0;
 void
-pdf_color_set_verbose (void)
+texpdf_color_set_verbose (void)
 {
   verbose++;
 }
@@ -36,7 +36,7 @@ pdf_color_set_verbose (void)
  * PDF_COLORSPACE_TYPE_RGB or PDF_COLORSPACE_TYPE_CMYK.
  */
 int
-pdf_color_type (const pdf_color *color)
+texpdf_color_type (const pdf_color *color)
 {
   ASSERT(color);
 
@@ -44,7 +44,7 @@ pdf_color_type (const pdf_color *color)
 }
 
 int
-pdf_color_rgbcolor (pdf_color *color, double r, double g, double b)
+texpdf_color_rgbcolor (pdf_color *color, double r, double g, double b)
 {
   ASSERT(color);
 
@@ -70,7 +70,7 @@ pdf_color_rgbcolor (pdf_color *color, double r, double g, double b)
 }
 
 int
-pdf_color_cmykcolor (pdf_color *color,
+texpdf_color_cmykcolor (pdf_color *color,
 		     double c, double m, double y, double k)
 {
   ASSERT(color);
@@ -103,7 +103,7 @@ pdf_color_cmykcolor (pdf_color *color,
 }
 
 int
-pdf_color_graycolor (pdf_color *color, double g)
+texpdf_color_graycolor (pdf_color *color, double g)
 {
   ASSERT(color);
 
@@ -121,7 +121,7 @@ pdf_color_graycolor (pdf_color *color, double g)
 
 
 void
-pdf_color_copycolor (pdf_color *color1, const pdf_color *color2)
+texpdf_color_copycolor (pdf_color *color1, const pdf_color *color2)
 {
   ASSERT(color1 && color2);
 
@@ -130,12 +130,12 @@ pdf_color_copycolor (pdf_color *color1, const pdf_color *color2)
 
 /* Brighten up a color. f == 0 means no change, f == 1 means white. */
 void
-pdf_color_brighten_color (pdf_color *dst, const pdf_color *src, double f)
+texpdf_color_brighten_color (pdf_color *dst, const pdf_color *src, double f)
 {
   ASSERT(dst && src);
 
   if (f == 1.0) {
-    pdf_color_white(dst);
+    texpdf_color_white(dst);
   } else {
     double f0, f1;
     int n;
@@ -150,7 +150,7 @@ pdf_color_brighten_color (pdf_color *dst, const pdf_color *src, double f)
 }
 
 int
-pdf_color_is_white (const pdf_color *color)
+texpdf_color_is_white (const pdf_color *color)
 {
   int n;
   double f;
@@ -178,7 +178,7 @@ pdf_color_is_white (const pdf_color *color)
 }
 
 int
-pdf_color_to_string (const pdf_color *color, char *buffer)
+texpdf_color_to_string (const pdf_color *color, char *buffer)
 {
   int i, len = 0;
 
@@ -202,7 +202,7 @@ pdf_color current_stroke = {
  * This routine is not a real color matching.
  */
 int
-pdf_color_compare (const pdf_color *color1, const pdf_color *color2)
+texpdf_color_compare (const pdf_color *color1, const pdf_color *color2)
 {
   int n;
 
@@ -227,7 +227,7 @@ pdf_color_compare (const pdf_color *color1, const pdf_color *color2)
 }
 
 int
-pdf_color_is_valid (const pdf_color *color)
+texpdf_color_is_valid (const pdf_color *color)
 {
   int  n;
 
@@ -257,9 +257,9 @@ pdf_color default_color = {
 };
 
 void
-pdf_color_set_default (const pdf_color *color)
+texpdf_color_set_default (const pdf_color *color)
 {
-  pdf_color_copycolor(&default_color, color);
+  texpdf_color_copycolor(&default_color, color);
 }
 
 #define DEV_COLOR_STACK_MAX 128
@@ -273,51 +273,51 @@ static struct {
 };
 
 void
-pdf_color_clear_stack (void)
+texpdf_color_clear_stack (void)
 {
   if (color_stack.current > 0) {
     WARN("You've mistakenly made a global color change within nested colors.");
   }
   color_stack.current = 0;
-  pdf_color_black(color_stack.stroke);
-  pdf_color_black(color_stack.fill);
+  texpdf_color_black(color_stack.stroke);
+  texpdf_color_black(color_stack.fill);
   return;
 }
 
 void
-pdf_color_set (pdf_doc *p, pdf_color *sc, pdf_color *fc)
+texpdf_color_set (pdf_doc *p, pdf_color *sc, pdf_color *fc)
 {
-  pdf_color_copycolor(&color_stack.stroke[color_stack.current], sc);
-  pdf_color_copycolor(&color_stack.fill[color_stack.current], fc);
-  pdf_dev_reset_color(p, 0);
+  texpdf_color_copycolor(&color_stack.stroke[color_stack.current], sc);
+  texpdf_color_copycolor(&color_stack.fill[color_stack.current], fc);
+  texpdf_dev_reset_color(p, 0);
 }
 
 void
-pdf_color_push (pdf_doc *p, pdf_color *sc, pdf_color *fc)
+texpdf_color_push (pdf_doc *p, pdf_color *sc, pdf_color *fc)
 {
   if (color_stack.current >= DEV_COLOR_STACK_MAX-1) {
     WARN("Color stack overflow. Just ignore.");
   } else {
     color_stack.current++;
-    pdf_color_set(p, sc, fc);
+    texpdf_color_set(p, sc, fc);
   }
   return;
 }
 
 void
-pdf_color_pop (pdf_doc *p)
+texpdf_color_pop (pdf_doc *p)
 {
   if (color_stack.current <= 0) {
     WARN("Color stack underflow. Just ignore.");
   } else {
     color_stack.current--;
-    pdf_dev_reset_color(p, 0);
+    texpdf_dev_reset_color(p, 0);
   }
   return;
 }
 
 void
-pdf_color_get_current (pdf_color **sc, pdf_color **fc)
+texpdf_color_get_current (pdf_color **sc, pdf_color **fc)
 {
   *sc = &color_stack.stroke[color_stack.current];
   *fc = &color_stack.fill[color_stack.current];
@@ -331,7 +331,7 @@ pdf_color_get_current (pdf_color **sc, pdf_color **fc)
  *   if the color values are changed inside of a page.
  */
 void
-pdf_dev_preserve_color (void)
+texpdf_dev_preserve_color (void)
 {
   if (color_stack.current > 0) {
     current_stroke = color_stack.stroke[color_stack.current];
@@ -449,7 +449,7 @@ valid_calrgb (struct calrgb_cdata *calrgb)
 }
 
 static pdf_obj *
-pdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
+texpdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
 {
   pdf_obj *colorspace;
   pdf_obj *calparams, *tmp_array;
@@ -459,33 +459,33 @@ pdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
   if (!valid_calrgb(calrgb))
     return NULL;
 
-  colorspace = pdf_new_array();
-  calparams  = pdf_new_dict();
+  colorspace = texpdf_new_array();
+  calparams  = texpdf_new_dict();
 
-  tmp_array  = pdf_new_array();
-  pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->white_point[0], 0.001)));
-  pdf_add_array(tmp_array, pdf_new_number(1.0));
-  pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->white_point[2], 0.001)));
-  pdf_add_dict(calparams, pdf_new_name("WhitePoint"), tmp_array);
+  tmp_array  = texpdf_new_array();
+  pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->white_point[0], 0.001)));
+  pdf_add_array(tmp_array, texpdf_new_number(1.0));
+  pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->white_point[2], 0.001)));
+  texpdf_add_dict(calparams, texpdf_new_name("WhitePoint"), tmp_array);
 
   if (calrgb->black_point[0] != 0.0 ||
       calrgb->black_point[1] != 0.0 ||
       calrgb->black_point[2] != 0.0) {
-    tmp_array  = pdf_new_array();
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->black_point[0], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->black_point[1], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->black_point[2], 0.001)));
-    pdf_add_dict(calparams, pdf_new_name("BlackPoint"), tmp_array);
+    tmp_array  = texpdf_new_array();
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[0], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[1], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[2], 0.001)));
+    texpdf_add_dict(calparams, texpdf_new_name("BlackPoint"), tmp_array);
   }
 
   if (calrgb->gamma[0] != 1.0 ||
       calrgb->gamma[1] != 1.0 ||
       calrgb->gamma[2] != 1.0) {
-    tmp_array  = pdf_new_array();
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->gamma[0], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->gamma[1], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->gamma[2], 0.001)));
-    pdf_add_dict(calparams, pdf_new_name("Gamma"), tmp_array);
+    tmp_array  = texpdf_new_array();
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[0], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[1], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[2], 0.001)));
+    texpdf_add_dict(calparams, texpdf_new_name("Gamma"), tmp_array);
   }
 
   if (calrgb->matrix[0] != 1.0 ||
@@ -497,20 +497,20 @@ pdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
       calrgb->matrix[6] != 0.0 ||
       calrgb->matrix[7] != 0.0 ||
       calrgb->matrix[8] != 1.0) {
-    tmp_array  = pdf_new_array();
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[0], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[1], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[2], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[3], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[4], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[5], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[6], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[7], 0.001)));
-    pdf_add_array(tmp_array, pdf_new_number(ROUND(calrgb->matrix[8], 0.001)));
-    pdf_add_dict(calparams,  pdf_new_name("Matrix"), tmp_array);
+    tmp_array  = texpdf_new_array();
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[0], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[1], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[2], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[3], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[4], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[5], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[6], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[7], 0.001)));
+    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[8], 0.001)));
+    texpdf_add_dict(calparams,  texpdf_new_name("Matrix"), tmp_array);
   }
 
-  pdf_add_array(colorspace, pdf_new_name("CalRGB"));
+  pdf_add_array(colorspace, texpdf_new_name("CalRGB"));
   pdf_add_array(colorspace, calparams);
 
   return colorspace;
@@ -539,7 +539,7 @@ iccp_version_supported (int major, int minor)
 {
   int  pdf_ver;
 
-  pdf_ver = pdf_get_version();
+  pdf_ver = texpdf_get_version();
   if (pdf_ver < 6) {
     if (icc_versions[pdf_ver].major < major)
       return 0;
@@ -773,16 +773,16 @@ iccp_get_rendering_intent (const void *profile, long proflen)
   intent = (p[64] << 24)|(p[65] << 16)|(p[66] << 8)|p[67];
   switch (ICC_INTENT_TYPE(intent)) {
   case ICC_INTENT_SATURATION:
-    ri = pdf_new_name("Saturation");
+    ri = texpdf_new_name("Saturation");
     break;
   case ICC_INTENT_PERCEPTUAL:
-    ri = pdf_new_name("Perceptual");
+    ri = texpdf_new_name("Perceptual");
     break;
   case ICC_INTENT_ABSOLUTE:
-    ri = pdf_new_name("AbsoluteColorimetric");
+    ri = texpdf_new_name("AbsoluteColorimetric");
     break;
   case ICC_INTENT_RELATIVE:
-    ri = pdf_new_name("RelativeColorimetric");
+    ri = texpdf_new_name("RelativeColorimetric");
     break;
   default:
     WARN("Invalid rendering intent type: %d", ICC_INTENT_TYPE(intent));
@@ -1023,7 +1023,7 @@ iccp_devClass_allowed (int dev_class)
 {
   int    colormode;
 
-  colormode = pdf_dev_get_param(PDF_DEV_PARAM_COLORMODE);
+  colormode = texpdf_dev_get_param(PDF_DEV_PARAM_COLORMODE);
 
   switch (colormode) {
 #if 0
@@ -1124,18 +1124,18 @@ iccp_load_profile (const char *ident,
     print_iccp_header(&icch, checksum);
   }
 
-  resource = pdf_new_array();
+  resource = texpdf_new_array();
 
-  stream = pdf_new_stream(STREAM_COMPRESS);
-  pdf_add_array(resource, pdf_new_name("ICCBased"));
+  stream = texpdf_new_stream(STREAM_COMPRESS);
+  pdf_add_array(resource, texpdf_new_name("ICCBased"));
   pdf_add_array(resource, pdf_ref_obj (stream));
 
-  stream_dict = pdf_stream_dict(stream);
-  pdf_add_dict(stream_dict, pdf_new_name("N"),
-	       pdf_new_number(get_num_components_iccbased(cdata)));
+  stream_dict = texpdf_stream_dict(stream);
+  texpdf_add_dict(stream_dict, texpdf_new_name("N"),
+	       texpdf_new_number(get_num_components_iccbased(cdata)));
 
   pdf_add_stream (stream, profile, proflen);
-  pdf_release_obj(stream);
+  texpdf_release_obj(stream);
 
   cspc_id = pdf_colorspace_defineresource(ident,
 					  PDF_COLORSPACE_TYPE_ICCBASED,
@@ -1162,7 +1162,7 @@ iccp_load_file_stream (unsigned char *checksum, long length, FILE *fp)
   }
   length -= 128;
 
-  stream = pdf_new_stream(STREAM_COMPRESS);
+  stream = texpdf_new_stream(STREAM_COMPRESS);
 
   MD5_init (&md5);
   MD5_write(&md5, wbuf + ICC_HEAD_SECT1_START, ICC_HEAD_SECT1_LENGTH);
@@ -1275,7 +1275,7 @@ pdf_colorspace_load_ICCBased (const char *ident, const char *filename)
       memcmp(icch.ID,  checksum, 16)) {
     WARN("Invalid ICC profile: Inconsistent checksum.");
     print_iccp_header(&icch, NULL);
-    pdf_release_obj(stream);
+    texpdf_release_obj(stream);
     return -1;
   }
 
@@ -1290,22 +1290,22 @@ pdf_colorspace_load_ICCBased (const char *ident, const char *filename)
     if (verbose)
       MESG("(ICCP:[id=%d])", cspc_id);
     release_iccbased_cdata(cdata);
-    pdf_release_obj(stream);
+    texpdf_release_obj(stream);
     return cspc_id;
   }
   if (verbose > 1) {
     print_iccp_header(&icch, checksum);
   }
 
-  resource = pdf_new_array();
+  resource = texpdf_new_array();
 
-  pdf_add_array(resource, pdf_new_name("ICCBased"));
+  pdf_add_array(resource, texpdf_new_name("ICCBased"));
   pdf_add_array(resource, pdf_ref_obj (stream));
 
-  stream_dict = pdf_stream_dict(stream);
-  pdf_add_dict(stream_dict, pdf_new_name("N"),
-	       pdf_new_number(get_num_components_iccbased(cdata)));
-  pdf_release_obj(stream);
+  stream_dict = texpdf_stream_dict(stream);
+  texpdf_add_dict(stream_dict, texpdf_new_name("N"),
+	       texpdf_new_number(get_num_components_iccbased(cdata)));
+  texpdf_release_obj(stream);
 
   cspc_id = pdf_colorspace_defineresource(ident,
 					  PDF_COLORSPACE_TYPE_ICCBASED,
@@ -1360,7 +1360,7 @@ pdf_colorspace_findresource (const char *ident,
 }
 
 static void
-pdf_init_colorspace_struct (pdf_colorspace *colorspace)
+texpdf_init_colorspace_struct (pdf_colorspace *colorspace)
 {
   ASSERT(colorspace);
 
@@ -1382,9 +1382,9 @@ pdf_clean_colorspace_struct (pdf_colorspace *colorspace)
   if (colorspace->ident)
     RELEASE(colorspace->ident);
   if (colorspace->resource)
-    pdf_release_obj(colorspace->resource);
+    texpdf_release_obj(colorspace->resource);
   if (colorspace->reference)
-    pdf_release_obj(colorspace->reference);
+    texpdf_release_obj(colorspace->reference);
   colorspace->resource  = NULL;
   colorspace->reference = NULL;
 
@@ -1407,9 +1407,9 @@ pdf_flush_colorspace (pdf_colorspace *colorspace)
   ASSERT(colorspace);
 
   if (colorspace->resource)
-    pdf_release_obj(colorspace->resource);
+    texpdf_release_obj(colorspace->resource);
   if (colorspace->reference)
-    pdf_release_obj(colorspace->reference);
+    texpdf_release_obj(colorspace->reference);
 
   colorspace->resource  = NULL;
   colorspace->reference = NULL;
@@ -1430,7 +1430,7 @@ pdf_colorspace_defineresource (const char *ident,
   cspc_id    = cspc_cache.count;
   colorspace = &cspc_cache.colorspaces[cspc_id];
 
-  pdf_init_colorspace_struct(colorspace);
+  texpdf_init_colorspace_struct(colorspace);
   if (ident) {
     colorspace->ident = NEW(strlen(ident) + 1, char);
     strcpy(colorspace->ident, ident);
@@ -1463,14 +1463,14 @@ pdf_colorspace_defineresource (const char *ident,
 }
 
 pdf_obj *
-pdf_get_colorspace_reference (int cspc_id)
+texpdf_get_colorspace_reference (int cspc_id)
 {
   pdf_colorspace *colorspace;
 
   colorspace = &cspc_cache.colorspaces[cspc_id];
   if (!colorspace->reference) {
     colorspace->reference = pdf_ref_obj(colorspace->resource);
-    pdf_release_obj(colorspace->resource); /* .... */
+    texpdf_release_obj(colorspace->resource); /* .... */
     colorspace->resource = NULL;
   }
 
@@ -1479,7 +1479,7 @@ pdf_get_colorspace_reference (int cspc_id)
 
 #if 0
 int
-pdf_get_colorspace_num_components (int cspc_id)
+texpdf_get_colorspace_num_components (int cspc_id)
 {
   pdf_colorspace *colorspace;
   int  num_components;
@@ -1514,7 +1514,7 @@ pdf_get_colorspace_num_components (int cspc_id)
 }
 
 int
-pdf_get_colorspace_subtype (int cspc_id)
+texpdf_get_colorspace_subtype (int cspc_id)
 {
   pdf_colorspace *colorspace;
 
@@ -1525,7 +1525,7 @@ pdf_get_colorspace_subtype (int cspc_id)
 #endif
 
 void
-pdf_init_colors (void)
+texpdf_init_colors (void)
 {
   cspc_cache.count    = 0;
   cspc_cache.capacity = 0;
@@ -1533,7 +1533,7 @@ pdf_init_colors (void)
 }
 
 void
-pdf_close_colors (void)
+texpdf_close_colors (void)
 {
   int  i;
 

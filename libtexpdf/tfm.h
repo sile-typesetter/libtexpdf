@@ -32,26 +32,26 @@ extern void tfm_set_verbose (void);
 extern int  tfm_open (const char * tex_name, int must_exist);
 extern void tfm_close_all (void);
 
-extern double tfm_get_width  (int font_id, int32_t ch);
+extern double texpdf_tfm_get_width  (int font_id, int32_t ch);
 #if 0
-extern double tfm_get_height (int font_id, int32_t ch);
-extern double tfm_get_depth  (int font_id, int32_t ch);
+extern double texpdf_tfm_get_height (int font_id, int32_t ch);
+extern double texpdf_tfm_get_depth  (int font_id, int32_t ch);
 #endif
 
-extern fixword tfm_get_fw_width  (int font_id, int32_t ch);
-extern fixword tfm_get_fw_height (int font_id, int32_t ch);
-extern fixword tfm_get_fw_depth  (int font_id, int32_t ch);
+extern fixword texpdf_tfm_get_fw_width  (int font_id, int32_t ch);
+extern fixword texpdf_tfm_get_fw_height (int font_id, int32_t ch);
+extern fixword texpdf_tfm_get_fw_depth  (int font_id, int32_t ch);
 
 extern fixword tfm_string_width  (int font_id, const unsigned char *s, unsigned len);
 extern fixword tfm_string_depth  (int font_id, const unsigned char *s, unsigned len);
 extern fixword tfm_string_height (int font_id, const unsigned char *s, unsigned len);
 
-extern double tfm_get_space (int font_id);
+extern double texpdf_tfm_get_space (int font_id);
 
 /* From TFM header */
-extern double tfm_get_design_size  (int font_id);
+extern double texpdf_tfm_get_design_size  (int font_id);
 #if 0
-extern char  *tfm_get_codingscheme (int font_id);
+extern char  *texpdf_tfm_get_codingscheme (int font_id);
 extern int tfm_is_vert (int font_id);
 #endif
 

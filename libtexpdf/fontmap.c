@@ -51,7 +51,7 @@ pdf_fontmap_set_verbose (void)
 
 
 void
-pdf_init_fontmap_record (fontmap_rec *mrec) 
+texpdf_init_fontmap_record (fontmap_rec *mrec) 
 {
   ASSERT(mrec);
 
@@ -89,7 +89,7 @@ pdf_init_fontmap_record (fontmap_rec *mrec)
 }
 
 void
-pdf_clear_fontmap_record (fontmap_rec *mrec)
+texpdf_clear_fontmap_record (fontmap_rec *mrec)
 {
   ASSERT(mrec);
 
@@ -110,7 +110,7 @@ pdf_clear_fontmap_record (fontmap_rec *mrec)
     RELEASE(mrec->opt.otl_tags);
   if (mrec->opt.charcoll)
     RELEASE(mrec->opt.charcoll);
-  pdf_init_fontmap_record(mrec);
+  texpdf_init_fontmap_record(mrec);
 }
 
 /* strdup: just returns NULL for NULL */
@@ -126,7 +126,7 @@ mstrdup (const char *s)
 }
 
 static void
-pdf_copy_fontmap_record (fontmap_rec *dst, const fontmap_rec *src)
+texpdf_copy_fontmap_record (fontmap_rec *dst, const fontmap_rec *src)
 {
   ASSERT( dst && src );
 
@@ -164,7 +164,7 @@ static void
 hval_free (void *vp)
 {
   fontmap_rec *mrec = (fontmap_rec *) vp;
-  pdf_clear_fontmap_record(mrec);
+  texpdf_clear_fontmap_record(mrec);
   RELEASE(mrec);
 }
 
@@ -246,7 +246,7 @@ skip_blank (const char **pp, const char *endptr)
 }
 
 static char *
-parse_string_value (const char **pp, const char *endptr)
+texpdf_parse_string_value (const char **pp, const char *endptr)
 {
   char  *q = NULL;
   const char *p = *pp;
@@ -255,7 +255,7 @@ parse_string_value (const char **pp, const char *endptr)
   if (!p || p >= endptr)
     return  NULL;
   if (*p == '"')
-    q = parse_c_string(&p, endptr);
+    q = texpdf_parse_c_string(&p, endptr);
   else {
     for (n = 0; p < endptr && !isspace((unsigned char)*p); p++, n++);
     if (n == 0)
@@ -270,7 +270,7 @@ parse_string_value (const char **pp, const char *endptr)
 
 /* no preceeding spaces allowed */
 static char *
-parse_integer_value (const char **pp, const char *endptr, int base)
+texpdf_parse_integer_value (const char **pp, const char *endptr, int base)
 {
   char  *q;
   const char *p = *pp;
@@ -334,7 +334,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
    * beginning with a  '-'.
    *
    * NOTE:
-   *   Dvipdfm basically uses parse_ident() for parsing enc_name,
+   *   Dvipdfm basically uses texpdf_parse_ident() for parsing enc_name,
    *   font_name, and other string values which assumes PostScript-like
    *   syntax.
    *   skip_white() skips '\r' and '\n' but they should terminate
@@ -344,13 +344,13 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
   skip_blank(&p, endptr);
   /* encoding field */
   if (p < endptr && *p != '-') { /* May be NULL */
-    mrec->enc_name = parse_string_value(&p, endptr);
+    mrec->enc_name = texpdf_parse_string_value(&p, endptr);
     skip_blank(&p, endptr);
   }
 
   /* fontname or font filename field */
   if (p < endptr && *p != '-') { /* May be NULL */
-    mrec->font_name = parse_string_value(&p, endptr);
+    mrec->font_name = texpdf_parse_string_value(&p, endptr);
     skip_blank(&p, endptr);
   }
   if (mrec->font_name) {
@@ -376,7 +376,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
     switch (mopt) {
 
     case  's': /* Slant option */
-      q = parse_float_decimal(&p, endptr);
+      q = texpdf_parse_float_decimal(&p, endptr);
       if (!q) {
         WARN("Missing a number value for 's' option.");
         return  -1;
@@ -386,7 +386,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       break;
 
     case  'e': /* Extend option */
-      q = parse_float_decimal(&p, endptr);
+      q = texpdf_parse_float_decimal(&p, endptr);
       if (!q) {
         WARN("Missing a number value for 'e' option.");
         return  -1;
@@ -400,7 +400,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       break;
 
     case  'b': /* Fake-bold option */
-      q = parse_float_decimal(&p, endptr);
+      q = texpdf_parse_float_decimal(&p, endptr);
       if (!q) {
         WARN("Missing a number value for 'b' option.");
         return  -1;
@@ -417,7 +417,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       break;
 
     case  'i':  /* TTC index */
-      q = parse_integer_value(&p, endptr, 10);
+      q = texpdf_parse_integer_value(&p, endptr, 10);
       if (!q) {
         WARN("Missing TTC index number...");
         return  -1;
@@ -431,7 +431,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       break;
 
     case  'p': /* UCS plane: just for testing */
-      q = parse_integer_value(&p, endptr, 0);
+      q = texpdf_parse_integer_value(&p, endptr, 0);
       if (!q) {
         WARN("Missing a number for 'p' option.");
         return  -1;
@@ -446,7 +446,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       break;
 
     case  'u': /* ToUnicode */
-      q = parse_string_value(&p, endptr);
+      q = texpdf_parse_string_value(&p, endptr);
       if (q)
         mrec->opt.tounicode = q;
       else {
@@ -456,7 +456,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       break;
 
     case  'v': /* StemV */
-      q = parse_integer_value(&p, endptr, 10);
+      q = texpdf_parse_integer_value(&p, endptr, 10);
       if (!q) {
         WARN("Missing a number for 'v' option.");
         return  -1;
@@ -473,7 +473,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       if (p + 4 <= endptr &&
           p[0] == '<' && p[3] == '>') {
         p++;
-        q = parse_integer_value(&p, endptr, 16);
+        q = texpdf_parse_integer_value(&p, endptr, 16);
         if (!q) {
           WARN("Invalid value for option 'm'.");
           return  -1;
@@ -491,7 +491,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
         const char  *rr;
         /* SFD mapping: sfd:Big5,00 */
         p += 4; skip_blank(&p, endptr);
-        q  = parse_string_value(&p, endptr);
+        q  = texpdf_parse_string_value(&p, endptr);
         if (!q) {
           WARN("Missing value for option 'm'.");
           return  -1;
@@ -514,7 +514,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
       } else if (p + 4 < endptr &&
                  !memcmp(p, "pad:", strlen("pad:"))) {
         p += 4; skip_blank(&p, endptr);
-        q  = parse_integer_value(&p, endptr, 16);
+        q  = texpdf_parse_integer_value(&p, endptr, 16);
         if (!q) {
           WARN("Invalid value for option 'm'.");
           return  -1;
@@ -538,7 +538,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
         WARN("Fontmap option 'w' meaningless for encoding other than \"unicode\".");
         return  -1;
       }
-      q  = parse_integer_value(&p, endptr, 10);
+      q  = texpdf_parse_integer_value(&p, endptr, 10);
       if (!q) {
         WARN("Missing wmode value...");
         return  -1;
@@ -584,7 +584,7 @@ fontmap_parse_mapdef_dps (fontmap_rec *mrec,
 
   if (*p != '"' && *p != '<') {
     if (p < endptr) {
-      q = parse_string_value(&p, endptr);
+      q = texpdf_parse_string_value(&p, endptr);
       if (q) RELEASE(q);
       skip_blank(&p, endptr);
     } else {
@@ -603,7 +603,7 @@ fontmap_parse_mapdef_dps (fontmap_rec *mrec,
          of doing as directed (define encoding file, fully embed); sorry.  */
       if (++p < endptr && (*p == '[' || *p == '<')) p++; /*skip */
       skip_blank(&p, endptr);
-      if ((q = parse_string_value(&p, endptr))) {
+      if ((q = texpdf_parse_string_value(&p, endptr))) {
         int n = strlen(q);
         if (n > 4 && strncmp(q+n-4, ".enc", 4) == 0)
           mrec->enc_name = q;
@@ -614,14 +614,14 @@ fontmap_parse_mapdef_dps (fontmap_rec *mrec,
       break;
 
     case '"': /* Options */
-      if ((q = parse_string_value(&p, endptr))) {
+      if ((q = texpdf_parse_string_value(&p, endptr))) {
         const char *r = q, *e = q+strlen(q);
         char *s, *t;
         skip_blank(&r, e);
         while (r < e) {
-          if ((s = parse_float_decimal(&r, e))) {
+          if ((s = texpdf_parse_float_decimal(&r, e))) {
             skip_blank(&r, e);
-            if ((t = parse_string_value(&r, e))) {
+            if ((t = texpdf_parse_string_value(&r, e))) {
               if (strcmp(t, "SlantFont") == 0)
                 mrec->opt.slant = atof(s);
               else if (strcmp(t, "ExtendFont") == 0)
@@ -629,7 +629,7 @@ fontmap_parse_mapdef_dps (fontmap_rec *mrec,
               RELEASE(t);
             }
             RELEASE(s);
-          } else if ((s = parse_string_value(&r, e))) { /* skip */
+          } else if ((s = texpdf_parse_string_value(&r, e))) { /* skip */
             RELEASE(s);
           }
           skip_blank(&r, e);
@@ -730,7 +730,7 @@ make_subfont_name (const char *map_name, const char *sfd_name, const char *sub_i
  * where 'ab' ... 'yz' is subfont IDs in SFD 'A'.
  */
 int
-pdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
+texpdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
 {
   fontmap_rec *mrec;
   char        *fnt_name, *sfd_name = NULL;
@@ -758,7 +758,7 @@ pdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
       mrec = ht_lookup_table(fontmap, tfm_name, strlen(tfm_name));
       if (!mrec) {
         mrec = NEW(1, fontmap_rec);
-        pdf_init_fontmap_record(mrec);
+        texpdf_init_fontmap_record(mrec);
         mrec->map_name = mstrdup(kp); /* link */
         mrec->charmap.sfd_name   = mstrdup(sfd_name);
         mrec->charmap.subfont_id = mstrdup(subfont_ids[n]);
@@ -773,7 +773,7 @@ pdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
   mrec = ht_lookup_table(fontmap, kp, strlen(kp));
   if (!mrec) {
     mrec = NEW(1, fontmap_rec);
-    pdf_copy_fontmap_record(mrec, vp);
+    texpdf_copy_fontmap_record(mrec, vp);
     if (mrec->map_name && !strcmp(kp, mrec->map_name)) {
       RELEASE(mrec->map_name);
       mrec->map_name = NULL;
@@ -787,7 +787,7 @@ pdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
 }
 
 int
-pdf_remove_fontmap_record (const char *kp)
+texpdf_remove_fontmap_record (const char *kp)
 {
   char  *fnt_name, *sfd_name = NULL;
 
@@ -829,7 +829,7 @@ pdf_remove_fontmap_record (const char *kp)
 }
 
 int
-pdf_insert_fontmap_record (const char *kp, const fontmap_rec *vp)
+texpdf_insert_fontmap_record (const char *kp, const fontmap_rec *vp)
 {
   fontmap_rec *mrec;
   char        *fnt_name, *sfd_name;
@@ -862,7 +862,7 @@ pdf_insert_fontmap_record (const char *kp, const fontmap_rec *vp)
       if (verbose > 3)
         MESG(" %s", tfm_name);
       mrec = NEW(1, fontmap_rec);
-      pdf_init_fontmap_record(mrec);
+      texpdf_init_fontmap_record(mrec);
       mrec->map_name = mstrdup(kp); /* link to this entry */
       mrec->charmap.sfd_name   = mstrdup(sfd_name);
       mrec->charmap.subfont_id = mstrdup(subfont_ids[n]);
@@ -874,7 +874,7 @@ pdf_insert_fontmap_record (const char *kp, const fontmap_rec *vp)
   }
 
   mrec = NEW(1, fontmap_rec);
-  pdf_copy_fontmap_record(mrec, vp);
+  texpdf_copy_fontmap_record(mrec, vp);
   if (mrec->map_name && !strcmp(kp, mrec->map_name)) {
     RELEASE(mrec->map_name);
     mrec->map_name = NULL;
@@ -889,7 +889,7 @@ pdf_insert_fontmap_record (const char *kp, const fontmap_rec *vp)
 
 
 int
-pdf_read_fontmap_line (fontmap_rec *mrec, const char *mline, long mline_len, int format)
+texpdf_read_fontmap_line (fontmap_rec *mrec, const char *mline, long mline_len, int format)
 {
   int    error;
   char  *q;
@@ -904,7 +904,7 @@ pdf_read_fontmap_line (fontmap_rec *mrec, const char *mline, long mline_len, int
   if (p >= endptr)
     return -1;
 
-  q = parse_string_value(&p, endptr);
+  q = texpdf_parse_string_value(&p, endptr);
   if (!q)
     return -1;
 
@@ -971,7 +971,7 @@ is_pdfm_mapline (const char *mline) /* NULL terminated. */
 }
 
 int
-pdf_load_fontmap_file (const char *filename, int mode)
+texpdf_load_fontmap_file (const char *filename, int mode)
 {
   fontmap_rec *mrec;
   FILE        *fp;
@@ -1012,30 +1012,30 @@ pdf_load_fontmap_file (const char *filename, int mode)
       format += m;
 
     mrec  = NEW(1, fontmap_rec);
-    pdf_init_fontmap_record(mrec);
+    texpdf_init_fontmap_record(mrec);
 
     /* format > 0: DVIPDFM, format <= 0: DVIPS/pdfTeX */
-    error = pdf_read_fontmap_line(mrec, p, llen, format);
+    error = texpdf_read_fontmap_line(mrec, p, llen, format);
     if (error) {
       WARN("Invalid map record in fontmap line %d from %s.", lpos, filename);
       WARN("-- Ignore the current input buffer: %s", p);
-      pdf_clear_fontmap_record(mrec);
+      texpdf_clear_fontmap_record(mrec);
       RELEASE(mrec);
       continue;
     } else {
       switch (mode) {
       case FONTMAP_RMODE_REPLACE:
-        pdf_insert_fontmap_record(mrec->map_name, mrec);
+        texpdf_insert_fontmap_record(mrec->map_name, mrec);
         break;
       case FONTMAP_RMODE_APPEND:
-        pdf_append_fontmap_record(mrec->map_name, mrec);
+        texpdf_append_fontmap_record(mrec->map_name, mrec);
         break;
       case FONTMAP_RMODE_REMOVE:
-        pdf_remove_fontmap_record(mrec->map_name);
+        texpdf_remove_fontmap_record(mrec->map_name);
         break;
       }
     }
-    pdf_clear_fontmap_record(mrec);
+    texpdf_clear_fontmap_record(mrec);
     RELEASE(mrec);
   }
   DPXFCLOSE(fp);
@@ -1048,7 +1048,7 @@ pdf_load_fontmap_file (const char *filename, int mode)
 
 #ifdef XETEX
 static int
-pdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
+texpdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
                                   int layout_dir, int extend, int slant, int embolden)
 {
   char        *fontmap_key;
@@ -1063,7 +1063,7 @@ pdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
     MESG("<NATIVE-FONTMAP:%s", fontmap_key);
 
   mrec  = NEW(1, fontmap_rec);
-  pdf_init_fontmap_record(mrec);
+  texpdf_init_fontmap_record(mrec);
 
   mrec->map_name  = fontmap_key;
   mrec->enc_name  = mstrdup(layout_dir == 0 ? "Identity-H" : "Identity-V");
@@ -1079,8 +1079,8 @@ pdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
   mrec->opt.slant  = slant    / 65536.0;
   mrec->opt.bold   = embolden / 65536.0;
   
-  pdf_insert_fontmap_record(mrec->map_name, mrec);
-  pdf_clear_fontmap_record(mrec);
+  texpdf_insert_fontmap_record(mrec->map_name, mrec);
+  texpdf_clear_fontmap_record(mrec);
   RELEASE(mrec);
 
   if (verbose)
@@ -1107,7 +1107,7 @@ pdf_load_native_font (const char *filename, unsigned long index,
   error = FT_New_Face(ftLib, filename, index, &face);
 
   if (error == 0)
-    error = pdf_insert_native_fontmap_record(filename, index, face,
+    error = texpdf_insert_native_fontmap_record(filename, index, face,
                                            layout_dir, extend, slant, embolden);
   return error;
 }
@@ -1171,7 +1171,7 @@ test_subfont (const char *tfm_name, const char *map_name, const char *sfd_name)
 
 
 fontmap_rec *
-pdf_lookup_fontmap_record (const char *tfm_name)
+texpdf_lookup_fontmap_record (const char *tfm_name)
 {
   fontmap_rec *mrec = NULL;
 
@@ -1183,14 +1183,14 @@ pdf_lookup_fontmap_record (const char *tfm_name)
 
 
 void
-pdf_init_fontmaps (void)
+texpdf_init_fontmaps (void)
 {
   fontmap = NEW(1, struct ht_table);
   ht_init_table(fontmap, hval_free);
 }
 
 void
-pdf_close_fontmaps (void)
+texpdf_close_fontmaps (void)
 {
   if (fontmap) {
     ht_clear_table(fontmap);
@@ -1205,8 +1205,8 @@ pdf_close_fontmaps (void)
 void
 pdf_clear_fontmaps (void)
 {
-  pdf_close_fontmaps();
-  pdf_init_fontmaps();
+  texpdf_close_fontmaps();
+  texpdf_init_fontmaps();
 }
 #endif
 
@@ -1448,22 +1448,22 @@ test_fontmap_main (int argc, char *argv[])
     }
   }
 
-  pdf_init_fontmaps();
+  texpdf_init_fontmaps();
   for (i = optind; i < argc; i++)
-    pdf_load_fontmap_file(argv[i], FONTMAP_RMODE_REPLACE);
+    texpdf_load_fontmap_file(argv[i], FONTMAP_RMODE_REPLACE);
 
   if (key == NULL)
     dump_fontmaps();
   else {
     fontmap_rec *mrec;
-    mrec = pdf_lookup_fontmap_record(key);
+    mrec = texpdf_lookup_fontmap_record(key);
     if (mrec)
       dump_fontmap_rec(key, mrec);
     else {
       WARN("Fontmap entry \"%s\" not found.", key);
     }
   }
-  pdf_close_fontmaps();
+  texpdf_close_fontmaps();
 
   return  0;
 }

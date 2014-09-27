@@ -552,7 +552,7 @@ read_c_litstrc (char *q, int len, const char **pp, const char *endptr)
 }
 
 char *
-parse_c_string (const char **pp, const char *endptr)
+texpdf_parse_c_string (const char **pp, const char *endptr)
 {
   char  *q = NULL;
   const char *p = *pp;
@@ -584,7 +584,7 @@ parse_c_string (const char **pp, const char *endptr)
 )
 
 char *
-parse_c_ident (const char **pp, const char *endptr)
+texpdf_parse_c_ident (const char **pp, const char *endptr)
 {
   char  *q = NULL;
   const char *p = *pp;
@@ -602,7 +602,7 @@ parse_c_ident (const char **pp, const char *endptr)
 }
 
 char *
-parse_float_decimal (const char **pp, const char *endptr)
+texpdf_parse_float_decimal (const char **pp, const char *endptr)
 {
   char  *q = NULL;
   const char *p = *pp;

@@ -424,7 +424,7 @@ agl_load_listfile (const char *filename, int is_predef)
     if (!nextptr || nextptr == p)
       continue;
 
-    name = parse_ident(&p, nextptr);
+    name = texpdf_parse_ident(&p, nextptr);
 
     skip_white(&p, endptr);
     if (!name || p[0] != ';') {

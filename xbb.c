@@ -243,16 +243,16 @@ static void do_pdf (FILE *fp, char *filename)
   if (!page)
     return;
 
-  pdf_release_obj(page);
+  texpdf_release_obj(page);
   write_xbb(filename, bbox.llx, bbox.lly, bbox.urx, bbox.ury,
 	    pdf_file_get_version(pf), count);
 }
 
 int extractbb (int argc, char *argv[]) 
 {
-  pdf_files_init();
+  texpdf_files_init();
 
-  pdf_set_version(PDF_VERSION_MAX);
+  texpdf_set_version(PDF_VERSION_MAX);
 
   argc -= 1; argv += 1;
 
@@ -322,24 +322,24 @@ int extractbb (int argc, char *argv[])
       WARN("Can't find file (%s), or it is forbidden to read ...skipping\n", argv[0]);
       goto cont;
     }
-    if (check_for_bmp(infile)) {
+    if (texpdf_check_for_bmp(infile)) {
       do_bmp(infile, kpse_file_name);
       goto cont;
     }
-    if (check_for_jpeg(infile)) {
+    if (texpdf_check_for_jpeg(infile)) {
       do_jpeg(infile, kpse_file_name);
       goto cont;
     }
-    if (check_for_jp2(infile)) {
+    if (texpdf_check_for_jp2(infile)) {
       do_jp2(infile, kpse_file_name);
       goto cont;
     }
-    if (check_for_pdf(infile)) {
+    if (texpdf_check_for_pdf(infile)) {
       do_pdf(infile, kpse_file_name);
       goto cont;
     }
 #ifdef HAVE_LIBPNG
-    if (check_for_png(infile)) {
+    if (texpdf_check_for_png(infile)) {
       do_png(infile, kpse_file_name);
       goto cont;
     }
@@ -352,7 +352,7 @@ int extractbb (int argc, char *argv[])
       MFCLOSE(infile);
   }
 
-  pdf_files_close();
+  texpdf_files_close();
 
   return 0;
 }
