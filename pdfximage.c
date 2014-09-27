@@ -20,30 +20,18 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "libtexpdf.h"
+
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
 #endif
 
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-
-#include "dpxfile.h"
-
-#include "pdfobj.h"
-
-#include "pdfdoc.h"
-#include "pdfdev.h"
-#include "pdfdraw.h"
-
-#include "epdf.h"
-#include "mpost.h"
-#include "pngimage.h"
-#include "jpegimage.h"
-#include "jp2image.h"
-#include "bmpimage.h"
-
-#include "pdfximage.h"
+#ifdef HAVE_STDBOOL_H
+#include <stdbool.h>
+#else
+#define true 1
+#define false 0
+#endif
 
 /* From psimage.h */
 static int  check_for_ps    (FILE *fp);

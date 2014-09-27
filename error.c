@@ -27,7 +27,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "dvipdfmx.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include "error.h"
 
 #define DPX_MESG        0
@@ -38,6 +41,7 @@ static int _mesg_type = DPX_MESG;
 #define WANT_NEWLINE() (_mesg_type != DPX_MESG_WARN && _mesg_type != DPX_MESG_ERROR)
 
 static int  really_quiet = 0;
+static char* my_name = "libtexpdf";
 
 void
 shut_up (int quietness)
