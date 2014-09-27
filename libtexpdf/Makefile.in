@@ -407,7 +407,7 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = $(FREETYPE_CFLAGS) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES)
 lib_LTLIBRARIES = libtexpdf.la
 libtexpdf_la_CPPFLAGS = -DXETEX $(AM_CPPFLAGS)
-AM_CFLAGS = $(WARNING_CFLAGS)
+AM_CFLAGS = $(WARNING_CFLAGS) -I..
 libtexpdf_la_SOURCES = agl.c agl.h bmpimage.c bmpimage.h cff.c cff.h \
 	cff_dict.c cff_dict.h cff_limits.h cff_stdstr.h cff_types.h \
 	cid_basefont.h cid.c cid.h cid_p.h cidtype0.c cidtype0.h \
