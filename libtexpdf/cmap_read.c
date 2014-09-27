@@ -572,11 +572,11 @@ CMap_parse (CMap *cmap, FILE *fp)
 	  MATCH_OP(tok2, "usecmap")) {
 	int   id;
 	CMap *ucmap;
-	id = CMap_cache_find(pst_data_ptr(tok1));
+	id = texpdf_CMap_cache_find(pst_data_ptr(tok1));
 	if (id < 0)
 	  status = -1;
 	else {
-	  ucmap = CMap_cache_get(id);
+	  ucmap = texpdf_CMap_cache_get(id);
 	  CMap_set_usecmap(cmap, ucmap);
 	}
       }

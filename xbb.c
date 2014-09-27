@@ -169,7 +169,7 @@ static void do_bmp (FILE *fp, char *filename)
   long   width, height;
   double xdensity, ydensity;
 
-  if (bmp_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
+  if (texpdf_bmp_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
     WARN("%s does not look like a BMP file...\n", filename);
     return;
   }
@@ -183,7 +183,7 @@ static void do_jpeg (FILE *fp, char *filename)
   long   width, height;
   double xdensity, ydensity;
 
-  if (jpeg_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
+  if (texpdf_jpeg_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
     WARN("%s does not look like a JPEG file...\n", filename);
     return;
   }
@@ -197,7 +197,7 @@ static void do_jp2 (FILE *fp, char *filename)
   long   width, height;
   double xdensity, ydensity;
 
-  if (jp2_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
+  if (texpdf_jp2_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
     WARN("%s does not look like a JP2/JPX file...\n", filename);
     return;
   }
@@ -212,7 +212,7 @@ static void do_png (FILE *fp, char *filename)
   long   width, height;
   double xdensity, ydensity;
 
-  if (png_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
+  if (texpdf_png_get_bbox(fp, &width, &height, &xdensity, &ydensity) < 0) {
     WARN("%s does not look like a PNG file...\n", filename);
     return;
   }
@@ -230,7 +230,7 @@ static void do_pdf (FILE *fp, char *filename)
   long count;
   pdf_rect bbox;
 
-  pf = pdf_open(filename, fp);
+  pf = texpdf_open(filename, fp);
   if (!pf) {
     WARN("%s does not look like a PDF file...\n", filename);
     return;
@@ -238,14 +238,14 @@ static void do_pdf (FILE *fp, char *filename)
 
   page = texpdf_doc_get_page(pf, page_no, &count, &bbox, NULL); /* DANGER */
 
-  pdf_close(pf);
+  texpdf_close(pf);
 
   if (!page)
     return;
 
   texpdf_release_obj(page);
   write_xbb(filename, bbox.llx, bbox.lly, bbox.urx, bbox.ury,
-	    pdf_file_get_version(pf), count);
+	    texpdf_file_get_version(pf), count);
 }
 
 int extractbb (int argc, char *argv[]) 

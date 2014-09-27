@@ -27,10 +27,10 @@
 #include "numbers.h"
 #include <kpathsea/kpathsea.h>
 
-extern void tfm_set_verbose (void);
+extern void texpdf_tfm_set_verbose (void);
 
-extern int  tfm_open (const char * tex_name, int must_exist);
-extern void tfm_close_all (void);
+extern int  texpdf_tfm_open (const char * tex_name, int must_exist);
+extern void texpdf_tfm_close_all (void);
 
 extern double texpdf_tfm_get_width  (int font_id, int32_t ch);
 #if 0

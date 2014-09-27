@@ -315,9 +315,9 @@ html_open_link (struct spc_env *spe, const char *name, struct spc_html_ *sd)
 	       texpdf_new_name("Subtype"), texpdf_new_name ("Link"));
 
   color = texpdf_new_array ();
-  pdf_add_array(color, texpdf_new_number(0.0));
-  pdf_add_array(color, texpdf_new_number(0.0));
-  pdf_add_array(color, texpdf_new_number(1.0));
+  texpdf_add_array(color, texpdf_new_number(0.0));
+  texpdf_add_array(color, texpdf_new_number(0.0));
+  texpdf_add_array(color, texpdf_new_number(1.0));
   texpdf_add_dict(sd->link_dict, texpdf_new_name("C"), color);
 
   url = fqurl(sd->baseurl, name);
@@ -339,7 +339,7 @@ html_open_link (struct spc_env *spe, const char *name, struct spc_html_ *sd)
 		 texpdf_new_string(url, strlen(url)));
     texpdf_add_dict(sd->link_dict,
 		 texpdf_new_name("A"),
-		 pdf_link_obj(action));
+		 texpdf_link_obj(action));
     texpdf_release_obj(action);
   }
   RELEASE(url);
@@ -365,11 +365,11 @@ html_open_dest (struct spc_env *spe, const char *name, struct spc_html_ *sd)
   ASSERT( page_ref ); /* Otherwise must be bug */
 
   array = texpdf_new_array();
-  pdf_add_array(array, page_ref);
-  pdf_add_array(array, texpdf_new_name("XYZ"));
-  pdf_add_array(array, texpdf_new_null());
-  pdf_add_array(array, texpdf_new_number(cp.y + 24.0));
-  pdf_add_array(array, texpdf_new_null());
+  texpdf_add_array(array, page_ref);
+  texpdf_add_array(array, texpdf_new_name("XYZ"));
+  texpdf_add_array(array, texpdf_new_null());
+  texpdf_add_array(array, texpdf_new_number(cp.y + 24.0));
+  texpdf_add_array(array, texpdf_new_null());
 
   error = texpdf_doc_add_names(pdf, "Dests",
 			    name, strlen(name),
@@ -553,7 +553,7 @@ check_resourcestatus (const char *category, const char *resname)
 
   dict2 = texpdf_lookup_dict(dict1, category);
   if (dict2 &&
-      pdf_obj_typeof(dict2) == PDF_DICT) {
+      texpdf_obj_typeof(dict2) == PDF_DICT) {
     if (texpdf_lookup_dict(dict2, resname))
       return  1;
   }
@@ -584,7 +584,7 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
     return  -1;
   }
 
-  transform_info_clear(&ti);
+  texpdf_transform_info_clear(&ti);
   obj = texpdf_lookup_dict(attr, "width");
   if (obj) {
     ti.width  = atopt(texpdf_string_value(obj));
@@ -642,7 +642,7 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
       char     *res_name;
       pdf_rect  r;
 
-      graphics_mode(pdf);
+      texpdf_graphics_mode(pdf);
 
       texpdf_dev_gsave(pdf);
 
@@ -656,7 +656,7 @@ spc_html__img_empty (struct spc_env *spe, pdf_obj *attr)
           if (!check_resourcestatus("ExtGState", res_name)) {
             dict = create_xgstate(round_at(0.01 * a, 0.01), 0);
             texpdf_doc_add_page_resource(pdf, "ExtGState",
-                                      res_name, pdf_ref_obj(dict));
+                                      res_name, texpdf_ref_obj(dict));
             texpdf_release_obj(dict);
           }
           texpdf_doc_add_page_content(pdf, " /", 2);  /* op: */

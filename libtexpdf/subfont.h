@@ -21,13 +21,13 @@
 #ifndef _SUBFONT_H_
 #define _SUBFONT_H_
 
-extern void   subfont_set_verbose (void);
+extern void   texpdf_subfont_set_verbose (void);
 
 extern void   release_sfd_record  (void);
 
-extern unsigned short lookup_sfd_record(int rec_id, unsigned char code);
+extern unsigned short texpdf_lookup_sfd_record(int rec_id, unsigned char code);
 
-extern int    sfd_load_record     (const char *sfd_name, const char *subfont_id);
+extern int    texpdf_sfd_load_record     (const char *sfd_name, const char *subfont_id);
 extern char **sfd_get_subfont_ids (const char *sfd_name, int *num_subfonts);
 
 #endif /* _SUBFONT_H_ */

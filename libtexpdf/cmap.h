@@ -99,19 +99,19 @@ extern int  CMap_add_codespacerange (CMap *cmap,
 				     const unsigned char *codelo, const unsigned char *codehi, int dim);
 extern int  CMap_match_codespace    (CMap *cmap, const unsigned char *c, int dim);
 
-extern void CMap_decode_char (CMap *cmap,
+extern void texpdf_CMap_decode_char (CMap *cmap,
 			      const unsigned char **inbuf, long *inbytesleft,
 			      unsigned char **outbuf, long *outbytesleft);
 
-extern long CMap_decode (CMap *cmap,
+extern long texpdf_CMap_decode (CMap *cmap,
 			 const unsigned char **inbuf,  long *inbytesleft,
 			 unsigned char **outbuf, long *outbytesleft);
 
 extern int  CMap_reverse_decode(CMap *cmap, CID cid);
 
 extern void  CMap_cache_init  (void);
-extern CMap *CMap_cache_get   (int id);
-extern int   CMap_cache_find  (const char *cmap_name);
+extern CMap *texpdf_CMap_cache_get   (int id);
+extern int   texpdf_CMap_cache_find  (const char *cmap_name);
 extern void  CMap_cache_close (void);
 extern int   CMap_cache_add   (CMap *cmap);
 

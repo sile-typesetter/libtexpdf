@@ -370,7 +370,7 @@ hval_free (void *hval)
 void
 agl_init_map (void)
 {
-  ht_init_table(&aglmap, hval_free);
+  texpdf_ht_init_table(&aglmap, hval_free);
   agl_load_listfile(AGL_EXTRA_LISTFILE, 0);
   if (agl_load_listfile(AGL_PREDEF_LISTFILE, 1) < 0) {
     WARN("Failed to load AGL file \"%s\"...", AGL_PREDEF_LISTFILE);
@@ -383,7 +383,7 @@ agl_init_map (void)
 void
 agl_close_map (void)
 {
-  ht_clear_table(&aglmap);
+  texpdf_ht_clear_table(&aglmap);
 }
 
 #define WBUF_SIZE 1024
@@ -415,7 +415,7 @@ agl_load_listfile (const char *filename, int is_predef)
     long      unicodes[AGL_MAX_UNICODES];
 
     endptr = p + strlen(p);
-    skip_white(&p, endptr);
+    texpdf_skip_white(&p, endptr);
 
     /* Need table version check. */
     if (!p || p[0] == '#' || p >= endptr)
@@ -426,7 +426,7 @@ agl_load_listfile (const char *filename, int is_predef)
 
     name = texpdf_parse_ident(&p, nextptr);
 
-    skip_white(&p, endptr);
+    texpdf_skip_white(&p, endptr);
     if (!name || p[0] != ';') {
       WARN("Invalid AGL entry: %s", wbuf);
       if (name)
@@ -435,7 +435,7 @@ agl_load_listfile (const char *filename, int is_predef)
     }
 
     p++;
-    skip_white(&p, endptr);
+    texpdf_skip_white(&p, endptr);
 
     n_unicodes = 0;
     while (p < endptr &&
@@ -450,7 +450,7 @@ agl_load_listfile (const char *filename, int is_predef)
       unicodes[n_unicodes++] = strtol(p, &nextptr, 16);
 
       p = nextptr;
-      skip_white(&p, endptr);
+      texpdf_skip_white(&p, endptr);
     }
 
     if (n_unicodes == 0) {
@@ -466,9 +466,9 @@ agl_load_listfile (const char *filename, int is_predef)
       agln->unicodes[i] = unicodes[i];
     }
 
-    duplicate = ht_lookup_table(&aglmap, name, strlen(name));
+    duplicate = texpdf_ht_lookup_table(&aglmap, name, strlen(name));
     if (!duplicate)
-      ht_append_table(&aglmap, name, strlen(name), agln);
+      texpdf_ht_append_table(&aglmap, name, strlen(name), agln);
     else {
       while (duplicate->alternate)
         duplicate = duplicate->alternate;
@@ -509,7 +509,7 @@ agl_lookup_list (const char *glyphname)
   if (!glyphname)
     return NULL;
 
-  agln = ht_lookup_table(&aglmap, glyphname, strlen(glyphname));
+  agln = texpdf_ht_lookup_table(&aglmap, glyphname, strlen(glyphname));
 
   return agln;
 }

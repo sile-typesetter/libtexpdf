@@ -1499,7 +1499,7 @@ otl_gsub_select (otl_gsub *gsub_list,
 
 #if  0
 static int
-otl_gsub_dump_single (struct otl_gsub_subtab *subtab)
+otl_gsub_texpdf_dump_single (struct otl_gsub_subtab *subtab)
 {
   long  gid, idx;
 
@@ -1534,7 +1534,7 @@ otl_gsub_dump_single (struct otl_gsub_subtab *subtab)
 }
 
 static int
-otl_gsub_dump_alternate (struct otl_gsub_subtab *subtab)
+otl_gsub_texpdf_dump_alternate (struct otl_gsub_subtab *subtab)
 {
   long  gid, idx;
 
@@ -1565,7 +1565,7 @@ otl_gsub_dump_alternate (struct otl_gsub_subtab *subtab)
 }
 
 static int
-otl_gsub_dump_ligature (struct otl_gsub_subtab *subtab)
+otl_gsub_texpdf_dump_ligature (struct otl_gsub_subtab *subtab)
 {
   long  gid, idx;
 
@@ -1596,7 +1596,7 @@ otl_gsub_dump_ligature (struct otl_gsub_subtab *subtab)
 }
 
 int
-otl_gsub_dump (otl_gsub *gsub_list,
+otl_gsub_texpdf_dump (otl_gsub *gsub_list,
                const char *script, const char *language, const char *feature)
 {
   int    error = -1;
@@ -1626,13 +1626,13 @@ otl_gsub_dump (otl_gsub *gsub_list,
     subtab = &(gsub->subtables[j]);
     switch ((int) subtab->LookupType){
     case OTL_GSUB_TYPE_SINGLE:
-      error = otl_gsub_dump_single(subtab);
+      error = otl_gsub_texpdf_dump_single(subtab);
       break;
     case OTL_GSUB_TYPE_ALTERNATE:
-      error = otl_gsub_dump_alternate(subtab);
+      error = otl_gsub_texpdf_dump_alternate(subtab);
       break;
     case OTL_GSUB_TYPE_LIGATURE:
-      error = otl_gsub_dump_ligature(subtab);
+      error = otl_gsub_texpdf_dump_ligature(subtab);
       break;
     }
   }

@@ -503,7 +503,7 @@ texpdf_ximage_set_image (pdf_ximage *I, void *image_info, pdf_obj *resource)
   I->attr.xdensity = info->xdensity;
   I->attr.ydensity = info->ydensity;
 
-  I->reference = pdf_ref_obj(resource);
+  I->reference = texpdf_ref_obj(resource);
 
   dict = texpdf_stream_dict(resource);
   texpdf_add_dict(dict, texpdf_new_name("Type"),    texpdf_new_name("XObject"));
@@ -532,7 +532,7 @@ texpdf_ximage_set_form (pdf_ximage *I, void *form_info, pdf_obj *resource)
   I->attr.bbox.urx = info->bbox.urx;
   I->attr.bbox.ury = info->bbox.ury;
 
-  I->reference = pdf_ref_obj(resource);
+  I->reference = texpdf_ref_obj(resource);
 
   texpdf_release_obj(resource); /* Caller don't know we are using reference. */
   I->resource  = NULL;
@@ -561,9 +561,9 @@ texpdf_ximage_get_reference (int id)
 
   I = GET_IMAGE(ic, id);
   if (!I->reference)
-    I->reference = pdf_ref_obj(I->resource);
+    I->reference = texpdf_ref_obj(I->resource);
 
-  return pdf_link_obj(I->reference);
+  return texpdf_link_obj(I->reference);
 }
 
 /* called from pdfdoc.c only for late binding */
@@ -849,7 +849,7 @@ texpdf_ximage_scale_image (int            id,
 
 /* Migrated from psimage.c */
 
-void set_distiller_template (char *s) 
+void texpdf_set_distiller_template (char *s) 
 {
   if (_opts.cmdtmpl)
     RELEASE(_opts.cmdtmpl);
@@ -862,7 +862,7 @@ void set_distiller_template (char *s)
   return;
 }
 
-char *get_distiller_template (void)
+char *texpdf_get_distiller_template (void)
 {
   return _opts.cmdtmpl;
 }

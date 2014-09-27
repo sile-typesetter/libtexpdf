@@ -321,14 +321,14 @@ png_include_image (pdf_ximage *ximage, FILE *png_file)
   }
   texpdf_add_dict(stream_dict, texpdf_new_name("ColorSpace"), colorspace);
 
-  pdf_add_stream(stream, stream_data_ptr, rowbytes*height);
+  texpdf_add_stream(stream, stream_data_ptr, rowbytes*height);
   RELEASE(stream_data_ptr);
 
   if (mask) {
     if (trans_type == PDF_TRANS_TYPE_BINARY)
       texpdf_add_dict(stream_dict, texpdf_new_name("Mask"), mask);
     else if (trans_type == PDF_TRANS_TYPE_ALPHA) {
-      texpdf_add_dict(stream_dict, texpdf_new_name("SMask"), pdf_ref_obj(mask));
+      texpdf_add_dict(stream_dict, texpdf_new_name("SMask"), texpdf_ref_obj(mask));
       texpdf_release_obj(mask);
     } else {
       WARN("%s: You found a bug in pngimage.c.", PNG_DEBUG_STR);
@@ -513,14 +513,14 @@ create_cspace_sRGB (png_structp png_ptr, png_infop info_ptr)
   case PNG_COLOR_TYPE_RGB:
   case PNG_COLOR_TYPE_RGB_ALPHA:
   case PNG_COLOR_TYPE_PALETTE:
-    pdf_add_array(colorspace, texpdf_new_name("CalRGB"));
+    texpdf_add_array(colorspace, texpdf_new_name("CalRGB"));
     break;
   case PNG_COLOR_TYPE_GRAY:
   case PNG_COLOR_TYPE_GRAY_ALPHA:
-    pdf_add_array(colorspace, texpdf_new_name("CalGray"));
+    texpdf_add_array(colorspace, texpdf_new_name("CalGray"));
     break;
   }
-  pdf_add_array(colorspace, cal_param);
+  texpdf_add_array(colorspace, cal_param);
 
   return colorspace;
 }
@@ -628,8 +628,8 @@ create_cspace_CalRGB (png_structp png_ptr, png_infop info_ptr)
     return NULL;
 
   colorspace = texpdf_new_array();
-  pdf_add_array(colorspace, texpdf_new_name("CalRGB"));
-  pdf_add_array(colorspace, cal_param);
+  texpdf_add_array(colorspace, texpdf_new_name("CalRGB"));
+  texpdf_add_array(colorspace, cal_param);
 
   return colorspace;
 }
@@ -669,8 +669,8 @@ create_cspace_CalGray (png_structp png_ptr, png_infop info_ptr)
     return NULL;
 
   colorspace = texpdf_new_array();
-  pdf_add_array(colorspace, texpdf_new_name("CalGray"));
-  pdf_add_array(colorspace, cal_param);
+  texpdf_add_array(colorspace, texpdf_new_name("CalGray"));
+  texpdf_add_array(colorspace, cal_param);
 
   return colorspace;
 }
@@ -733,31 +733,31 @@ make_param_Cal (png_byte color_type,
 
   /* White point is always required. */
   white_point = texpdf_new_array();
-  pdf_add_array(white_point, texpdf_new_number(ROUND(Xw, 0.00001)));
-  pdf_add_array(white_point, texpdf_new_number(ROUND(Yw, 0.00001)));
-  pdf_add_array(white_point, texpdf_new_number(ROUND(Zw, 0.00001)));
+  texpdf_add_array(white_point, texpdf_new_number(ROUND(Xw, 0.00001)));
+  texpdf_add_array(white_point, texpdf_new_number(ROUND(Yw, 0.00001)));
+  texpdf_add_array(white_point, texpdf_new_number(ROUND(Zw, 0.00001)));
   texpdf_add_dict(cal_param, texpdf_new_name("WhitePoint"), white_point);
 
   /* Matrix - default: Identity */ 
   if (color_type & PNG_COLOR_MASK_COLOR) {
     if (G != 1.0) {
       dev_gamma = texpdf_new_array();
-      pdf_add_array(dev_gamma, texpdf_new_number(ROUND(G, 0.00001)));
-      pdf_add_array(dev_gamma, texpdf_new_number(ROUND(G, 0.00001)));
-      pdf_add_array(dev_gamma, texpdf_new_number(ROUND(G, 0.00001)));
+      texpdf_add_array(dev_gamma, texpdf_new_number(ROUND(G, 0.00001)));
+      texpdf_add_array(dev_gamma, texpdf_new_number(ROUND(G, 0.00001)));
+      texpdf_add_array(dev_gamma, texpdf_new_number(ROUND(G, 0.00001)));
       texpdf_add_dict(cal_param, texpdf_new_name("Gamma"), dev_gamma);
     }
 
     matrix = texpdf_new_array();
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Xr, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Yr, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Zr, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Xg, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Yg, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Zg, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Xb, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Yb, 0.00001)));
-    pdf_add_array(matrix, texpdf_new_number(ROUND(Zb, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Xr, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Yr, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Zr, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Xg, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Yg, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Zg, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Xb, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Yb, 0.00001)));
+    texpdf_add_array(matrix, texpdf_new_number(ROUND(Zb, 0.00001)));
     texpdf_add_dict (cal_param, texpdf_new_name("Matrix"), matrix);
   } else { /* Gray */
     if (G != 1.0)
@@ -794,7 +794,7 @@ create_cspace_Indexed (png_structp png_ptr, png_infop info_ptr)
 
   /* Order is important. */
   colorspace = texpdf_new_array ();
-  pdf_add_array(colorspace, texpdf_new_name("Indexed"));
+  texpdf_add_array(colorspace, texpdf_new_name("Indexed"));
 
   if (png_get_valid(png_ptr, info_ptr, PNG_INFO_iCCP))
     base = create_cspace_ICCBased(png_ptr, info_ptr);
@@ -808,8 +808,8 @@ create_cspace_Indexed (png_structp png_ptr, png_infop info_ptr)
   if (!base)
     base = texpdf_new_name("DeviceRGB");
 
-  pdf_add_array(colorspace, base);
-  pdf_add_array(colorspace, texpdf_new_number(num_plte-1));
+  texpdf_add_array(colorspace, base);
+  texpdf_add_array(colorspace, texpdf_new_number(num_plte-1));
   data_ptr = NEW(num_plte*3, png_byte);
   for (i = 0; i < num_plte; i++) {
     data_ptr[3*i]   = plte[i].red;
@@ -818,7 +818,7 @@ create_cspace_Indexed (png_structp png_ptr, png_infop info_ptr)
   }
   lookup = texpdf_new_string(data_ptr, num_plte*3);
   RELEASE(data_ptr);
-  pdf_add_array(colorspace, lookup);
+  texpdf_add_array(colorspace, lookup);
 
   return colorspace;
 }
@@ -859,24 +859,24 @@ create_ckey_mask (png_structp png_ptr, png_infop info_ptr)
   case PNG_COLOR_TYPE_PALETTE:
     for (i = 0; i < num_trans; i++) {
       if (trans[i] == 0x00) {
-	pdf_add_array(colorkeys, texpdf_new_number(i));
-	pdf_add_array(colorkeys, texpdf_new_number(i));
+	texpdf_add_array(colorkeys, texpdf_new_number(i));
+	texpdf_add_array(colorkeys, texpdf_new_number(i));
       } else if (trans[i] != 0xff) {
 	WARN("%s: You found a bug in pngimage.c.", PNG_DEBUG_STR);
       }
     }
     break;
   case PNG_COLOR_TYPE_RGB:
-    pdf_add_array(colorkeys, texpdf_new_number(colors->red));
-    pdf_add_array(colorkeys, texpdf_new_number(colors->red));
-    pdf_add_array(colorkeys, texpdf_new_number(colors->green));
-    pdf_add_array(colorkeys, texpdf_new_number(colors->green));
-    pdf_add_array(colorkeys, texpdf_new_number(colors->blue));
-    pdf_add_array(colorkeys, texpdf_new_number(colors->blue));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->red));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->red));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->green));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->green));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->blue));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->blue));
     break;
   case PNG_COLOR_TYPE_GRAY:
-    pdf_add_array(colorkeys, texpdf_new_number(colors->gray));
-    pdf_add_array(colorkeys, texpdf_new_number(colors->gray));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->gray));
+    texpdf_add_array(colorkeys, texpdf_new_number(colors->gray));
     break;
   default:
     WARN("%s: You found a bug in pngimage.c.", PNG_DEBUG_STR);
@@ -931,7 +931,7 @@ create_soft_mask (png_structp png_ptr, png_infop info_ptr,
     png_byte idx = image_data_ptr[i];
     smask_data_ptr[i] = (idx < num_trans) ? trans[idx] : 0xff;
   }
-  pdf_add_stream(smask, (char *)smask_data_ptr, width*height);
+  texpdf_add_stream(smask, (char *)smask_data_ptr, width*height);
   RELEASE(smask_data_ptr);
 
   return smask;
@@ -996,7 +996,7 @@ strip_soft_mask (png_structp png_ptr, png_infop info_ptr,
     return NULL;
   }
 
-  pdf_add_stream(smask, smask_data_ptr, width*height);
+  texpdf_add_stream(smask, smask_data_ptr, width*height);
   RELEASE(smask_data_ptr);
 
   return smask;
@@ -1017,7 +1017,7 @@ read_image_data (png_structp png_ptr, png_bytep dest_ptr,
 }
 
 int
-png_get_bbox (FILE *png_file, long *width, long *height,
+texpdf_png_get_bbox (FILE *png_file, long *width, long *height,
 	       double *xdensity, double *ydensity)
 {
   png_structp png_ptr;

@@ -249,7 +249,7 @@ pdf_obj_get_verbose(void)
 }
 
 void
-pdf_obj_set_verbose(void)
+texpdf_obj_set_verbose(void)
 {
   verbose++;
 }
@@ -322,7 +322,7 @@ pdf_out_init (const char *filename, int do_encryption)
 }
 
 static void
-dump_xref_table (void)
+texpdf_dump_xref_table (void)
 {
   long length;
   unsigned long i;
@@ -349,7 +349,7 @@ dump_xref_table (void)
 }
 
 static void
-dump_trailer_dict (void)
+texpdf_dump_trailer_dict (void)
 {
   pdf_out(pdf_output_file, "trailer\n", 8);
   enc_mode = 0;
@@ -363,7 +363,7 @@ dump_trailer_dict (void)
  * contributed by Matthias Franz (March 21, 2007)
  */
 static void
-dump_xref_stream (void)
+texpdf_dump_xref_stream (void)
 {
   unsigned long pos, i;
   unsigned poslen;
@@ -378,9 +378,9 @@ dump_xref_stream (void)
     poslen++;
 
   w = texpdf_new_array();
-  pdf_add_array(w, texpdf_new_number(1));      /* type                */
-  pdf_add_array(w, texpdf_new_number(poslen)); /* offset (big-endian) */
-  pdf_add_array(w, texpdf_new_number(2));      /* generation          */
+  texpdf_add_array(w, texpdf_new_number(1));      /* type                */
+  texpdf_add_array(w, texpdf_new_number(poslen)); /* offset (big-endian) */
+  texpdf_add_array(w, texpdf_new_number(2));      /* generation          */
   texpdf_add_dict(trailer_dict, texpdf_new_name("W"), w);
 
   /* We need the xref entry for the xref stream right now */
@@ -398,7 +398,7 @@ dump_xref_stream (void)
     f3 = output_xref[i].field3;
     buf[poslen+1] = (unsigned char) (f3 >> 8);
     buf[poslen+2] = (unsigned char) (f3);
-    pdf_add_stream(xref_stream, &buf, poslen+3);
+    texpdf_add_stream(xref_stream, &buf, poslen+3);
   }
 
   texpdf_release_obj(xref_stream);
@@ -431,10 +431,10 @@ pdf_out_flush (void)
 		 texpdf_new_number(next_label));
 
     if (xref_stream)
-      dump_xref_stream();
+      texpdf_dump_xref_stream();
     else {
-      dump_xref_table();
-      dump_trailer_dict();
+      texpdf_dump_xref_table();
+      texpdf_dump_trailer_dict();
     }
 
     /* Done with xref table */
@@ -473,7 +473,7 @@ texpdf_error_cleanup (void)
 void
 texpdf_set_root (pdf_obj *object)
 {
-  if (texpdf_add_dict(trailer_dict, texpdf_new_name("Root"), pdf_ref_obj(object))) {
+  if (texpdf_add_dict(trailer_dict, texpdf_new_name("Root"), texpdf_ref_obj(object))) {
     ERROR("Root object already set!");
   }
   /* Adobe Readers don't like a document catalog inside an encrypted
@@ -488,7 +488,7 @@ texpdf_set_root (pdf_obj *object)
 void
 texpdf_set_info (pdf_obj *object)
 {
-  if (texpdf_add_dict(trailer_dict, texpdf_new_name("Info"), pdf_ref_obj(object))) {
+  if (texpdf_add_dict(trailer_dict, texpdf_new_name("Info"), texpdf_ref_obj(object))) {
     ERROR ("Info object already set!");
   }
 }
@@ -504,7 +504,7 @@ texpdf_set_id (pdf_obj *id)
 void
 texpdf_set_encrypt (pdf_obj *encrypt)
 {
-  if (texpdf_add_dict(trailer_dict, texpdf_new_name("Encrypt"), pdf_ref_obj(encrypt))) {
+  if (texpdf_add_dict(trailer_dict, texpdf_new_name("Encrypt"), texpdf_ref_obj(encrypt))) {
     ERROR("Encrypt object already set!");
   }
   encrypt->flags |= OBJ_NO_ENCRYPT;
@@ -514,7 +514,7 @@ static
 void pdf_out_char (FILE *file, char c)
 {
   if (output_stream && file ==  pdf_output_file)
-    pdf_add_stream(output_stream, &c, 1);
+    texpdf_add_stream(output_stream, &c, 1);
   else {
     fputc(c, file);
     /* Keep tallys for xref table *only* if writing a pdf file. */
@@ -539,7 +539,7 @@ static
 void pdf_out (FILE *file, const void *buffer, long length)
 {
   if (output_stream && file ==  pdf_output_file)
-    pdf_add_stream(output_stream, buffer, length);
+    texpdf_add_stream(output_stream, buffer, length);
   else {
     fwrite(buffer, 1, length, file);
     /* Keep tallys for xref table *only* if writing a pdf file */
@@ -600,7 +600,7 @@ texpdf_new_obj(int type)
 }
 
 int
-pdf_obj_typeof (pdf_obj *object)
+texpdf_obj_typeof (pdf_obj *object)
 {
   if (INVALIDOBJ(object))
     return PDF_OBJ_INVALID;
@@ -643,10 +643,10 @@ pdf_transfer_label (pdf_obj *dst, pdf_obj *src)
  * fear that somebody else will free it.
  */
 pdf_obj *
-pdf_link_obj (pdf_obj *object)
+texpdf_link_obj (pdf_obj *object)
 {
   if (INVALIDOBJ(object))
-    ERROR("pdf_link_obj(): passed invalid object.");
+    ERROR("texpdf_link_obj(): passed invalid object.");
 
   object->refcount += 1;
 
@@ -655,10 +655,10 @@ pdf_link_obj (pdf_obj *object)
 
 
 pdf_obj *
-pdf_ref_obj (pdf_obj *object)
+texpdf_ref_obj (pdf_obj *object)
 {
   if (INVALIDOBJ(object))
-    ERROR("pdf_ref_obj(): passed invalid object.");
+    ERROR("texpdf_ref_obj(): passed invalid object.");
   
   if (object->refcount == 0) {
     MESG("\nTrying to refer already released object!!!\n");
@@ -667,7 +667,7 @@ pdf_ref_obj (pdf_obj *object)
   }
 
   if (PDF_OBJ_INDIRECTTYPE(object)) {
-    return pdf_link_obj(object);
+    return texpdf_link_obj(object);
   } else {
     return texpdf_new_ref(object);
   }
@@ -806,7 +806,7 @@ texpdf_set_number (pdf_obj *object, double value)
 }
 
 double
-pdf_number_value (pdf_obj *object)
+texpdf_number_value (pdf_obj *object)
 {
   pdf_number *data;
 
@@ -1071,7 +1071,7 @@ release_name (pdf_name *data)
 }
 
 char *
-pdf_name_value (pdf_obj *object)
+texpdf_name_value (pdf_obj *object)
 {
   pdf_name *data;
 
@@ -1144,7 +1144,7 @@ texpdf_get_array (pdf_obj *array, long idx)
 }
 
 unsigned int
-pdf_array_length (pdf_obj *array)
+texpdf_array_length (pdf_obj *array)
 {
   pdf_array *data;
 
@@ -1172,11 +1172,11 @@ release_array (pdf_array *data)
 }
 
 /*
- * The name pdf_add_array is misleading. It behaves differently than
+ * The name texpdf_add_array is misleading. It behaves differently than
  * texpdf_add_dict(). This should be pdf_push_array().
  */
 void
-pdf_add_array (pdf_obj *array, pdf_obj *object)
+texpdf_add_array (pdf_obj *array, pdf_obj *object)
 {
   pdf_array *data;
 
@@ -1210,7 +1210,7 @@ pdf_put_array (pdf_obj *array, unsigned idx, pdf_obj *object)
   /*
    * Rangecheck error in PostScript interpreters if
    * idx > data->size - 1. But texpdf_new_array() doesn't set
-   * array size, pdf_add_array() dynamically increases size
+   * array size, texpdf_add_array() dynamically increases size
    * of array. This might confusing...
    */
   if (idx + 1 > data->size) {
@@ -1358,7 +1358,7 @@ texpdf_add_dict (pdf_obj *dict, pdf_obj *key, pdf_obj *value)
 
   /* If this key already exists, simply replace the value */
   for (data = dict->data; data->key != NULL; data = data->next) {
-    if (!strcmp(pdf_name_value(key), pdf_name_value(data->key))) {
+    if (!strcmp(texpdf_name_value(key), texpdf_name_value(data->key))) {
       /* Release the old value */
       texpdf_release_obj(data->value);
       /* Release the new key (we don't need it) */
@@ -1400,7 +1400,7 @@ texpdf_put_dict (pdf_obj *dict, const char *key, pdf_obj *value)
   data = dict->data;
 
   while (data->key != NULL) {
-    if (!strcmp(key, pdf_name_value(data->key))) {
+    if (!strcmp(key, texpdf_name_value(data->key))) {
       texpdf_release_obj(data->value);
       data->value = value;
       break;
@@ -1437,7 +1437,7 @@ texpdf_merge_dict (pdf_obj *dict1, pdf_obj *dict2)
 
   data = dict2->data;
   while (data->key != NULL) {
-    texpdf_add_dict(dict1, pdf_link_obj(data->key), pdf_link_obj(data->value));
+    texpdf_add_dict(dict1, texpdf_link_obj(data->key), texpdf_link_obj(data->value));
     data = data->next;
   }
 }
@@ -1475,7 +1475,7 @@ texpdf_lookup_dict (pdf_obj *dict, const char *name)
 
   data = dict->data;
   while (data->key != NULL) {
-    if (!strcmp(name, pdf_name_value(data->key))) {
+    if (!strcmp(name, texpdf_name_value(data->key))) {
       return data->value;
     }
     data = data->next;
@@ -1499,7 +1499,7 @@ pdf_dict_keys (pdf_obj *dict)
     /* We duplicate name object rather than linking keys.
      * If we forget to free keys, broken PDF is generated.
      */
-    pdf_add_array(keys, texpdf_new_name(pdf_name_value(data->key)));
+    texpdf_add_array(keys, texpdf_new_name(texpdf_name_value(data->key)));
   }
 
   return keys;
@@ -1731,7 +1731,7 @@ get_objstm_data (pdf_obj *objstm) {
 }
 
 void
-pdf_add_stream (pdf_obj *stream, const void *stream_data, long length)
+texpdf_add_stream (pdf_obj *stream, const void *stream_data, long length)
 {
   pdf_stream *data;
 
@@ -1751,7 +1751,7 @@ pdf_add_stream (pdf_obj *stream, const void *stream_data, long length)
 #if HAVE_ZLIB
 #define WBUF_SIZE 4096
 int
-pdf_add_stream_flate (pdf_obj *dst, const void *data, long len)
+texpdf_add_stream_flate (pdf_obj *dst, const void *data, long len)
 {
   z_stream z;
   Bytef    wbuf[WBUF_SIZE];
@@ -1778,14 +1778,14 @@ pdf_add_stream_flate (pdf_obj *dst, const void *data, long len)
     }
 
     if (z.avail_out == 0) {
-      pdf_add_stream(dst, wbuf, WBUF_SIZE);
+      texpdf_add_stream(dst, wbuf, WBUF_SIZE);
       z.next_out  = wbuf;
       z.avail_out = WBUF_SIZE;
     }
   }
 
   if (WBUF_SIZE - z.avail_out > 0)
-    pdf_add_stream(dst, wbuf, WBUF_SIZE - z.avail_out);
+    texpdf_add_stream(dst, wbuf, WBUF_SIZE - z.avail_out);
 
   return (inflateEnd(&z) == Z_OK ? 0 : -1);
 }
@@ -1818,16 +1818,16 @@ get_decode_parms (struct decode_parms *parms, pdf_obj *dict)
 
   tmp = pdf_deref_obj(texpdf_lookup_dict(dict, "Predictor"));
   if (tmp)
-    parms->predictor = pdf_number_value(tmp);
+    parms->predictor = texpdf_number_value(tmp);
   tmp = pdf_deref_obj(texpdf_lookup_dict(dict, "Colors"));
   if (tmp)
-    parms->colors = pdf_number_value(tmp);
+    parms->colors = texpdf_number_value(tmp);
   tmp = pdf_deref_obj(texpdf_lookup_dict(dict, "BitsPerComponent"));
   if (tmp)
-    parms->bits_per_component = pdf_number_value(tmp);
+    parms->bits_per_component = texpdf_number_value(tmp);
   tmp = pdf_deref_obj(texpdf_lookup_dict(dict, "Columns"));
   if (tmp)
-    parms->columns = pdf_number_value(tmp);
+    parms->columns = texpdf_number_value(tmp);
 
   if (parms->bits_per_component != 1 &&
       parms->bits_per_component != 2 &&
@@ -1895,7 +1895,7 @@ filter_row_TIFF2 (unsigned char *dst, const unsigned char *src,
 }
 
 /* This routine is inefficient. Length is typically 4 for Xref streams.
- * Especially, calling pdf_add_stream() for each 4 bytes append is highly
+ * Especially, calling texpdf_add_stream() for each 4 bytes append is highly
  * inefficient.
  */
 static int
@@ -1916,7 +1916,7 @@ filter_decoded (pdf_obj *dst, const void *src, long srclen,
   memset(prev, 0, length);
   switch (parms->predictor) {
   case 1 : /* No prediction */
-    pdf_add_stream(dst, src, srclen); /* Just copy */
+    texpdf_add_stream(dst, src, srclen); /* Just copy */
     break;
   case 2: /* TIFF Predictor 2 */
     {
@@ -1927,7 +1927,7 @@ filter_decoded (pdf_obj *dst, const void *src, long srclen,
             int pv = i - bytes_per_pixel >= 0 ? buf[i - bytes_per_pixel] : 0;
             buf[i] = (unsigned char)(((int) p[i] + pv) & 0xff);
           }
-          pdf_add_stream(dst, buf, length);
+          texpdf_add_stream(dst, buf, length);
           p += length;
         }
       } else if (parms->bits_per_component == 16) {
@@ -1942,14 +1942,14 @@ filter_decoded (pdf_obj *dst, const void *src, long srclen,
             buf[i]     = (unsigned char) (c >> 8);
             buf[i + 1] = (unsigned char) (c & 0xff);
           }
-          pdf_add_stream(dst, buf, length);
+          texpdf_add_stream(dst, buf, length);
           p += length;
         }
       } else { /* bits per component 1, 2, 4 */
         while (!error && p + length < endptr) {
           error = filter_row_TIFF2(buf, p, parms);
           if (!error) {
-            pdf_add_stream(dst, buf, length);
+            texpdf_add_stream(dst, buf, length);
             p += length;
           }
         }
@@ -2020,7 +2020,7 @@ filter_decoded (pdf_obj *dst, const void *src, long srclen,
           error = -1;
         }
         if (!error) {
-          pdf_add_stream(dst, buf, length); /* highly inefficient */
+          texpdf_add_stream(dst, buf, length); /* highly inefficient */
           memcpy(prev, buf, length);
           p += length;
         }
@@ -2039,7 +2039,7 @@ filter_decoded (pdf_obj *dst, const void *src, long srclen,
 }
 
 static int
-pdf_add_stream_flate_filtered (pdf_obj *dst, const void *data, long len, struct decode_parms *parms)
+texpdf_add_stream_flate_filtered (pdf_obj *dst, const void *data, long len, struct decode_parms *parms)
 {
   pdf_obj *tmp;
   z_stream z;
@@ -2069,14 +2069,14 @@ pdf_add_stream_flate_filtered (pdf_obj *dst, const void *data, long len, struct 
     }
 
     if (z.avail_out == 0) {
-      pdf_add_stream(tmp, wbuf, WBUF_SIZE);
+      texpdf_add_stream(tmp, wbuf, WBUF_SIZE);
       z.next_out  = wbuf;
       z.avail_out = WBUF_SIZE;
     }
   }
 
   if (WBUF_SIZE - z.avail_out > 0)
-    pdf_add_stream(tmp, wbuf, WBUF_SIZE - z.avail_out);
+    texpdf_add_stream(tmp, wbuf, WBUF_SIZE - z.avail_out);
 
   error = filter_decoded(dst, pdf_stream_dataptr(tmp), pdf_stream_length(tmp), parms);
   texpdf_release_obj(tmp);
@@ -2103,7 +2103,7 @@ pdf_concat_stream (pdf_obj *dst, pdf_obj *src)
 
   filter = texpdf_lookup_dict(stream_dict, "Filter");
   if (!filter)
-    pdf_add_stream(dst, stream_data, stream_length);
+    texpdf_add_stream(dst, stream_data, stream_length);
 #if HAVE_ZLIB
   else {
     struct decode_parms parms;
@@ -2115,7 +2115,7 @@ pdf_concat_stream (pdf_obj *dst, pdf_obj *src)
       /* Dictionary or array */
       tmp = pdf_deref_obj(texpdf_lookup_dict(stream_dict, "DecodeParms"));
       if (PDF_OBJ_ARRAYTYPE(tmp)) {
-        if (pdf_array_length(tmp) > 1) {
+        if (texpdf_array_length(tmp) > 1) {
           WARN("Unexpected size for DecodeParms array.");
           return -1;
         }
@@ -2131,19 +2131,19 @@ pdf_concat_stream (pdf_obj *dst, pdf_obj *src)
       have_parms = 1;
     }
     if (PDF_OBJ_ARRAYTYPE(filter)) {
-      if (pdf_array_length(filter) > 1) {
+      if (texpdf_array_length(filter) > 1) {
         WARN("Multiple DecodeFilter not supported.");
         return -1;
       }
       filter = texpdf_get_array(filter, 0);
     }
     if (PDF_OBJ_NAMETYPE(filter)) {
-      char  *filter_name = pdf_name_value(filter);
+      char  *filter_name = texpdf_name_value(filter);
       if (filter_name && !strcmp(filter_name, "FlateDecode")) {
         if (have_parms)
-          error = pdf_add_stream_flate_filtered(dst, stream_data, stream_length, &parms);
+          error = texpdf_add_stream_flate_filtered(dst, stream_data, stream_length, &parms);
         else
-          error = pdf_add_stream_flate(dst, stream_data, stream_length);
+          error = texpdf_add_stream_flate(dst, stream_data, stream_length);
       } else {
         WARN("DecodeFilter \"%s\" not supported.", filter_name);
         error = -1;
@@ -2306,7 +2306,7 @@ release_objstm (pdf_obj *objstm)
     long i = 2*pos, *val = data+2;
     while (i--) {
       long length = sprintf(format_buffer, "%ld ", *(val++));
-      pdf_add_stream(objstm, format_buffer, length);
+      texpdf_add_stream(objstm, format_buffer, length);
     }
   }
 
@@ -2315,7 +2315,7 @@ release_objstm (pdf_obj *objstm)
   texpdf_add_dict(dict, texpdf_new_name("N"), texpdf_new_number(pos));
   texpdf_add_dict(dict, texpdf_new_name("First"), texpdf_new_number(stream->stream_length));
   
-  pdf_add_stream(objstm, old_buf, old_length);
+  texpdf_add_stream(objstm, old_buf, old_length);
   RELEASE(old_buf);
   texpdf_release_obj(objstm);
 }
@@ -2447,7 +2447,7 @@ find_xref (FILE *pdf_input_file)
 
     start = work_buffer;
     end   = start + strlen(work_buffer);
-    skip_white(&start, end);
+    texpdf_skip_white(&start, end);
     number   = texpdf_parse_number(&start, end);
     xref_pos = (long) atof(number);
     RELEASE(number);
@@ -2476,7 +2476,7 @@ texpdf_parse_trailer (pdf_file *pf)
     result = NULL;
   } else {
     const char *p = work_buffer + strlen("trailer");
-    skip_white(&p, work_buffer + WORK_BUFFER_SIZE);
+    texpdf_skip_white(&p, work_buffer + WORK_BUFFER_SIZE);
     result = texpdf_parse_pdf_dict(&p, work_buffer + WORK_BUFFER_SIZE, pf);
   }
 
@@ -2559,7 +2559,7 @@ pdf_read_object (unsigned long obj_num, unsigned short obj_gen,
     char         *sp;
     unsigned long n, g;
 
-    skip_white(&q, endptr);
+    texpdf_skip_white(&q, endptr);
     sp = texpdf_parse_unsigned(&q, endptr);
     if (!sp) {
       RELEASE(buffer);
@@ -2568,7 +2568,7 @@ pdf_read_object (unsigned long obj_num, unsigned short obj_gen,
     n = strtoul(sp, NULL, 10);
     RELEASE(sp);
 
-    skip_white(&q, endptr);
+    texpdf_skip_white(&q, endptr);
     sp = texpdf_parse_unsigned(&q, endptr);
     if (!sp) {
       RELEASE(buffer);
@@ -2586,7 +2586,7 @@ pdf_read_object (unsigned long obj_num, unsigned short obj_gen,
   }
 
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   if (memcmp(p, "obj", strlen("obj"))) {
     WARN("Didn't find \"obj\".");
     RELEASE(buffer);
@@ -2596,7 +2596,7 @@ pdf_read_object (unsigned long obj_num, unsigned short obj_gen,
 
   result = texpdf_parse_pdf_object(&p, endptr, pf);
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   if (memcmp(p, "endobj", strlen("endobj"))) {
     WARN("Didn't find \"endobj\".");
     if (result)
@@ -2637,18 +2637,18 @@ read_objstm (pdf_file *pf, unsigned long num)
 
   type = texpdf_lookup_dict(dict, "Type");
   if (!PDF_OBJ_NAMETYPE(type) ||
-      strcmp(pdf_name_value(type), "ObjStm"))
+      strcmp(texpdf_name_value(type), "ObjStm"))
     goto error;
 
   n_obj = texpdf_lookup_dict(dict, "N");
   if (!PDF_OBJ_NUMBERTYPE(n_obj))
     goto error;
-  n = (long) pdf_number_value(n_obj);
+  n = (long) texpdf_number_value(n_obj);
 
   first_obj = texpdf_lookup_dict(dict, "First");
   if (!PDF_OBJ_NUMBERTYPE(first_obj))
     goto error;
-  first = (long) pdf_number_value(first_obj);
+  first = (long) texpdf_number_value(first_obj);
   /* reject object streams without object data */
   if (first >= pdf_stream_length(objstm))
     goto error;
@@ -2674,7 +2674,7 @@ read_objstm (pdf_file *pf, unsigned long num)
   }
 
   /* Any garbage after last entry? */
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   if (p != endptr)
     goto error;
   RELEASE(data);
@@ -2706,7 +2706,7 @@ texpdf_get_object (pdf_file *pf, unsigned long obj_num, unsigned short obj_gen)
   }
 
   if ((result = pf->xref_table[obj_num].direct)) {
-    return pdf_link_obj(result);
+    return texpdf_link_obj(result);
   }
 
   if (pf->xref_table[obj_num].type == 1) {
@@ -2746,7 +2746,7 @@ texpdf_get_object (pdf_file *pf, unsigned long obj_num, unsigned short obj_gen)
   }
 
   /* Make sure the caller doesn't free this object */
-  pf->xref_table[obj_num].direct = pdf_link_obj(result);
+  pf->xref_table[obj_num].direct = texpdf_link_obj(result);
 
   return result;
 
@@ -2781,7 +2781,7 @@ pdf_deref_obj (pdf_obj *obj)
   int count = PDF_OBJ_MAX_DEPTH;
 
   if (obj)
-    obj = pdf_link_obj(obj);
+    obj = texpdf_link_obj(obj);
 
   while (PDF_OBJ_INDIRECTTYPE(obj) && --count) {
     pdf_file *pf = OBJ_FILE(obj);
@@ -2796,7 +2796,7 @@ pdf_deref_obj (pdf_obj *obj)
         ERROR("Undefined object reference"); 
       }
       texpdf_release_obj(obj);
-      obj = pdf_link_obj(next_obj);
+      obj = texpdf_link_obj(next_obj);
     }
   }
 
@@ -2978,24 +2978,24 @@ texpdf_parse_xref_stream (pdf_file *pf, long xref_pos, pdf_obj **trailer)
     xrefstm = tmp;
   }
 
-  *trailer = pdf_link_obj(texpdf_stream_dict(xrefstm));
+  *trailer = texpdf_link_obj(texpdf_stream_dict(xrefstm));
 
   size_obj = texpdf_lookup_dict(*trailer, "Size");
   if (!PDF_OBJ_NUMBERTYPE(size_obj))
     goto error;
-  size = (unsigned long) pdf_number_value(size_obj);
+  size = (unsigned long) texpdf_number_value(size_obj);
 
   length = pdf_stream_length(xrefstm);
 
   W_obj = texpdf_lookup_dict(*trailer, "W");
-  if (!PDF_OBJ_ARRAYTYPE(W_obj) || pdf_array_length(W_obj) != 3)
+  if (!PDF_OBJ_ARRAYTYPE(W_obj) || texpdf_array_length(W_obj) != 3)
     goto error;
 
   for (i = 0; i < 3; i++) {
     pdf_obj *tmp = texpdf_get_array(W_obj, i);
     if (!PDF_OBJ_NUMBERTYPE(tmp))
       goto error;
-    wsum += (W[i] = (int) pdf_number_value(tmp));
+    wsum += (W[i] = (int) texpdf_number_value(tmp));
   }
 
   p = pdf_stream_dataptr(xrefstm);
@@ -3004,7 +3004,7 @@ texpdf_parse_xref_stream (pdf_file *pf, long xref_pos, pdf_obj **trailer)
   if (index_obj) {
     unsigned int index_len;
     if (!PDF_OBJ_ARRAYTYPE(index_obj) ||
-	((index_len = pdf_array_length(index_obj)) % 2 ))
+	((index_len = texpdf_array_length(index_obj)) % 2 ))
       goto error;
 
     i = 0;
@@ -3014,8 +3014,8 @@ texpdf_parse_xref_stream (pdf_file *pf, long xref_pos, pdf_obj **trailer)
       if (!PDF_OBJ_NUMBERTYPE(first) ||
 	  !PDF_OBJ_NUMBERTYPE(size_obj) ||
 	  texpdf_parse_xrefstm_subsec(pf, &p, &length, W, wsum,
-			       (long) pdf_number_value(first),
-			       (long) pdf_number_value(size_obj)))
+			       (long) texpdf_number_value(first),
+			       (long) texpdf_number_value(size_obj)))
 	goto error;
     }
   } else if (texpdf_parse_xrefstm_subsec(pf, &p, &length, W, wsum, 0, size))
@@ -3061,12 +3061,12 @@ read_xref (pdf_file *pf)
 	goto error;
 
       if (!main_trailer)
-	main_trailer = pdf_link_obj(trailer);
+	main_trailer = texpdf_link_obj(trailer);
 
       if ((xrefstm = texpdf_lookup_dict(trailer, "XRefStm"))) {
 	pdf_obj *new_trailer = NULL;
 	if (PDF_OBJ_NUMBERTYPE(xrefstm) &&
-	    texpdf_parse_xref_stream(pf, (long) pdf_number_value(xrefstm),
+	    texpdf_parse_xref_stream(pf, (long) texpdf_number_value(xrefstm),
 			      &new_trailer))
 	  texpdf_release_obj(new_trailer);
 	else
@@ -3080,13 +3080,13 @@ read_xref (pdf_file *pf)
     } else if (!res && texpdf_parse_xref_stream(pf, xref_pos, &trailer)) {
       /* cross-reference stream */
       if (!main_trailer)
-	main_trailer = pdf_link_obj(trailer);
+	main_trailer = texpdf_link_obj(trailer);
     } else
       goto error;
 
     if ((prev = texpdf_lookup_dict(trailer, "Prev"))) {
       if (PDF_OBJ_NUMBERTYPE(prev))
-	xref_pos = (long) pdf_number_value(prev);
+	xref_pos = (long) texpdf_number_value(prev);
       else
 	goto error;
     } else
@@ -3163,11 +3163,11 @@ void
 texpdf_files_init (void)
 {
   pdf_files = NEW(1, struct ht_table);
-  ht_init_table(pdf_files, (void (*)(void *)) pdf_file_free);
+  texpdf_ht_init_table(pdf_files, (void (*)(void *)) pdf_file_free);
 }
 
 int
-pdf_file_get_version (pdf_file *pf)
+texpdf_file_get_version (pdf_file *pf)
 {
   ASSERT(pf);
   return pf->version;
@@ -3177,7 +3177,7 @@ pdf_obj *
 pdf_file_get_trailer (pdf_file *pf)
 {
   ASSERT(pf);
-  return pdf_link_obj(pf->trailer);
+  return texpdf_link_obj(pf->trailer);
 }
 
 pdf_obj *
@@ -3188,14 +3188,14 @@ pdf_file_get_catalog (pdf_file *pf)
 }
 
 pdf_file *
-pdf_open (const char *ident, FILE *file)
+texpdf_open (const char *ident, FILE *file)
 {
   pdf_file *pf = NULL;
 
   ASSERT(pdf_files);
 
   if (ident)
-    pf = (pdf_file *) ht_lookup_table(pdf_files, ident, strlen(ident));
+    pf = (pdf_file *) texpdf_ht_lookup_table(pdf_files, ident, strlen(ident));
 
   if (pf) {
     pf->file = file;
@@ -3204,7 +3204,7 @@ pdf_open (const char *ident, FILE *file)
     int version = texpdf_check_for_pdf_version(file);
 
     if (version < 1 || version > pdf_version) {
-      WARN("pdf_open: Not a PDF 1.[1-%u] file.", pdf_version);
+      WARN("texpdf_open: Not a PDF 1.[1-%u] file.", pdf_version);
       return NULL;
     }
 
@@ -3230,7 +3230,7 @@ pdf_open (const char *ident, FILE *file)
       unsigned int minor;
 
       if (!PDF_OBJ_NAMETYPE(new_version) ||
-	  sscanf(pdf_name_value(new_version), "1.%u", &minor) != 1) {
+	  sscanf(texpdf_name_value(new_version), "1.%u", &minor) != 1) {
 	texpdf_release_obj(new_version);
 	WARN("Illegal Version entry in document catalog. Broken PDF file?");
 	goto error;
@@ -3243,7 +3243,7 @@ pdf_open (const char *ident, FILE *file)
     }
 
     if (ident)
-      ht_append_table(pdf_files, ident, strlen(ident), pf);
+      texpdf_ht_append_table(pdf_files, ident, strlen(ident), pf);
   }
 
   return pf;
@@ -3254,7 +3254,7 @@ pdf_open (const char *ident, FILE *file)
 }
 
 void
-pdf_close (pdf_file *pf)
+texpdf_close (pdf_file *pf)
 {
   if (pf)
     pf->file = NULL;
@@ -3264,7 +3264,7 @@ void
 texpdf_files_close (void)
 {
   ASSERT(pdf_files);
-  ht_clear_table(pdf_files);
+  texpdf_ht_clear_table(pdf_files);
   RELEASE(pdf_files);
 }
 
@@ -3307,7 +3307,7 @@ import_dict (pdf_obj *key, pdf_obj *value, void *pdata)
   if (!tmp) {
     return -1;
   }
-  texpdf_add_dict(copy, pdf_link_obj(key), tmp);
+  texpdf_add_dict(copy, texpdf_link_obj(key), tmp);
 
   return 0;
 }
@@ -3333,7 +3333,7 @@ pdf_import_indirect (pdf_obj *object)
   if ((ref = pf->xref_table[obj_num].indirect)) {
     if (ref == &loop_marker)
       ERROR("Loop in object hierarchy detected. Broken PDF file?");
-    return  pdf_link_obj(ref);
+    return  texpdf_link_obj(ref);
   } else {
     pdf_obj *obj, *tmp;
 
@@ -3348,12 +3348,12 @@ pdf_import_indirect (pdf_obj *object)
 
     tmp = pdf_import_object(obj);
     
-    pf->xref_table[obj_num].indirect = ref = pdf_ref_obj(tmp);
+    pf->xref_table[obj_num].indirect = ref = texpdf_ref_obj(tmp);
     
     texpdf_release_obj(tmp);
     texpdf_release_obj(obj);
     
-    return  pdf_link_obj(ref);
+    return  texpdf_link_obj(ref);
   }
 }
 
@@ -3371,13 +3371,13 @@ pdf_import_object (pdf_obj *object)
   pdf_obj  *tmp;
   int       i;
 
-  switch (pdf_obj_typeof(object)) {
+  switch (texpdf_obj_typeof(object)) {
 
   case PDF_INDIRECT:
     if (OBJ_FILE(object)) {
       imported = pdf_import_indirect(object);
     } else {
-      imported = pdf_link_obj(object);
+      imported = texpdf_link_obj(object);
     }
     break;
 
@@ -3393,7 +3393,7 @@ pdf_import_object (pdf_obj *object)
       stream_dict = texpdf_stream_dict(imported);
       texpdf_merge_dict(stream_dict, tmp);
       texpdf_release_obj(tmp);
-      pdf_add_stream(imported,
+      texpdf_add_stream(imported,
 		     pdf_stream_dataptr(object),
 		     pdf_stream_length(object));
     }
@@ -3412,18 +3412,18 @@ pdf_import_object (pdf_obj *object)
   case PDF_ARRAY:
 
     imported = texpdf_new_array();
-    for (i = 0; i < pdf_array_length(object); i++) {
+    for (i = 0; i < texpdf_array_length(object); i++) {
       tmp = pdf_import_object(texpdf_get_array(object, i));
       if (!tmp) {
 	texpdf_release_obj(imported);
 	return NULL;
       }
-      pdf_add_array(imported, tmp);
+      texpdf_add_array(imported, tmp);
     }
     break;
 
   default:
-    imported = pdf_link_obj(object);
+    imported = texpdf_link_obj(object);
   }
 
   return imported;

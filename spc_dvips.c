@@ -58,7 +58,7 @@ spc_handler_ps_header (struct spc_env *spe, struct spc_arg *args)
 {
   char *ps_header, *pro;
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr + 1 >= args->endptr ||
       args->curptr[0] != '=') {
     spc_warn(spe, "No filename specified for PSfile special.");
@@ -134,7 +134,7 @@ spc_handler_ps_file (struct spc_env *spe, struct spc_arg *args)
 
   ASSERT(spe && args);
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr + 1 >= args->endptr ||
       args->curptr[0] != '=') {
     spc_warn(spe, "No filename specified for PSfile special.");
@@ -148,7 +148,7 @@ spc_handler_ps_file (struct spc_env *spe, struct spc_arg *args)
     return  -1;
   }
 
-  transform_info_clear(&ti);
+  texpdf_transform_info_clear(&ti);
   if (spc_util_read_dimtrns(spe, &ti, args, NULL, 1) < 0) {
     RELEASE(filename);
     return  -1;
@@ -180,7 +180,7 @@ spc_handler_ps_plotfile (struct spc_env *spe, struct spc_arg *args)
 
   spc_warn(spe, "\"ps: plotfile\" found (not properly implemented)");
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   filename = texpdf_parse_filename(&args->curptr, args->endptr);
   if (!filename) {
     spc_warn(spe, "Expecting filename but not found...");
@@ -192,7 +192,7 @@ spc_handler_ps_plotfile (struct spc_env *spe, struct spc_arg *args)
     spc_warn(spe, "Could not open PS file: %s", filename);
     error = -1;
   } else {
-    transform_info_clear(&p);
+    texpdf_transform_info_clear(&p);
     p.matrix.d = -1.0; /* xscale = 1.0, yscale = -1.0 */
 #if 0
     /* I don't know how to treat this... */
@@ -248,19 +248,19 @@ spc_handler_ps_literal (struct spc_env *spe, struct spc_arg *args)
     y_user = pending_y = spe->y_user;
   }
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr < args->endptr) {
 
-    st_depth = mps_stack_depth();
+    st_depth = texpdf_mps_stack_depth();
     gs_depth = texpdf_dev_current_depth();
 
-    error = mps_exec_inline(pdf, &args->curptr,
+    error = texpdf_mps_exec_inline(pdf, &args->curptr,
 			    args->endptr,
 			    x_user, y_user);
     if (error) {
       spc_warn(spe, "Interpreting PS code failed!!! Output might be broken!!!");
       texpdf_dev_grestore_to(pdf, gs_depth);
-    } else if (st_depth != mps_stack_depth()) {
+    } else if (st_depth != texpdf_mps_stack_depth()) {
       spc_warn(spe, "Stack not empty after execution of inline PostScript code.");
       spc_warn(spe, ">> Your macro package makes some assumption on internal behaviour of DVI drivers.");
       spc_warn(spe, ">> It may not compatible with dvipdfmx.");
@@ -527,7 +527,7 @@ spc_handler_ps_tricks_parse_path (struct spc_env *spe, struct spc_arg *args)
   int error;
 
   if (!distiller_template)
-    distiller_template = get_distiller_template();
+    distiller_template = texpdf_get_distiller_template();
 
   texpdf_dev_currentmatrix(&M);
   if (!gs_in) {
@@ -558,7 +558,7 @@ spc_handler_ps_tricks_parse_path (struct spc_env *spe, struct spc_arg *args)
     } else {
       fwrite(args->curptr, 1, clip - args->curptr, fp);
       fprintf(fp, " stroke ");
-      skip_white(&clip, args->endptr);
+      texpdf_skip_white(&clip, args->endptr);
       texpdf_parse_ident(&clip, args->endptr);
       fwrite(clip, 1, args->endptr - clip, fp);
     }
@@ -597,7 +597,7 @@ spc_handler_ps_tricks_parse_path (struct spc_env *spe, struct spc_arg *args)
   }
 
   fp = fopen(gs_out, "rb");
-   if (pdf_copy_clip(pdf, fp, 1, 0, 0) != 0) {
+   if (texpdf_copy_clip(pdf, fp, 1, 0, 0) != 0) {
     spc_warn(spe, "Failed to parse the clipping path.");
     RELEASE(gs_in);
     gs_in = 0;
@@ -621,7 +621,7 @@ spc_handler_ps_tricks_render (struct spc_env *spe, struct spc_arg *args)
   pdf_tmatrix M;
 
   if (!distiller_template)
-    distiller_template = get_distiller_template();
+    distiller_template = texpdf_get_distiller_template();
 
   texpdf_dev_currentmatrix(&M);
   if (!gs_in) {
@@ -650,8 +650,8 @@ spc_handler_ps_tricks_render (struct spc_env *spe, struct spc_arg *args)
     char *gs_out;
     int error, form_id;
     transform_info p;
-    transform_info_clear(&p);
-    pdf_invertmatrix(&M);
+    texpdf_transform_info_clear(&p);
+    texpdf_invertmatrix(&M);
     p.matrix = M;
 
     fclose(fp);
@@ -812,14 +812,14 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
 
   texpdf_dev_gsave(pdf);
 
-  st_depth = mps_stack_depth();
+  st_depth = texpdf_mps_stack_depth();
   gs_depth = texpdf_dev_current_depth();
 
   {
     pdf_tmatrix M;
     M.a = M.d = 1.0; M.b = M.c = 0.0; M.e = spe->x_user; M.f = spe->y_user;
     texpdf_dev_concat(pdf, &M);
-  error = mps_exec_inline(pdf, &args->curptr,
+  error = texpdf_mps_exec_inline(pdf, &args->curptr,
 			  args->endptr,
 			  spe->x_user, spe->y_user);
     M.e = -spe->x_user; M.f = -spe->y_user;
@@ -828,7 +828,7 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
   if (error)
     spc_warn(spe, "Interpreting PS code failed!!! Output might be broken!!!");
   else {
-    if (st_depth != mps_stack_depth()) {
+    if (st_depth != texpdf_mps_stack_depth()) {
       spc_warn(spe, "Stack not empty after execution of inline PostScript code.");
       spc_warn(spe, ">> Your macro package makes some assumption on internal behaviour of DVI drivers.");
       spc_warn(spe, ">> It may not compatible with dvipdfmx.");
@@ -904,7 +904,7 @@ spc_dvips_at_begin_page (void)
 int
 spc_dvips_at_end_page (void)
 {
-  mps_eop_cleanup();
+  texpdf_mps_eop_cleanup();
   if (!temporary_defs) {
     dpx_delete_temp_file(temporary_defs, true);
     temporary_defs = 0;
@@ -921,7 +921,7 @@ spc_dvips_check_special (const char *buf, long len)
   p      = buf;
   endptr = p + len;
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   if (p >= endptr)
     return  0;
 
@@ -947,7 +947,7 @@ spc_dvips_setup_handler (struct spc_handler *handle,
 
   ASSERT(handle && spe && args);
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
 
   key = args->curptr;
   while (args->curptr < args->endptr &&
@@ -978,7 +978,7 @@ spc_dvips_setup_handler (struct spc_handler *handle,
     if (keylen == strlen(dvips_handlers[i].key) &&
 	!strncmp(key, dvips_handlers[i].key, keylen)) {
 
-      skip_white(&args->curptr, args->endptr);
+      texpdf_skip_white(&args->curptr, args->endptr);
 
       args->command = dvips_handlers[i].key;
 

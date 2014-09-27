@@ -252,7 +252,7 @@ handle_undefined (CMap *cmap,
 }
 
 void
-CMap_decode_char (CMap *cmap,
+texpdf_CMap_decode_char (CMap *cmap,
 		  const unsigned char **inbuf, long *inbytesleft,
 		  unsigned char **outbuf, long *outbytesleft)
 {
@@ -278,7 +278,7 @@ CMap_decode_char (CMap *cmap,
     return;
   } else if (!cmap->mapTbl) {
     if (cmap->useCMap) {
-      CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
+      texpdf_CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
       return;
     } else {
       /* no mapping available in this CMap */
@@ -301,7 +301,7 @@ CMap_decode_char (CMap *cmap,
     ERROR("%s: Premature end of input string.", CMAP_DEBUG_STR);
   else if (!MAP_DEFINED(t[c].flag)) {
     if (cmap->useCMap) {
-      CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
+      texpdf_CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
       return;
     } else {
       /* no mapping available in this CMap */
@@ -350,7 +350,7 @@ CMap_decode_char (CMap *cmap,
  * For convenience, it does not do decoding to CIDs.
  */
 long
-CMap_decode (CMap *cmap,
+texpdf_CMap_decode (CMap *cmap,
 	     const unsigned char **inbuf,  long *inbytesleft,
 	     unsigned char **outbuf, long *outbytesleft)
 {
@@ -359,7 +359,7 @@ CMap_decode (CMap *cmap,
   ASSERT(cmap && inbuf && outbuf);
   ASSERT(inbytesleft && outbytesleft);
   for (count = 0;*inbytesleft > 0 && *outbytesleft > 0; count++)
-    CMap_decode_char(cmap, inbuf, inbytesleft, outbuf, outbytesleft);
+    texpdf_CMap_decode_char(cmap, inbuf, inbytesleft, outbuf, outbytesleft);
 
   return count;
 }
@@ -793,7 +793,7 @@ locate_tbl (mapDef **cur, const unsigned char *code, int dim)
 /*
  * Guess how many bytes consumed as a `single' character:
  * Substring of length bytesconsumed bytes of input string is interpreted as
- * a `single' character by CMap_decode().
+ * a `single' character by texpdf_CMap_decode().
  */
 static int
 bytes_consumed (CMap *cmap, const unsigned char *instr, long inbytes)
@@ -914,14 +914,14 @@ CMap_cache_init (void)
 }
 
 CMap *
-CMap_cache_get (int id)
+texpdf_CMap_cache_get (int id)
 {
   CHECK_ID(id);
   return __cache->cmaps[id];
 }
 
 int
-CMap_cache_find (const char *cmap_name)
+texpdf_CMap_cache_find (const char *cmap_name)
 {
   int   id = 0;
   FILE *fp = NULL;

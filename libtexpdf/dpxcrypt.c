@@ -67,7 +67,7 @@ static void _gcry_burn_stack (int bytes)
  * heavily modified for GnuPG by Werner Koch <wk@gnupg.org> 
  */
 
-void MD5_init (MD5_CONTEXT *ctx)
+void texpdf_MD5_init (MD5_CONTEXT *ctx)
 {
   ctx->A = 0x67452301;
   ctx->B = 0xefcdab89;
@@ -202,7 +202,7 @@ static void transform (MD5_CONTEXT *ctx, const unsigned char *data)
 /* The routine updates the message-digest context to
  * account for the presence of each of the characters inBuf[0..inLen-1]
  * in the message whose digest is being computed. */
-void MD5_write (MD5_CONTEXT *hd, const unsigned char *inbuf, unsigned long inlen)
+void texpdf_MD5_write (MD5_CONTEXT *hd, const unsigned char *inbuf, unsigned long inlen)
 {
   if (hd->count == 64) { /* flush the buffer */
     transform(hd, hd->buf);
@@ -214,7 +214,7 @@ void MD5_write (MD5_CONTEXT *hd, const unsigned char *inbuf, unsigned long inlen
   if (hd->count) {
     for (; inlen && hd->count < 64; inlen--)
       hd->buf[hd->count++] = *inbuf++;
-    MD5_write(hd, NULL, 0);
+    texpdf_MD5_write(hd, NULL, 0);
     if (!inlen) return;
   }
   _gcry_burn_stack(80+6*sizeof(void*));
@@ -235,12 +235,12 @@ void MD5_write (MD5_CONTEXT *hd, const unsigned char *inbuf, unsigned long inlen
  * The handle is prepared for a new MD5 cycle.
  * Returns 16 bytes representing the digest. */
 
-void MD5_final (unsigned char *outbuf, MD5_CONTEXT *hd)
+void texpdf_MD5_final (unsigned char *outbuf, MD5_CONTEXT *hd)
 {
   unsigned long t, msb, lsb;
   unsigned char *p;
 
-  MD5_write(hd, NULL, 0); /* flush */
+  texpdf_MD5_write(hd, NULL, 0); /* flush */
 
   t = hd->nblocks;
   /* multiply by 64 to make a byte count */
@@ -261,7 +261,7 @@ void MD5_final (unsigned char *outbuf, MD5_CONTEXT *hd)
   } else { /* need one extra block */
     hd->buf[hd->count++] = 0x80; /* pad character */
     while (hd->count < 64) hd->buf[hd->count++] = 0;
-    MD5_write(hd, NULL, 0); /* flush */
+    texpdf_MD5_write(hd, NULL, 0); /* flush */
     memset(hd->buf, 0, 56); /* fill next block with zeroes */
   }
   /* append the 64 bit count */

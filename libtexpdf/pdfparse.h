@@ -27,10 +27,10 @@
 #include "pdfobj.h"
 
 /* Please remove this */
-extern void dump (const char *start, const char *end);
+extern void texpdf_dump (const char *start, const char *end);
 
 extern void skip_line  (const char **start, const char *end);
-extern void skip_white (const char **start, const char *end);
+extern void texpdf_skip_white (const char **start, const char *end);
 
 extern char *texpdf_parse_number   (const char **start, const char *end);
 extern char *texpdf_parse_unsigned (const char **start, const char *end);

@@ -91,7 +91,7 @@ mp_setfont (const char *font_name, double pt_size)
 
   mrec = texpdf_lookup_fontmap_record(font_name);
   if (mrec && mrec->charmap.sfd_name && mrec->charmap.subfont_id) {
-    subfont_id = sfd_load_record(mrec->charmap.sfd_name, mrec->charmap.subfont_id);
+    subfont_id = texpdf_sfd_load_record(mrec->charmap.sfd_name, mrec->charmap.subfont_id);
   }
 
   /* See comments in dvi_locate_font() in dvi.c. */
@@ -108,7 +108,7 @@ mp_setfont (const char *font_name, double pt_size)
   font->subfont_id = subfont_id;
   font->pt_size    = pt_size;
 #ifdef TEXLIVE_INTERNAL  
-  font->tfm_id     = tfm_open(font_name, 0); /* Need not exist in MP mode */
+  font->tfm_id     = texpdf_tfm_open(font_name, 0); /* Need not exist in MP mode */
 #endif  
   font->font_id    = texpdf_dev_locate_font(name,
                                          (spt_t) (pt_size * dev_unit_dviunit()));
@@ -188,13 +188,13 @@ is_fontname (const char *token)
 }
 
 int
-mps_scan_bbox (const char **pp, const char *endptr, pdf_rect *bbox)
+texpdf_mps_scan_bbox (const char **pp, const char *endptr, pdf_rect *bbox)
 {
   char  *number;
   double values[4];
   int    i;
 
-  /* skip_white() skips lines starting '%'... */
+  /* texpdf_skip_white() skips lines starting '%'... */
   while (*pp < endptr && isspace((unsigned char)**pp))
     (*pp)++;
 
@@ -206,7 +206,7 @@ mps_scan_bbox (const char **pp, const char *endptr, pdf_rect *bbox)
       *pp += 14;
 
       for (i = 0; i < 4; i++) {
-	skip_white(pp, endptr);
+	texpdf_skip_white(pp, endptr);
 	number = texpdf_parse_number(pp, endptr);
 	if (!number) {
 	  break;
@@ -246,7 +246,7 @@ skip_prolog (const char **start, const char *end)
   save = *start;
   while (*start < end) {
     if (**start != '%')
-      skip_white(start, end);
+      texpdf_skip_white(start, end);
     if (*start >= end)
       break;
     if (!strncmp(*start, "%%EndProlog", 11)) {
@@ -535,7 +535,7 @@ pop_get_numbers (double *values, int count)
       texpdf_release_obj(tmp);
       break;
     }
-    values[count] = pdf_number_value(tmp);
+    values[count] = texpdf_number_value(tmp);
     texpdf_release_obj(tmp);
   }
 
@@ -556,7 +556,7 @@ cvr_array (pdf_obj *array, double *values, int count)
 	WARN("mpost: Not a number!");
 	break;
       }
-      values[count] = pdf_number_value(tmp);
+      values[count] = texpdf_number_value(tmp);
     }
   }
   if (array)
@@ -575,7 +575,7 @@ is_fontdict (pdf_obj *dict)
 
   tmp = texpdf_lookup_dict(dict, "Type");
   if (!tmp || !PDF_OBJ_NAMETYPE(tmp) ||
-      strcmp(pdf_name_value(tmp), "Font")) {
+      strcmp(texpdf_name_value(tmp), "Font")) {
     return 0;
   }
 
@@ -653,7 +653,7 @@ do_scalefont (void)
     error = 1;
   else if (is_fontdict(font_dict)) {
     font_scale  = texpdf_lookup_dict(font_dict, "FontScale");
-    texpdf_set_number(font_scale, pdf_number_value(font_scale)*scale);
+    texpdf_set_number(font_scale, texpdf_number_value(font_scale)*scale);
     if (top_stack < PS_STACK_SIZE) {
       stack[top_stack++] = font_dict;
     } else {
@@ -683,8 +683,8 @@ do_setfont (void)
     /* Subfont support prevent us from managing
      * font in a single place...
      */
-    font_name  = pdf_name_value  (texpdf_lookup_dict(font_dict, "FontName"));
-    font_scale = pdf_number_value(texpdf_lookup_dict(font_dict, "FontScale"));
+    font_name  = texpdf_name_value  (texpdf_lookup_dict(font_dict, "FontName"));
+    font_scale = texpdf_number_value(texpdf_lookup_dict(font_dict, "FontScale"));
 
     error = mp_setfont(font_name, font_scale);
   }
@@ -776,7 +776,7 @@ do_show (pdf_doc *p)
 
     ustr = NEW(length * 2, unsigned char);
     for (i = 0; i < length; i++) {
-      uch = lookup_sfd_record(font->subfont_id, strptr[i]);
+      uch = texpdf_lookup_sfd_record(font->subfont_id, strptr[i]);
       ustr[2*i  ] = uch >> 8;
       ustr[2*i+1] = uch & 0xff;
 #ifdef TEXLIVE_INTERNAL      
@@ -814,7 +814,7 @@ do_show (pdf_doc *p)
     texpdf_dev_rmoveto(text_width, 0.0);
   }
 
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
   texpdf_release_obj(text_str);
 
   return 0;
@@ -851,7 +851,7 @@ do_texfig_operator (pdf_doc *p, int opcode, double x_user, double y_user)
       double   dvi2pts;
       char     resname[256];
 
-      transform_info_clear(&fig_p);
+      texpdf_transform_info_clear(&fig_p);
       dvi2pts = 1.0/dev_unit_dviunit();
 
       fig_p.width    =  values[0] * dvi2pts;
@@ -1154,7 +1154,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	error = 1;
 	break;
       }
-      num_dashes = pdf_array_length(pattern);
+      num_dashes = texpdf_array_length(pattern);
       if (num_dashes > PDF_DASH_SIZE_MAX) {
 	WARN("Too many dashes...");
 	texpdf_release_obj(pattern);
@@ -1167,7 +1167,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	if (!PDF_OBJ_NUMBERTYPE(dash))
 	  error = 1;
 	else {
-	  dash_values[i] = pdf_number_value(dash);
+	  dash_values[i] = texpdf_number_value(dash);
 	}
       }
       texpdf_release_obj(pattern);
@@ -1260,7 +1260,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	error = 1;
 	break;
       }
-      cp.y = pdf_number_value(tmp);
+      cp.y = texpdf_number_value(tmp);
       texpdf_release_obj(tmp);
 
       tmp = POP_STACK();
@@ -1268,7 +1268,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	error = 1;
 	break;
       }
-      cp.x = pdf_number_value(tmp);
+      cp.x = texpdf_number_value(tmp);
       texpdf_release_obj(tmp);
 
       if (!has_matrix) {
@@ -1302,7 +1302,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	error = 1;
 	break;
       }
-      cp.y = pdf_number_value(tmp);
+      cp.y = texpdf_number_value(tmp);
       texpdf_release_obj(tmp);
 
       tmp = POP_STACK();
@@ -1310,7 +1310,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	error = 1;
 	break;
       }
-      cp.x = pdf_number_value(tmp);
+      cp.x = texpdf_number_value(tmp);
       texpdf_release_obj(tmp);
 
       if (!has_matrix) {
@@ -1394,7 +1394,7 @@ mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, d
   pdf_obj *obj;
   int      error = 0;
 
-  skip_white(start, end);
+  texpdf_skip_white(start, end);
   while (*start < end && !error) {
     if (isdigit((unsigned char)**start) ||
 	(*start < end - 1 &&
@@ -1405,7 +1405,7 @@ mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, d
       value = strtod(*start, &next);
       if (next < end && !strchr("<([{/%", *next) && !isspace((unsigned char)*next)) {
 	WARN("Unkown PostScript operator.");
-	dump(*start, next);
+	texpdf_dump(*start, next);
 	error = 1;
       } else {
 	PUSH(texpdf_new_number(value));
@@ -1438,27 +1438,27 @@ mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, d
 	RELEASE(token);
       }
     }
-    skip_white(start, end);
+    texpdf_skip_white(start, end);
   }
 
   return error;
 }
 
 void
-mps_eop_cleanup (void)
+texpdf_mps_eop_cleanup (void)
 {
   clear_fonts();
   do_clear();
 }
 
 int
-mps_stack_depth (void)
+texpdf_mps_stack_depth (void)
 {
   return top_stack;
 }
 
 int
-mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
+texpdf_mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
 		 double x_user, double y_user)
 {
   int  error;
@@ -1537,7 +1537,7 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
     length -= nb_read;
   }
 
-  error = mps_scan_bbox(&p, endptr, &(info.bbox));
+  error = texpdf_mps_scan_bbox(&p, endptr, &(info.bbox));
   if (error) {
     WARN("Error occured while scanning MetaPost file headers: Could not find BoundingBox.");
     RELEASE(buffer);
@@ -1554,7 +1554,7 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
 
   mp_cmode = MP_CMODE_MPOST;
   gs_depth = texpdf_dev_current_depth();
-  st_depth = mps_stack_depth();
+  st_depth = texpdf_mps_stack_depth();
   /* At this point the gstate must be initialized, since it starts a new
    * XObject. Note that it increase gs_depth by 1. */
   texpdf_dev_push_gstate();
@@ -1583,7 +1583,7 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
 }
 
 int
-mps_do_page (pdf_doc *p, FILE *image_file)
+texpdf_mps_do_page (pdf_doc *p, FILE *image_file)
 {
   int       error = 0;
   pdf_rect  bbox;
@@ -1604,7 +1604,7 @@ mps_do_page (pdf_doc *p, FILE *image_file)
   start = buffer;
   end   = buffer + size;
 
-  error = mps_scan_bbox(&start, end, &bbox);
+  error = texpdf_mps_scan_bbox(&start, end, &bbox);
   if (error) {
     WARN("Error occured while scanning MetaPost file headers: Could not find BoundingBox.");
     RELEASE(buffer);

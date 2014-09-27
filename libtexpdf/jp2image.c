@@ -332,7 +332,7 @@ jp2_include_image (pdf_ximage *ximage, FILE *fp)
     rewind(fp);
     while ((nb_read =
         fread(work_buffer, sizeof(char), WORK_BUFFER_SIZE, fp)) > 0)
-      pdf_add_stream(stream, work_buffer, nb_read);
+      texpdf_add_stream(stream, work_buffer, nb_read);
   }
 
   texpdf_ximage_set_image(ximage, &info, stream);
@@ -341,7 +341,7 @@ jp2_include_image (pdf_ximage *ximage, FILE *fp)
 }
 
 int
-jp2_get_bbox (FILE *fp, long *width, long *height,
+texpdf_jp2_get_bbox (FILE *fp, long *width, long *height,
          double *xdensity, double *ydensity)
 {
   int r;

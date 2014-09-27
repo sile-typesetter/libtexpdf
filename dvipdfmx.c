@@ -247,7 +247,7 @@ read_length (double *vp, const char **pp, const char *endptr)
   v = atof(q);
   RELEASE(q);
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   q = texpdf_parse_c_ident(&p, endptr);
   if (q) {
     char *qq = q;
@@ -257,7 +257,7 @@ read_length (double *vp, const char **pp, const char *endptr)
     }
     if (strlen(q) == 0) {
       RELEASE(qq);
-      skip_white(&p, endptr);
+      texpdf_skip_white(&p, endptr);
       qq = q = texpdf_parse_c_ident(&p, endptr);
     }
     if (q) {
@@ -404,10 +404,10 @@ set_verbose (int argc, char *argv[])
       texpdf_dev_set_verbose();
       texpdf_doc_set_verbose();
       texpdf_enc_set_verbose();
-      pdf_obj_set_verbose();
-      pdf_fontmap_set_verbose();
+      texpdf_obj_set_verbose();
+      texpdf_fontmap_set_verbose();
       dpx_file_set_verbose();
-      tt_aux_set_verbose();
+      texpdf_tt_aux_set_verbose();
     }
   }
 }
@@ -448,7 +448,7 @@ do_args (int argc, char *argv[])
         usage();
       case 'D':
         CHECK_ARG(1, "PS->PDF conversion command line template");
-        set_distiller_template(argv[1]);
+        texpdf_set_distiller_template(argv[1]);
         POP_ARG();
         break;
       case 'r':
@@ -676,7 +676,7 @@ read_config_file (const char *config)
 
     argc = 0;
     end = work_buffer + strlen(work_buffer);
-    skip_white (&start, end);
+    texpdf_skip_white (&start, end);
     if (start >= end)
       continue;
     /* Build up an argument list as if it were passed on the command
@@ -687,7 +687,7 @@ read_config_file (const char *config)
       strcpy (argv[0]+1, option);
       RELEASE (option);
       *argv[0] = '-';
-      skip_white (&start, end);
+      texpdf_skip_white (&start, end);
       if (start < end) {
         argc += 1;
         if (*start == '"') {
@@ -833,7 +833,7 @@ do_mps_pages (void)
   /* _FIXME_ */
   fp = MFOPEN(dvi_filename, FOPEN_RBIN_MODE);
   if (fp) {
-    mps_do_page(pdf, fp);
+    texpdf_mps_do_page(pdf, fp);
     MFCLOSE(fp);
   } else {
     long  i, page_no, step, page_count = 0;
@@ -851,7 +851,7 @@ do_mps_pages (void)
         fp = MFOPEN(filename, FOPEN_RBIN_MODE);
         if (fp) {
           MESG("[%ld<%s>", page_no + 1, filename);
-          mps_do_page(pdf, fp);
+          texpdf_mps_do_page(pdf, fp);
           page_count++;
           MESG("]");
           MFCLOSE(fp);
@@ -956,7 +956,7 @@ main (int argc, char *argv[])
   kpse_init_prog("", font_dpi, NULL, NULL);
   kpse_set_program_enabled(kpse_pk_format, true, kpse_src_texmf_cnf);
 #endif
-  pdf_font_set_dpi(font_dpi);
+  texpdf_font_set_dpi(font_dpi);
   dpx_delete_old_cache(image_cache_life);
 
   if (!dvi_filename) {
@@ -1041,7 +1041,7 @@ main (int argc, char *argv[])
     texpdf_doc_enable_manual_thumbnails(pdf);
 
   if (opt_flags & OPT_CIDFONT_FIXEDPITCH)
-    CIDFont_set_flags(CIDFONT_FORCE_FIXEDPITCH);
+    texpdf_CIDFont_set_flags(CIDFONT_FORCE_FIXEDPITCH);
 
   /* Please move this to spc_init_specials(). */
   if (opt_flags & OPT_TPIC_TRANSPARENT_FILL)

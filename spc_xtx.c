@@ -196,7 +196,7 @@ spc_handler_xtx_fontmapline (struct spc_env *spe, struct spc_arg *ap)
   const char  *p;
   char        *q;
 
-  skip_white(&ap->curptr, ap->endptr);
+  texpdf_skip_white(&ap->curptr, ap->endptr);
   if (ap->curptr >= ap->endptr) {
     spc_warn(spe, "Empty fontmapline special?");
     return  -1;
@@ -206,7 +206,7 @@ spc_handler_xtx_fontmapline (struct spc_env *spe, struct spc_arg *ap)
   if (opchr == '-' || opchr == '+')
     ap->curptr++;
 
-  skip_white(&ap->curptr, ap->endptr);
+  texpdf_skip_white(&ap->curptr, ap->endptr);
 
   switch (opchr) {
   case  '-':
@@ -227,7 +227,7 @@ spc_handler_xtx_fontmapline (struct spc_env *spe, struct spc_arg *ap)
     *q = '\0';
     mrec = NEW(1, fontmap_rec);
     texpdf_init_fontmap_record(mrec);
-    error = texpdf_read_fontmap_line(mrec, buffer, (long) (ap->endptr - ap->curptr), is_pdfm_mapline(buffer));
+    error = texpdf_read_fontmap_line(mrec, buffer, (long) (ap->endptr - ap->curptr), texpdf_is_pdfm_mapline(buffer));
     if (error)
       spc_warn(spe, "Invalid fontmap line.");
     else if (opchr == '+')
@@ -250,7 +250,7 @@ spc_handler_xtx_fontmapfile (struct spc_env *spe, struct spc_arg *args)
   char  *mapfile;
   int    mode, error = 0;
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr >= args->endptr)
     return 0;
 
@@ -284,7 +284,7 @@ static char overlay_name[256];
 static int
 spc_handler_xtx_initoverlay (struct spc_env *spe, struct spc_arg *args)
 {
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr >= args->endptr)
     return -1;
   strncpy(overlay_name, args->curptr, args->endptr - args->curptr);
@@ -297,7 +297,7 @@ spc_handler_xtx_initoverlay (struct spc_env *spe, struct spc_arg *args)
 static int
 spc_handler_xtx_clipoverlay (struct spc_env *spe, struct spc_arg *args)
 {
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr >= args->endptr)
     return -1;
   texpdf_dev_grestore(pdf);
@@ -324,7 +324,7 @@ spc_handler_xtx_renderingmode (struct spc_env *spe, struct spc_arg *args)
   }
   sprintf(work_buffer, " %d Tr", (int) value);
   texpdf_doc_add_page_content(pdf, work_buffer, strlen(work_buffer));
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr < args->endptr) {
     texpdf_doc_add_page_content(pdf, " ", 1);
     texpdf_doc_add_page_content(pdf, args->curptr, args->endptr - args->curptr);
@@ -395,7 +395,7 @@ spc_xtx_check_special (const char *buf, long len)
   p      = buf;
   endptr = p + len;
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   if (p + strlen("x:") <= endptr &&
       !memcmp(p, "x:", strlen("x:"))) {
     r = 1;
@@ -413,7 +413,7 @@ spc_xtx_setup_handler (struct spc_handler *sph,
 
   ASSERT(sph && spe && ap);
 
-  skip_white(&ap->curptr, ap->endptr);
+  texpdf_skip_white(&ap->curptr, ap->endptr);
   if (ap->curptr + strlen("x:") >= ap->endptr ||
       memcmp(ap->curptr, "x:", strlen("x:"))) {
     spc_warn(spe, "Not x: special???");
@@ -421,7 +421,7 @@ spc_xtx_setup_handler (struct spc_handler *sph,
   }
   ap->curptr += strlen("x:");
 
-  skip_white(&ap->curptr, ap->endptr);
+  texpdf_skip_white(&ap->curptr, ap->endptr);
   q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
   if (q) {
     for (i = 0;
@@ -430,7 +430,7 @@ spc_xtx_setup_handler (struct spc_handler *sph,
         ap->command = xtx_handlers[i].key;
         sph->key   = "x:";
         sph->exec  = xtx_handlers[i].exec;
-        skip_white(&ap->curptr, ap->endptr);
+        texpdf_skip_white(&ap->curptr, ap->endptr);
         error = 0;
         break;
       }

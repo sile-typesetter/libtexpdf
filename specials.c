@@ -187,19 +187,19 @@ spc_lookup_reference (const char *key)
     value = texpdf_doc_next_page_ref(pdf);
     break;
   case  K_OBJ__PAGES:
-    value = pdf_ref_obj(texpdf_doc_page_tree(pdf));
+    value = texpdf_ref_obj(texpdf_doc_page_tree(pdf));
     break;
   case  K_OBJ__NAMES:
-    value = pdf_ref_obj(texpdf_doc_names(pdf));
+    value = texpdf_ref_obj(texpdf_doc_names(pdf));
     break;
   case  K_OBJ__RESOURCES:
-    value = pdf_ref_obj(texpdf_doc_current_page_resources(pdf));
+    value = texpdf_ref_obj(texpdf_doc_current_page_resources(pdf));
     break;
   case  K_OBJ__CATALOG:
-    value = pdf_ref_obj(texpdf_doc_catalog(pdf));
+    value = texpdf_ref_obj(texpdf_doc_catalog(pdf));
     break;
   case  K_OBJ__DOCINFO:
-    value = pdf_ref_obj(texpdf_doc_docinfo(pdf));
+    value = texpdf_ref_obj(texpdf_doc_docinfo(pdf));
     break;
   default:
     if (ispageref(key))
@@ -341,10 +341,10 @@ check_garbage (struct spc_arg *args)
   if (args->curptr >= args->endptr)
     return;
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr < args->endptr) {
     WARN("Unparsed material at end of special ignored.");
-    dump(args->curptr, args->endptr);
+    texpdf_dump(args->curptr, args->endptr);
   }
 
   return;
@@ -556,7 +556,7 @@ spc_exec_special (const char *buffer, int32_t size,
   struct spc_handler special;
 
   if (verbose > 3) {
-    dump(buffer, buffer + size);
+    texpdf_dump(buffer, buffer + size);
   }
 
   init_special(&special, &spe, &args, buffer, size, x_user, y_user, mag);

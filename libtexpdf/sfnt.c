@@ -445,7 +445,7 @@ sfnt_create_FontFile_stream (sfnt *sfont)
   p += sfnt_put_ushort(p, log2floor(td->num_kept_tables));
   p += sfnt_put_ushort(p, td->num_kept_tables * 16 - sr);
 
-  pdf_add_stream(stream, wbuf, 12);
+  texpdf_add_stream(stream, wbuf, 12);
 
   /*
    * Compute start of actual tables (after headers).
@@ -464,7 +464,7 @@ sfnt_create_FontFile_stream (sfnt *sfont)
       p += sfnt_put_ulong(p, td->tables[i].check_sum);
       p += sfnt_put_ulong(p, offset);
       p += sfnt_put_ulong(p, td->tables[i].length);
-      pdf_add_stream(stream, wbuf, 16);
+      texpdf_add_stream(stream, wbuf, 16);
 
       offset += td->tables[i].length;
     }
@@ -475,7 +475,7 @@ sfnt_create_FontFile_stream (sfnt *sfont)
     if (td->flags[i] & SFNT_TABLE_REQUIRED) {
       if ((offset % 4) != 0) {
 	length  = 4 - (offset % 4);
-	pdf_add_stream(stream, padbytes, length);
+	texpdf_add_stream(stream, padbytes, length);
 	offset += length;
       }
       if (!td->tables[i].data) {
@@ -495,12 +495,12 @@ sfnt_create_FontFile_stream (sfnt *sfont)
 	    ERROR("Reading file failed...");
 	    return NULL;
 	  } else if (nb_read > 0) {
-	    pdf_add_stream(stream, wbuf, nb_read);
+	    texpdf_add_stream(stream, wbuf, nb_read);
 	  }
 	  length -= nb_read;
 	}
       } else {
-	pdf_add_stream(stream,
+	texpdf_add_stream(stream,
 		       td->tables[i].data, td->tables[i].length);
 	RELEASE(td->tables[i].data);
 	td->tables[i].data = NULL;

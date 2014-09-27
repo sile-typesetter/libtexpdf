@@ -88,7 +88,7 @@ get_density (double *xdensity, double *ydensity, struct hdr_info *hdr)
 }
 
 int
-bmp_get_bbox (FILE *fp, long *width, long *height,
+texpdf_bmp_get_bbox (FILE *fp, long *width, long *height,
               double *xdensity, double *ydensity)
 {
   int r;
@@ -182,10 +182,10 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
     RELEASE(palette);
 
     colorspace = texpdf_new_array();
-    pdf_add_array(colorspace, texpdf_new_name("Indexed"));
-    pdf_add_array(colorspace, texpdf_new_name("DeviceRGB"));
-    pdf_add_array(colorspace, texpdf_new_number(num_palette-1));
-    pdf_add_array(colorspace, lookup);
+    texpdf_add_array(colorspace, texpdf_new_name("Indexed"));
+    texpdf_add_array(colorspace, texpdf_new_name("DeviceRGB"));
+    texpdf_add_array(colorspace, texpdf_new_number(num_palette-1));
+    texpdf_add_array(colorspace, lookup);
   } else {
     colorspace = texpdf_new_name("DeviceRGB");
   }
@@ -252,10 +252,10 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
     if (flip) {
       for (n = info.height - 1; n >= 0; n--) {
         p = stream_data_ptr + n * rowbytes;
-        pdf_add_stream(stream, p, rowbytes);
+        texpdf_add_stream(stream, p, rowbytes);
       }
     } else {
-      pdf_add_stream(stream, stream_data_ptr, rowbytes*info.height);
+      texpdf_add_stream(stream, stream_data_ptr, rowbytes*info.height);
     }
     RELEASE(stream_data_ptr);
   }

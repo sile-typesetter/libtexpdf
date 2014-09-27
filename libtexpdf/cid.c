@@ -270,9 +270,9 @@ CIDFont_get_resource (CIDFont *font)
   ASSERT(font);
 
   if (!font->indirect)
-    font->indirect = pdf_ref_obj(font->fontdict);
+    font->indirect = texpdf_ref_obj(font->fontdict);
 
-  return pdf_link_obj(font->indirect);
+  return texpdf_link_obj(font->indirect);
 }
 
 /*
@@ -440,11 +440,11 @@ CIDFont_base_open (CIDFont *font, const char *name, CIDSysInfo *cmap_csi, cid_op
 
     tmp = texpdf_lookup_dict(fontdict, "CIDSystemInfo");
 
-    ASSERT( tmp && pdf_obj_typeof(tmp) == PDF_DICT );
+    ASSERT( tmp && texpdf_obj_typeof(tmp) == PDF_DICT );
 
     registry   = texpdf_string_value(texpdf_lookup_dict(tmp, "Registry"));
     ordering   = texpdf_string_value(texpdf_lookup_dict(tmp, "Ordering"));
-    supplement = pdf_number_value(texpdf_lookup_dict(tmp, "Supplement"));
+    supplement = texpdf_number_value(texpdf_lookup_dict(tmp, "Supplement"));
     if (cmap_csi) { /* NULL for accept any */
       if (strcmp(registry, cmap_csi->registry) ||
           strcmp(ordering, cmap_csi->ordering))
@@ -468,9 +468,9 @@ CIDFont_base_open (CIDFont *font, const char *name, CIDSysInfo *cmap_csi, cid_op
     char    *type;
 
     tmp  = texpdf_lookup_dict(fontdict, "Subtype");
-    ASSERT( tmp != NULL && pdf_obj_typeof(tmp) == PDF_NAME );
+    ASSERT( tmp != NULL && texpdf_obj_typeof(tmp) == PDF_NAME );
 
-    type = pdf_name_value(tmp);
+    type = texpdf_name_value(tmp);
     if (!strcmp(type, "CIDFontType0"))
       font->subtype = CIDFONT_TYPE0;
     else if (!strcmp(type, "CIDFontType2"))
@@ -797,7 +797,7 @@ get_cidsysinfo (const char *map_name, fontmap_opt *fmap_opt)
 }
 
 void
-CIDFont_set_flags (long flags)
+texpdf_CIDFont_set_flags (long flags)
 {
   CIDFont_type0_set_flags(flags);
   CIDFont_type2_set_flags(flags);

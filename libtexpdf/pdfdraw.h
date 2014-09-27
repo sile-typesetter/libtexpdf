@@ -152,7 +152,7 @@ extern int    texpdf_dev_bspline       (double x0, double y0,
                                      double x2, double y2);
 
  
-extern void   pdf_invertmatrix      (pdf_tmatrix *M);
+extern void   texpdf_invertmatrix      (pdf_tmatrix *M);
   
 /* The depth here is the depth of q/Q nesting.
  * We must remember current depth of nesting when starting a page or xform,

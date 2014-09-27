@@ -50,7 +50,7 @@ truedpi (const char *ident, double point_size, unsigned bdpi)
   double    design_size;
   int       tfm_id;
 
-  tfm_id = tfm_open(ident, 0);
+  tfm_id = texpdf_tfm_open(ident, 0);
   if (tfm_id < 0)
     return  dpi;
 
@@ -203,7 +203,7 @@ static void
 send_out (unsigned char *rowptr, uint32_t rowbytes, pdf_obj *stream)
 #endif
 {
-  pdf_add_stream(stream, (void *)rowptr, rowbytes);
+  texpdf_add_stream(stream, (void *)rowptr, rowbytes);
 #if  DEBUG == 2
   {
     uint32_t i, n, len = (wd + 7) / 8;
@@ -474,7 +474,7 @@ create_pk_CharProc_stream (struct pk_header_ *pkh,
    */
   len = pdf_sprint_number(work_buffer, chrwid);
   len += sprintf (work_buffer + len, " 0 %d %d %d %d d1\n", llx, lly, urx, ury);
-  pdf_add_stream(stream, work_buffer, len);
+  texpdf_add_stream(stream, work_buffer, len);
   /*
    * Acrobat dislike transformation [0 0 0 0 dx dy].
    * PDF Reference, 4th ed., p.147, says,
@@ -487,9 +487,9 @@ create_pk_CharProc_stream (struct pk_header_ *pkh,
   if (pkh->bm_wd != 0 && pkh->bm_ht != 0 && pkt_len > 0) {
     /* Scale and translate origin to lower left corner for raster data */
     len = sprintf (work_buffer, "q\n%d 0 0 %d %d %d cm\n", pkh->bm_wd, pkh->bm_ht, llx, lly);
-    pdf_add_stream(stream, work_buffer, len);
+    texpdf_add_stream(stream, work_buffer, len);
     len = sprintf (work_buffer, "BI\n/W %d\n/H %d\n/IM true\n/BPC 1\nID ", pkh->bm_wd, pkh->bm_ht);
-    pdf_add_stream(stream, work_buffer, len);
+    texpdf_add_stream(stream, work_buffer, len);
     /* Add bitmap data */
     if (pkh->dyn_f == 14) /* bitmap */
               pk_decode_bitmap(stream,
@@ -502,7 +502,7 @@ create_pk_CharProc_stream (struct pk_header_ *pkh,
                                pkh->dyn_f, pkh->run_color,
                                pkt_ptr,    pkt_len);
     len = sprintf (work_buffer, "\nEI\nQ");
-    pdf_add_stream(stream, work_buffer, len);
+    texpdf_add_stream(stream, work_buffer, len);
   } /* Otherwise we embed an empty stream :-( */
 
   return  stream;
@@ -626,7 +626,7 @@ pdf_font_load_pkfont (pdf_font *font)
           pk_char2name(charname, pkh.chrcode);
         }
 
-        texpdf_add_dict(charprocs, texpdf_new_name(charname), pdf_ref_obj(charproc)); /* _FIXME_ */
+        texpdf_add_dict(charprocs, texpdf_new_name(charname), texpdf_ref_obj(charproc)); /* _FIXME_ */
         texpdf_release_obj(charproc);
       }
       charavail[pkh.chrcode & 0xff] = 1;
@@ -659,7 +659,7 @@ pdf_font_load_pkfont (pdf_font *font)
   fontdict = pdf_font_get_resource(font);
 
   texpdf_add_dict(fontdict,
-               texpdf_new_name("CharProcs"), pdf_ref_obj(charprocs));
+               texpdf_new_name("CharProcs"), texpdf_ref_obj(charprocs));
   texpdf_release_obj(charprocs);
 
   /*
@@ -672,8 +672,8 @@ pdf_font_load_pkfont (pdf_font *font)
    */
   procset   = texpdf_new_dict();
   tmp_array = texpdf_new_array();
-  pdf_add_array(tmp_array, texpdf_new_name("PDF"));
-  pdf_add_array(tmp_array, texpdf_new_name("ImageB"));
+  texpdf_add_array(tmp_array, texpdf_new_name("PDF"));
+  texpdf_add_array(tmp_array, texpdf_new_name("ImageB"));
   texpdf_add_dict(procset,
                texpdf_new_name("ProcSet"), tmp_array);
   texpdf_add_dict(fontdict,
@@ -688,7 +688,7 @@ pdf_font_load_pkfont (pdf_font *font)
       if (code < firstchar) firstchar = code;
       if (code > lastchar)  lastchar  = code;
       if (code != prev + 1)
-        pdf_add_array(tmp_array, texpdf_new_number(code));
+        texpdf_add_array(tmp_array, texpdf_new_number(code));
 
 #if  ENABLE_GLYPHENC
       if (encoding_id >= 0 && enc_vec) {
@@ -704,7 +704,7 @@ pdf_font_load_pkfont (pdf_font *font)
         charname = work_buffer;
         pk_char2name(charname, code);
       }
-      pdf_add_array(tmp_array, texpdf_new_name(charname));
+      texpdf_add_array(tmp_array, texpdf_new_name(charname));
       prev = code;
     }
   }
@@ -725,7 +725,7 @@ pdf_font_load_pkfont (pdf_font *font)
     texpdf_add_dict(encoding,
 		 texpdf_new_name("Differences"), tmp_array);
     texpdf_add_dict(fontdict,
-		 texpdf_new_name("Encoding"),    pdf_ref_obj(encoding));
+		 texpdf_new_name("Encoding"),    texpdf_ref_obj(encoding));
     texpdf_release_obj(encoding);
   } else
     texpdf_release_obj(tmp_array);
@@ -733,10 +733,10 @@ pdf_font_load_pkfont (pdf_font *font)
   /* FontBBox: Accurate value is important.
    */
   tmp_array = texpdf_new_array();
-  pdf_add_array(tmp_array, texpdf_new_number(bbox.llx));
-  pdf_add_array(tmp_array, texpdf_new_number(bbox.lly));
-  pdf_add_array(tmp_array, texpdf_new_number(bbox.urx));
-  pdf_add_array(tmp_array, texpdf_new_number(bbox.ury));
+  texpdf_add_array(tmp_array, texpdf_new_number(bbox.llx));
+  texpdf_add_array(tmp_array, texpdf_new_number(bbox.lly));
+  texpdf_add_array(tmp_array, texpdf_new_number(bbox.urx));
+  texpdf_add_array(tmp_array, texpdf_new_number(bbox.ury));
   texpdf_add_dict (fontdict , texpdf_new_name("FontBBox"), tmp_array);
 
   /* Widths:
@@ -745,23 +745,23 @@ pdf_font_load_pkfont (pdf_font *font)
   tmp_array = texpdf_new_array();
   for (code = firstchar; code <= lastchar; code++) {
     if (usedchars[code])
-      pdf_add_array(tmp_array, texpdf_new_number(widths[code]));
+      texpdf_add_array(tmp_array, texpdf_new_number(widths[code]));
     else {
-      pdf_add_array(tmp_array, texpdf_new_number(0));
+      texpdf_add_array(tmp_array, texpdf_new_number(0));
     }
   }
   texpdf_add_dict(fontdict,
-               texpdf_new_name("Widths"), pdf_ref_obj(tmp_array));
+               texpdf_new_name("Widths"), texpdf_ref_obj(tmp_array));
   texpdf_release_obj(tmp_array);
 
   /* FontMatrix */
   tmp_array = texpdf_new_array();
-  pdf_add_array(tmp_array, texpdf_new_number(0.001 * pix2charu));
-  pdf_add_array(tmp_array, texpdf_new_number(0.0));
-  pdf_add_array(tmp_array, texpdf_new_number(0.0));
-  pdf_add_array(tmp_array, texpdf_new_number(0.001 * pix2charu));
-  pdf_add_array(tmp_array, texpdf_new_number(0.0));
-  pdf_add_array(tmp_array, texpdf_new_number(0.0));
+  texpdf_add_array(tmp_array, texpdf_new_number(0.001 * pix2charu));
+  texpdf_add_array(tmp_array, texpdf_new_number(0.0));
+  texpdf_add_array(tmp_array, texpdf_new_number(0.0));
+  texpdf_add_array(tmp_array, texpdf_new_number(0.001 * pix2charu));
+  texpdf_add_array(tmp_array, texpdf_new_number(0.0));
+  texpdf_add_array(tmp_array, texpdf_new_number(0.0));
   texpdf_add_dict (fontdict , texpdf_new_name("FontMatrix"), tmp_array);
 
 

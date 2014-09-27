@@ -76,7 +76,7 @@ texpdf_new_name_tree (void)
   struct ht_table *names;
 
   names = NEW(1, struct ht_table);
-  ht_init_table(names, hval_free);
+  texpdf_ht_init_table(names, hval_free);
 
   return names;
 }
@@ -112,7 +112,7 @@ texpdf_delete_name_tree (struct ht_table **names)
 
   check_objects_defined (*names);
 
-  ht_clear_table(*names);
+  texpdf_ht_clear_table(*names);
   RELEASE(*names);
   *names = NULL;
 }
@@ -130,12 +130,12 @@ texpdf_names_add_object (struct ht_table *names,
     return -1;
   }
 
-  value = ht_lookup_table(names, key, keylen);
+  value = texpdf_ht_lookup_table(names, key, keylen);
   if (!value) {
     value = NEW(1, struct obj_data);
     value->object     = object;
     value->closed     = 0;
-    ht_append_table(names, key, keylen, value);
+    texpdf_ht_append_table(names, key, keylen, value);
   } else {
     ASSERT(value->object);
     if (PDF_OBJ_UNDEFINED(value->object)) {
@@ -164,7 +164,7 @@ texpdf_names_lookup_reference (struct ht_table *names,
 
   ASSERT(names);
 
-  value = ht_lookup_table(names, key, keylen);
+  value = texpdf_ht_lookup_table(names, key, keylen);
 
   if (value) {
     object = value->object;
@@ -178,7 +178,7 @@ texpdf_names_lookup_reference (struct ht_table *names,
     texpdf_names_add_object(names, key, keylen, object);
   }
 
-  return pdf_ref_obj(object);
+  return texpdf_ref_obj(object);
 }
 
 pdf_obj *
@@ -189,7 +189,7 @@ texpdf_names_lookup_object (struct ht_table *names,
 
   ASSERT(names);
 
-  value = ht_lookup_table(names, key, keylen);
+  value = texpdf_ht_lookup_table(names, key, keylen);
   if (!value || PDF_OBJ_UNDEFINED(value->object))
     return NULL;
   ASSERT(value->object);
@@ -205,7 +205,7 @@ texpdf_names_close_object (struct ht_table *names,
 
   ASSERT(names);
 
-  value = ht_lookup_table(names, key, keylen);
+  value = texpdf_ht_lookup_table(names, key, keylen);
   if (!value ||PDF_OBJ_UNDEFINED(value->object) ) {
     WARN("Cannot close undefined object @%s.", printable_key(key, keylen));
     return -1;
@@ -276,8 +276,8 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
 
     limits = texpdf_new_array();
     last   = &first[num_leaves - 1];
-    pdf_add_array(limits, texpdf_new_string(first->key, first->keylen));
-    pdf_add_array(limits, texpdf_new_string(last->key , last->keylen ));
+    texpdf_add_array(limits, texpdf_new_string(first->key, first->keylen));
+    texpdf_add_array(limits, texpdf_new_string(last->key , last->keylen ));
     texpdf_add_dict (result, texpdf_new_name("Limits"),    limits);
   }
 
@@ -291,18 +291,18 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
       struct named_object *cur;
 
       cur = &first[i];
-      pdf_add_array(names, texpdf_new_string(cur->key, cur->keylen));
+      texpdf_add_array(names, texpdf_new_string(cur->key, cur->keylen));
       switch (PDF_OBJ_TYPEOF(cur->value)) {
       case PDF_ARRAY:
       case PDF_DICT:
       case PDF_STREAM:
       case PDF_STRING:
-	pdf_add_array(names, pdf_ref_obj(cur->value));
+	texpdf_add_array(names, texpdf_ref_obj(cur->value));
 	break;
       case PDF_OBJ_INVALID:
 	ERROR("Invalid object...: %s", printable_key(cur->key, cur->keylen));
       default:
-	pdf_add_array(names, pdf_link_obj(cur->value));
+	texpdf_add_array(names, texpdf_link_obj(cur->value));
 	break;
       }
       texpdf_release_obj(cur->value);
@@ -321,7 +321,7 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
       start = (i*num_leaves) / NAME_CLUSTER;
       end   = ((i+1)*num_leaves) / NAME_CLUSTER;
       subtree = build_name_tree(&first[start], (end - start), 0);
-      pdf_add_array  (kids, pdf_ref_obj(subtree));
+      texpdf_add_array  (kids, texpdf_ref_obj(subtree));
       texpdf_release_obj(subtree);
     }
     texpdf_add_dict(result, texpdf_new_name("Kids"), kids);
@@ -351,7 +351,7 @@ flat_table (struct ht_table *ht_tab, long *num_entries,
       key   = ht_iter_getkey(&iter, &keylen);
 
       if (filter) {
-	pdf_obj *new_obj = ht_lookup_table(filter, key, keylen);
+	pdf_obj *new_obj = texpdf_ht_lookup_table(filter, key, keylen);
 
 	if (!new_obj)
 	  continue;
@@ -371,7 +371,7 @@ flat_table (struct ht_table *ht_tab, long *num_entries,
       } else if (value->object) {
 	objects[count].key    = (char *) key;
 	objects[count].keylen = keylen;
-	objects[count].value  = pdf_link_obj(value->object);
+	objects[count].value  = texpdf_link_obj(value->object);
       }
       count++;
     } while (ht_iter_next(&iter) >= 0);

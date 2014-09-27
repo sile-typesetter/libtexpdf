@@ -73,8 +73,8 @@ extern void texpdf_ximage_set_form  (pdf_ximage *ximage, void *info, pdf_obj *re
 extern long texpdf_ximage_get_page  (pdf_ximage *I);
 
 /* from pdfximage.c */
-extern void set_distiller_template (char *s);
-extern char *get_distiller_template (void);
+extern void texpdf_set_distiller_template (char *s);
+extern char *texpdf_get_distiller_template (void);
 
 extern int
 texpdf_ximage_scale_image (int            id,

@@ -316,12 +316,12 @@ Type0Font_get_resource (Type0Font *font)
     pdf_obj *array;
 
     array = texpdf_new_array();
-    pdf_add_array(array, CIDFont_get_resource(font->descendant));
+    texpdf_add_array(array, CIDFont_get_resource(font->descendant));
     texpdf_add_dict(font->fontdict, texpdf_new_name("DescendantFonts"), array);
-    font->indirect = pdf_ref_obj(font->fontdict);
+    font->indirect = texpdf_ref_obj(font->fontdict);
   }
 
-  return pdf_link_obj(font->indirect);
+  return texpdf_link_obj(font->indirect);
 }
 
 /******************************** CACHE ********************************/
@@ -383,7 +383,7 @@ Type0Font_cache_find (const char *map_name, int cmap_id, fontmap_opt *fmap_opt)
    * Adobe-Japan2) must be splited into multiple CID-keyed fonts.
    */
 
-  cmap = CMap_cache_get(cmap_id);
+  cmap = texpdf_CMap_cache_get(cmap_id);
   csi  = (CMap_is_Identity(cmap)) ? NULL : CMap_get_CIDSysInfo(cmap) ;
 
   cid_id = CIDFont_cache_find(map_name, csi, fmap_opt);
@@ -604,38 +604,38 @@ end\nend\n\n\
 "
 
   stream = texpdf_new_stream(STREAM_COMPRESS);
-  pdf_add_stream(stream, CMAP_PART0, strlen(CMAP_PART0));
-  pdf_add_stream(stream, CMAP_PART1, strlen(CMAP_PART1));
-  pdf_add_stream(stream, "\n100 beginbfrange\n", strlen("\n100 beginbfrange\n"));
+  texpdf_add_stream(stream, CMAP_PART0, strlen(CMAP_PART0));
+  texpdf_add_stream(stream, CMAP_PART1, strlen(CMAP_PART1));
+  texpdf_add_stream(stream, "\n100 beginbfrange\n", strlen("\n100 beginbfrange\n"));
   for (i = 0; i < 0x64; i++) {
     n = sprintf(buf,
                 "<%02X00> <%02XFF> <%02X00>\n", i, i, i);
-    pdf_add_stream(stream, buf, n);
+    texpdf_add_stream(stream, buf, n);
   }
-  pdf_add_stream(stream, "endbfrange\n\n", strlen("endbfrange\n\n"));
+  texpdf_add_stream(stream, "endbfrange\n\n", strlen("endbfrange\n\n"));
 
-  pdf_add_stream(stream, "\n100 beginbfrange\n", strlen("\n100 beginbfrange\n"));
+  texpdf_add_stream(stream, "\n100 beginbfrange\n", strlen("\n100 beginbfrange\n"));
   for (i = 0x64; i < 0xc8; i++) {
     n = sprintf(buf,
                 "<%02X00> <%02XFF> <%02X00>\n", i, i, i);
-    pdf_add_stream(stream, buf, n);
+    texpdf_add_stream(stream, buf, n);
   }
-  pdf_add_stream(stream, "endbfrange\n\n", strlen("endbfrange\n\n"));
+  texpdf_add_stream(stream, "endbfrange\n\n", strlen("endbfrange\n\n"));
 
-  pdf_add_stream(stream, "\n48 beginbfrange\n", strlen("\n48 beginbfrange\n"));
+  texpdf_add_stream(stream, "\n48 beginbfrange\n", strlen("\n48 beginbfrange\n"));
   for (i = 0xc8; i <= 0xd7; i++) {
     n = sprintf(buf,
                 "<%02X00> <%02XFF> <%02X00>\n", i, i, i);
-    pdf_add_stream(stream, buf, n);
+    texpdf_add_stream(stream, buf, n);
   }
   for (i = 0xe0; i <= 0xff; i++) {
     n = sprintf(buf,
                 "<%02X00> <%02XFF> <%02X00>\n", i, i, i);
-    pdf_add_stream(stream, buf, n);
+    texpdf_add_stream(stream, buf, n);
   }
-  pdf_add_stream(stream, "endbfrange\n\n", strlen("endbfrange\n\n"));
+  texpdf_add_stream(stream, "endbfrange\n\n", strlen("endbfrange\n\n"));
 
-  pdf_add_stream(stream, CMAP_PART3, strlen(CMAP_PART3));
+  texpdf_add_stream(stream, CMAP_PART3, strlen(CMAP_PART3));
 
   return  stream;
 }

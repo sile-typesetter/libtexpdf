@@ -62,7 +62,7 @@ skip_comments (unsigned char **inbuf, unsigned char *inbufend)
 {
   while (*inbuf < inbufend && **inbuf == '%') {
     pst_skip_line(inbuf, inbufend);
-    skip_white_spaces(inbuf, inbufend);
+    texpdf_skip_white_spaces(inbuf, inbufend);
   }
 }
 
@@ -98,7 +98,7 @@ pst_get_token (unsigned char **inbuf, unsigned char *inbufend)
 
   ASSERT(*inbuf <= inbufend && !*inbufend);
 
-  skip_white_spaces(inbuf, inbufend);
+  texpdf_skip_white_spaces(inbuf, inbufend);
   skip_comments(inbuf, inbufend);
   if (*inbuf >= inbufend)
     return NULL;

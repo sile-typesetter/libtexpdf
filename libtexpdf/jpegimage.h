@@ -28,7 +28,7 @@
 
 extern int texpdf_check_for_jpeg     (FILE *fp);
 extern int jpeg_include_image (pdf_ximage *ximage, FILE *fp);
-extern int jpeg_get_bbox (FILE *fp, long *width, long *height,
+extern int texpdf_jpeg_get_bbox (FILE *fp, long *width, long *height,
 			  double *xdensity, double *ydensity);
 
 #endif /* _JPEGIMAGE_H_ */

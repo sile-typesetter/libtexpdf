@@ -281,7 +281,7 @@ spc_util_read_length (struct spc_env *spe, double *vp /* ret. */, struct spc_arg
   v = atof(q);
   RELEASE(q);
 
-  skip_white(&ap->curptr, ap->endptr);
+  texpdf_skip_white(&ap->curptr, ap->endptr);
   q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
   if (q) {
     char *qq = q;
@@ -292,7 +292,7 @@ spc_util_read_length (struct spc_env *spe, double *vp /* ret. */, struct spc_arg
 
       if (!*q) {
         RELEASE(qq);
-        skip_white(&ap->curptr, ap->endptr);
+        texpdf_skip_white(&ap->curptr, ap->endptr);
         qq = q = texpdf_parse_c_ident(&ap->curptr, ap->endptr);
       }
     }

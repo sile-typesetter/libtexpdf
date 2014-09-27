@@ -869,10 +869,10 @@ dpx_create_fix_temp_file (const char *filename)
       cwd = xgetcwd();
   }
 
-  MD5_init(&state);
-  MD5_write(&state, (unsigned char *)cwd,      strlen(cwd));
-  MD5_write(&state, (unsigned const char *)filename, strlen(filename));
-  MD5_final(digest, &state);
+  texpdf_MD5_init(&state);
+  texpdf_MD5_write(&state, (unsigned char *)cwd,      strlen(cwd));
+  texpdf_MD5_write(&state, (unsigned const char *)filename, strlen(filename));
+  texpdf_MD5_final(digest, &state);
 
   ret = NEW(strlen(dir)+1+strlen(PREFIX)+MAX_KEY_LEN*2 + 1, char);
   sprintf(ret, "%s/%s", dir, PREFIX);

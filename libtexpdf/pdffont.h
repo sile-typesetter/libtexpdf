@@ -37,7 +37,7 @@
 extern void pdf_font_set_verbose (void);
 extern int  pdf_font_get_verbose (void);
 
-extern void pdf_font_set_dpi (int font_dpi);
+extern void texpdf_font_set_dpi (int font_dpi);
 
 #define PDF_FONT_FLAG_NOEMBED   (1 << 0)
 #define PDF_FONT_FLAG_COMPOSITE (1 << 1)
@@ -48,7 +48,7 @@ extern void pdf_font_set_dpi (int font_dpi);
 
 typedef struct pdf_font pdf_font;
 
-/* pdf_open_document() call them. */
+/* texpdf_open_document() call them. */
 extern void     texpdf_init_fonts  (void);
 extern void     texpdf_close_fonts (void);
 

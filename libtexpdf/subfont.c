@@ -22,7 +22,7 @@
 #include <errno.h>
 static int verbose = 0;
 void
-subfont_set_verbose (void)
+texpdf_subfont_set_verbose (void)
 {
   verbose++;
 }
@@ -348,7 +348,7 @@ sfd_get_subfont_ids (const char *sfd_name, int *num_ids)
  * Mapping tables are actually read here.
  */
 int
-sfd_load_record (const char *sfd_name, const char *subfont_id)
+texpdf_sfd_load_record (const char *sfd_name, const char *subfont_id)
 {
   int               rec_id = -1;
   struct sfd_file_ *sfd;
@@ -438,7 +438,7 @@ sfd_load_record (const char *sfd_name, const char *subfont_id)
 
 /* Lookup mapping table */
 unsigned short
-lookup_sfd_record (int rec_id, unsigned char c)
+texpdf_lookup_sfd_record (int rec_id, unsigned char c)
 {
   if (!sfd_record ||
        rec_id < 0 || rec_id >= num_sfd_records)
@@ -468,7 +468,7 @@ release_sfd_record (void)
 
 
 #if  DPXTEST
-/* SFD file dumper */
+/* SFD file texpdf_dumper */
 #ifdef HAVE_ICONV
 #include <iconv.h>
 #else
@@ -477,18 +477,18 @@ typedef int iconv_t;
 #include <string.h>
 
 static void
-dump_table (const char *sfd_name, const char *sub_name, iconv_t cd)
+texpdf_dump_table (const char *sfd_name, const char *sub_name, iconv_t cd)
 {
   int  rec_id, i;
 
-  rec_id = sfd_load_record(sfd_name, sub_name);
+  rec_id = texpdf_sfd_load_record(sfd_name, sub_name);
   if (rec_id < 0) {
     WARN("Could not load SFD mapping for \"%s\"", sub_name);
     return;
   }
   fprintf(stdout, "  <subfont id=\"%s\">\n", sub_name);
   for (i = 0; i < 256; i++) {
-    unsigned short c = lookup_sfd_record(rec_id, i);
+    unsigned short c = texpdf_lookup_sfd_record(rec_id, i);
     char    *p, inbuf[2];
     char    *q, outbuf[32];
     size_t   r, inbufleft = 2, outbufleft = 32;
@@ -550,7 +550,7 @@ test_subfont_help (void)
   fprintf(stdout, "  It must be an encoding name recognized by iconv.\n");
   fprintf(stdout, "  With this option write Unicode character in auxiliary attribute 'uc'.\n");
   fprintf(stdout, "-s, --subfont-id string\n");
-  fprintf(stdout, "  Load and dump mapping table only for subfont 'string'.\n");
+  fprintf(stdout, "  Load and texpdf_dump mapping table only for subfont 'string'.\n");
 }
 
 int
@@ -626,10 +626,10 @@ test_subfont_main (int argc, char *argv[])
       WARN("Could not open SFD file: %s", sfd_name);
     else {
       for (i = 0; i < num_ids; i++)
-        dump_table(sfd_name, sub_id[i], cd);
+        texpdf_dump_table(sfd_name, sub_id[i], cd);
     }
   } else {
-    dump_table(sfd_name, sub_name, cd);
+    texpdf_dump_table(sfd_name, sub_name, cd);
   }
   fprintf(stdout, "</subfontDefinition>\n");
 

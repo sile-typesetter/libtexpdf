@@ -179,7 +179,7 @@ static void read_a_font_def(FILE *vf_file, int32_t font_id, int thisfont)
   (dev_font -> directory)[dir_length] = 0;
   (dev_font -> name)[name_length] = 0;
   vf_fonts[thisfont].num_dev_fonts += 1;
-  dev_font->tfm_id = tfm_open (dev_font -> name, 1); /* must exist */
+  dev_font->tfm_id = texpdf_tfm_open (dev_font -> name, 1); /* must exist */
   dev_font->dev_id =
     dvi_locate_font (dev_font->name, 
 		     sqxfw (vf_fonts[thisfont].ptsize,

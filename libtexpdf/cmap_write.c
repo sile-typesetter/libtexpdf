@@ -166,11 +166,11 @@ write_map (mapDef *mtab, int count,
       if (count > 100)
 	ERROR("Unexpected error....: %d", count);
       sprintf(fmt_buf, "%d beginbfchar\n", count);
-      pdf_add_stream(stream, fmt_buf,  strlen(fmt_buf));
-      pdf_add_stream(stream,
+      texpdf_add_stream(stream, fmt_buf,  strlen(fmt_buf));
+      texpdf_add_stream(stream,
 		     wbuf->buf, (long) (wbuf->curptr - wbuf->buf));
       wbuf->curptr = wbuf->buf;
-      pdf_add_stream(stream,
+      texpdf_add_stream(stream,
 		     "endbfchar\n", strlen("endbfchar\n"));
       count = 0;
     }
@@ -181,16 +181,16 @@ write_map (mapDef *mtab, int count,
 
     if (count > 0) {
       sprintf(fmt_buf, "%d beginbfchar\n", count);
-      pdf_add_stream(stream, fmt_buf,  strlen(fmt_buf));
-      pdf_add_stream(stream,
+      texpdf_add_stream(stream, fmt_buf,  strlen(fmt_buf));
+      texpdf_add_stream(stream,
 		     wbuf->buf, (long) (wbuf->curptr - wbuf->buf));
       wbuf->curptr = wbuf->buf;
-      pdf_add_stream(stream,
+      texpdf_add_stream(stream,
 		     "endbfchar\n", strlen("endbfchar\n"));
       count = 0;
     }
     sprintf(fmt_buf, "%d beginbfrange\n", num_blocks);
-    pdf_add_stream(stream, fmt_buf, strlen(fmt_buf));
+    texpdf_add_stream(stream, fmt_buf, strlen(fmt_buf));
     for (i = 0; i < num_blocks; i++) {
       int j;
 
@@ -213,10 +213,10 @@ write_map (mapDef *mtab, int count,
       *(wbuf->curptr)++ = '>';
       *(wbuf->curptr)++ = '\n';
     }
-    pdf_add_stream(stream,
+    texpdf_add_stream(stream,
 		   wbuf->buf, (long) (wbuf->curptr - wbuf->buf));
     wbuf->curptr = wbuf->buf;
-    pdf_add_stream(stream,
+    texpdf_add_stream(stream,
 		   "endbfrange\n", strlen("endbfrange\n"));
   }
 
@@ -341,7 +341,7 @@ CMap_create_stream (CMap *cmap)
     2 * (cmap->profile.maxBytesIn + cmap->profile.maxBytesOut) + 16;
 
   /* Start CMap */
-  pdf_add_stream(stream, (const void *) CMAP_BEGIN, strlen(CMAP_BEGIN));
+  texpdf_add_stream(stream, (const void *) CMAP_BEGIN, strlen(CMAP_BEGIN));
 
   wbuf.curptr += sprintf(wbuf.curptr, "/CMapName /%s def\n", cmap->name);
   wbuf.curptr += sprintf(wbuf.curptr, "/CMapType %d def\n" , cmap->type);
@@ -356,7 +356,7 @@ CMap_create_stream (CMap *cmap)
 >> def\n"
   wbuf.curptr += sprintf(wbuf.curptr, CMAP_CSI_FMT,
 			 csi->registry, csi->ordering, csi->supplement);
-  pdf_add_stream(stream, wbuf.buf, (long)(wbuf.curptr - wbuf.buf));
+  texpdf_add_stream(stream, wbuf.buf, (long)(wbuf.curptr - wbuf.buf));
   wbuf.curptr = wbuf.buf;
 
   /* codespacerange */
@@ -377,9 +377,9 @@ CMap_create_stream (CMap *cmap)
     *(wbuf.curptr)++ = '>';
     *(wbuf.curptr)++ = '\n';
   }
-  pdf_add_stream(stream, wbuf.buf, (long)(wbuf.curptr - wbuf.buf));
+  texpdf_add_stream(stream, wbuf.buf, (long)(wbuf.curptr - wbuf.buf));
   wbuf.curptr = wbuf.buf;
-  pdf_add_stream(stream,
+  texpdf_add_stream(stream,
 		 "endcodespacerange\n", strlen("endcodespacerange\n"));
 
   /* CMap body */
@@ -391,17 +391,17 @@ CMap_create_stream (CMap *cmap)
       if (count > 100)
 	ERROR("Unexpected error....: %d", count);
       sprintf(fmt_buf, "%d beginbfchar\n", count);
-      pdf_add_stream(stream, fmt_buf,  strlen(fmt_buf));
-      pdf_add_stream(stream,
+      texpdf_add_stream(stream, fmt_buf,  strlen(fmt_buf));
+      texpdf_add_stream(stream,
 		     wbuf.buf, (long) (wbuf.curptr - wbuf.buf));
-      pdf_add_stream(stream,
+      texpdf_add_stream(stream,
 		     "endbfchar\n", strlen("endbfchar\n"));
       count = 0;
       wbuf.curptr = wbuf.buf;
     }
   }
   /* End CMap */
-  pdf_add_stream(stream, CMAP_END, strlen(CMAP_END));
+  texpdf_add_stream(stream, CMAP_END, strlen(CMAP_END));
 
   RELEASE(codestr);
   RELEASE(wbuf.buf);

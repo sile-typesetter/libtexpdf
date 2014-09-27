@@ -62,7 +62,7 @@ spc_handler_postscriptbox (struct spc_env *spe, struct spc_arg *ap)
   memcpy(buf, ap->curptr, len);
   buf[len] = '\0';
 
-  transform_info_clear(&ti);
+  texpdf_transform_info_clear(&ti);
 
   spc_warn(spe, buf);
   if (sscanf(buf, "{%lfpt}{%lfpt}{%255[^}]}",
@@ -95,7 +95,7 @@ spc_handler_postscriptbox (struct spc_env *spe, struct spc_arg *ap)
     const char *p = mfgets(buf, 512, fp);
     if (!p)
       break;
-    if (mps_scan_bbox(&p, p + strlen(p), &ti.bbox) >= 0) {
+    if (texpdf_mps_scan_bbox(&p, p + strlen(p), &ti.bbox) >= 0) {
       ti.flags |= INFO_HAS_USER_BBOX;
       break;
     }
@@ -140,7 +140,7 @@ spc_misc_check_special (const char *buffer, long size)
   p      = buffer;
   endptr = p + size;
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   size   = (long) (endptr - p);
   for (i = 0;
        i < sizeof(misc_handlers)/sizeof(struct spc_handler); i++) {
@@ -163,7 +163,7 @@ spc_misc_setup_handler (struct spc_handler *handle,
 
   ASSERT(handle && spe && args);
 
-  skip_white(&args->curptr, args->endptr);
+  texpdf_skip_white(&args->curptr, args->endptr);
 
   key = args->curptr;
   while (args->curptr < args->endptr &&
@@ -186,7 +186,7 @@ spc_misc_setup_handler (struct spc_handler *handle,
     if (keylen == strlen(misc_handlers[i].key) &&
 	!strncmp(key, misc_handlers[i].key, keylen)) {
 
-      skip_white(&args->curptr, args->endptr);
+      texpdf_skip_white(&args->curptr, args->endptr);
 
       args->command = misc_handlers[i].key;
 

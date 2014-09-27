@@ -117,7 +117,7 @@ create_encoding_resource (pdf_encoding *encoding, pdf_encoding *baseenc)
     pdf_obj *resource = texpdf_new_dict();
     if (baseenc)
       texpdf_add_dict(resource, texpdf_new_name("BaseEncoding"),
-		   pdf_link_obj(baseenc->resource));
+		   texpdf_link_obj(baseenc->resource));
     texpdf_add_dict(resource, texpdf_new_name("Differences"),  differences);
     return resource; 
   } else {
@@ -132,7 +132,7 @@ create_encoding_resource (pdf_encoding *encoding, pdf_encoding *baseenc)
      *
      * Actually these fonts will be ignored in pdffont.c.
      */
-    return baseenc ? pdf_link_obj(baseenc->resource) : NULL;
+    return baseenc ? texpdf_link_obj(baseenc->resource) : NULL;
   }
 }
 
@@ -241,8 +241,8 @@ make_encoding_differences (char **enc_vec, char **baseenc, const char *is_used)
        * Difference found.
        */
       if (skipping)
-        pdf_add_array(differences, texpdf_new_number(code));
-      pdf_add_array(differences,   texpdf_new_name(enc_vec[code]));
+        texpdf_add_array(differences, texpdf_new_number(code));
+      texpdf_add_array(differences,   texpdf_new_name(enc_vec[code]));
       skipping = 0;
       count++;
     } else
@@ -296,19 +296,19 @@ load_encoding_file (const char *filename)
   p        = wbuf;
   endptr   = wbuf + fsize;
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
 
   /*
    * Skip comment lines.
    */
   while (p < endptr && p[0] == '%') {
     skip_line (&p, endptr);
-    skip_white(&p, endptr);
+    texpdf_skip_white(&p, endptr);
   }
   if (p[0] == '/')
     enc_name = texpdf_parse_pdf_name(&p, endptr);
 
-  skip_white(&p, endptr);
+  texpdf_skip_white(&p, endptr);
   encoding_array = texpdf_parse_pdf_array(&p, endptr, NULL);
   RELEASE(wbuf);
   if (!encoding_array) {
@@ -318,14 +318,14 @@ load_encoding_file (const char *filename)
   }
 
   for (code = 0; code < 256; code++) {
-    enc_vec[code] = pdf_name_value(texpdf_get_array(encoding_array, code));
+    enc_vec[code] = texpdf_name_value(texpdf_get_array(encoding_array, code));
   }
-  enc_id = pdf_encoding_new_encoding(enc_name ? pdf_name_value(enc_name) : NULL,
+  enc_id = pdf_encoding_new_encoding(enc_name ? texpdf_name_value(enc_name) : NULL,
 				     filename, enc_vec, NULL, 0);
 
   if (enc_name) {
     if (verbose > 1)
-      MESG("[%s]", pdf_name_value(enc_name));
+      MESG("[%s]", texpdf_name_value(enc_name));
     texpdf_release_obj(enc_name);
   }
   texpdf_release_obj(encoding_array);

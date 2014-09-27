@@ -463,18 +463,18 @@ texpdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
   calparams  = texpdf_new_dict();
 
   tmp_array  = texpdf_new_array();
-  pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->white_point[0], 0.001)));
-  pdf_add_array(tmp_array, texpdf_new_number(1.0));
-  pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->white_point[2], 0.001)));
+  texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->white_point[0], 0.001)));
+  texpdf_add_array(tmp_array, texpdf_new_number(1.0));
+  texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->white_point[2], 0.001)));
   texpdf_add_dict(calparams, texpdf_new_name("WhitePoint"), tmp_array);
 
   if (calrgb->black_point[0] != 0.0 ||
       calrgb->black_point[1] != 0.0 ||
       calrgb->black_point[2] != 0.0) {
     tmp_array  = texpdf_new_array();
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[0], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[1], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[2], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[0], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[1], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->black_point[2], 0.001)));
     texpdf_add_dict(calparams, texpdf_new_name("BlackPoint"), tmp_array);
   }
 
@@ -482,9 +482,9 @@ texpdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
       calrgb->gamma[1] != 1.0 ||
       calrgb->gamma[2] != 1.0) {
     tmp_array  = texpdf_new_array();
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[0], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[1], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[2], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[0], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[1], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->gamma[2], 0.001)));
     texpdf_add_dict(calparams, texpdf_new_name("Gamma"), tmp_array);
   }
 
@@ -498,20 +498,20 @@ texpdf_color_make_calrgb_resource (struct calrgb_cdata *calrgb)
       calrgb->matrix[7] != 0.0 ||
       calrgb->matrix[8] != 1.0) {
     tmp_array  = texpdf_new_array();
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[0], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[1], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[2], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[3], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[4], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[5], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[6], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[7], 0.001)));
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[8], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[0], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[1], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[2], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[3], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[4], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[5], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[6], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[7], 0.001)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(calrgb->matrix[8], 0.001)));
     texpdf_add_dict(calparams,  texpdf_new_name("Matrix"), tmp_array);
   }
 
-  pdf_add_array(colorspace, texpdf_new_name("CalRGB"));
-  pdf_add_array(colorspace, calparams);
+  texpdf_add_array(colorspace, texpdf_new_name("CalRGB"));
+  texpdf_add_array(colorspace, calparams);
 
   return colorspace;
 }
@@ -898,17 +898,17 @@ iccp_get_checksum (unsigned char *checksum, const void *profile, long proflen)
 
   p = (const unsigned char *) profile;
 
-  MD5_init (&md5);
-  MD5_write(&md5, p + ICC_HEAD_SECT1_START, ICC_HEAD_SECT1_LENGTH);
-  MD5_write(&md5, nullbytes16, 12);
-  MD5_write(&md5, p + ICC_HEAD_SECT2_START, ICC_HEAD_SECT2_LENGTH);
-  MD5_write(&md5, nullbytes16, 16);
-  MD5_write(&md5, p + ICC_HEAD_SECT3_START, ICC_HEAD_SECT3_LENGTH);
+  texpdf_MD5_init (&md5);
+  texpdf_MD5_write(&md5, p + ICC_HEAD_SECT1_START, ICC_HEAD_SECT1_LENGTH);
+  texpdf_MD5_write(&md5, nullbytes16, 12);
+  texpdf_MD5_write(&md5, p + ICC_HEAD_SECT2_START, ICC_HEAD_SECT2_LENGTH);
+  texpdf_MD5_write(&md5, nullbytes16, 16);
+  texpdf_MD5_write(&md5, p + ICC_HEAD_SECT3_START, ICC_HEAD_SECT3_LENGTH);
 
   /* body */
-  MD5_write(&md5, p + 128, proflen - 128);
+  texpdf_MD5_write(&md5, p + 128, proflen - 128);
 
-  MD5_final(checksum, &md5);
+  texpdf_MD5_final(checksum, &md5);
 }
 
 static void
@@ -1127,14 +1127,14 @@ iccp_load_profile (const char *ident,
   resource = texpdf_new_array();
 
   stream = texpdf_new_stream(STREAM_COMPRESS);
-  pdf_add_array(resource, texpdf_new_name("ICCBased"));
-  pdf_add_array(resource, pdf_ref_obj (stream));
+  texpdf_add_array(resource, texpdf_new_name("ICCBased"));
+  texpdf_add_array(resource, texpdf_ref_obj (stream));
 
   stream_dict = texpdf_stream_dict(stream);
   texpdf_add_dict(stream_dict, texpdf_new_name("N"),
 	       texpdf_new_number(get_num_components_iccbased(cdata)));
 
-  pdf_add_stream (stream, profile, proflen);
+  texpdf_add_stream (stream, profile, proflen);
   texpdf_release_obj(stream);
 
   cspc_id = pdf_colorspace_defineresource(ident,
@@ -1164,24 +1164,24 @@ iccp_load_file_stream (unsigned char *checksum, long length, FILE *fp)
 
   stream = texpdf_new_stream(STREAM_COMPRESS);
 
-  MD5_init (&md5);
-  MD5_write(&md5, wbuf + ICC_HEAD_SECT1_START, ICC_HEAD_SECT1_LENGTH);
-  MD5_write(&md5, nullbytes16, 12);
-  MD5_write(&md5, wbuf + ICC_HEAD_SECT2_START, ICC_HEAD_SECT2_LENGTH);
-  MD5_write(&md5, nullbytes16, 16);
-  MD5_write(&md5, wbuf + ICC_HEAD_SECT3_START, ICC_HEAD_SECT3_LENGTH);
+  texpdf_MD5_init (&md5);
+  texpdf_MD5_write(&md5, wbuf + ICC_HEAD_SECT1_START, ICC_HEAD_SECT1_LENGTH);
+  texpdf_MD5_write(&md5, nullbytes16, 12);
+  texpdf_MD5_write(&md5, wbuf + ICC_HEAD_SECT2_START, ICC_HEAD_SECT2_LENGTH);
+  texpdf_MD5_write(&md5, nullbytes16, 16);
+  texpdf_MD5_write(&md5, wbuf + ICC_HEAD_SECT3_START, ICC_HEAD_SECT3_LENGTH);
 
-  pdf_add_stream(stream, wbuf, 128);
+  texpdf_add_stream(stream, wbuf, 128);
 
   /* body */
   while (length > 0) {
     nb_read = fread(wbuf, 1, MIN(length, WBUF_SIZE), fp);
-    MD5_write(&md5, wbuf, nb_read);
-    pdf_add_stream(stream, wbuf, nb_read);
+    texpdf_MD5_write(&md5, wbuf, nb_read);
+    texpdf_add_stream(stream, wbuf, nb_read);
     length -= nb_read;
   }
 
-  MD5_final(checksum, &md5);
+  texpdf_MD5_final(checksum, &md5);
 
 
   return stream;
@@ -1299,8 +1299,8 @@ pdf_colorspace_load_ICCBased (const char *ident, const char *filename)
 
   resource = texpdf_new_array();
 
-  pdf_add_array(resource, texpdf_new_name("ICCBased"));
-  pdf_add_array(resource, pdf_ref_obj (stream));
+  texpdf_add_array(resource, texpdf_new_name("ICCBased"));
+  texpdf_add_array(resource, texpdf_ref_obj (stream));
 
   stream_dict = texpdf_stream_dict(stream);
   texpdf_add_dict(stream_dict, texpdf_new_name("N"),
@@ -1469,12 +1469,12 @@ texpdf_get_colorspace_reference (int cspc_id)
 
   colorspace = &cspc_cache.colorspaces[cspc_id];
   if (!colorspace->reference) {
-    colorspace->reference = pdf_ref_obj(colorspace->resource);
+    colorspace->reference = texpdf_ref_obj(colorspace->resource);
     texpdf_release_obj(colorspace->resource); /* .... */
     colorspace->resource = NULL;
   }
 
-  return pdf_link_obj(colorspace->reference);
+  return texpdf_link_obj(colorspace->reference);
 }
 
 #if 0

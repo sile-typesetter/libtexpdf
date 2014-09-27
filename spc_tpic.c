@@ -137,7 +137,7 @@ check_resourcestatus (const char *category, const char *resname)
 
   dict2 = texpdf_lookup_dict(dict1, category);
   if (dict2 &&
-      pdf_obj_typeof(dict2) == PDF_DICT) {
+      texpdf_obj_typeof(dict2) == PDF_DICT) {
     if (texpdf_lookup_dict(dict2, resname))
       return  1;
   }
@@ -182,7 +182,7 @@ set_fillstyle (double g, double a, int f_ais)
     if (!check_resourcestatus("ExtGState", resname)) {
       dict = create_xgstate(ROUND(0.01 * alp, 0.01), f_ais);
       texpdf_doc_add_page_resource(pdf, "ExtGState",
-                                resname, pdf_ref_obj(dict));
+                                resname, texpdf_ref_obj(dict));
       texpdf_release_obj(dict);
     }
     len += sprintf(buf + len, " /%s gs", resname);
@@ -902,9 +902,9 @@ tpic_filter_getopts (pdf_obj *kp, pdf_obj *vp, void *dp)
 
   ASSERT( kp && vp && tp );
 
-  k = pdf_name_value(kp);
+  k = texpdf_name_value(kp);
   if (!strcmp(k, "fill-mode")) {
-    if (pdf_obj_typeof(vp) != PDF_STRING) {
+    if (texpdf_obj_typeof(vp) != PDF_STRING) {
       WARN("Invalid value for TPIC option fill-mode...");
       error = -1;
     } else {

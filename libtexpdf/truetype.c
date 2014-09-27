@@ -116,7 +116,7 @@ pdf_font_open_truetype (pdf_font *font)
         DPXFCLOSE(fp);
       return  -1;
     }
-    ASSERT(pdf_obj_typeof(tmp) == PDF_DICT);
+    ASSERT(texpdf_obj_typeof(tmp) == PDF_DICT);
 
     texpdf_merge_dict(descriptor, tmp);
     texpdf_release_obj(tmp);
@@ -145,8 +145,8 @@ pdf_font_open_truetype (pdf_font *font)
 #endif /* ENABLE_NOEMBED */
       pdf_font_set_flags(font, PDF_FONT_FLAG_NOEMBED);
       tmp = texpdf_lookup_dict(descriptor, "Flags");
-      if (tmp && pdf_obj_typeof(tmp) == PDF_NUMBER) {
-        flags  = (long) pdf_number_value(tmp);
+      if (tmp && texpdf_obj_typeof(tmp) == PDF_NUMBER) {
+        flags  = (long) texpdf_number_value(tmp);
         flags &= (1 << 2); /* clear Symbolic */
         flags |= (1 << 5); /* set Nonsymbolic */
         texpdf_add_dict(descriptor, texpdf_new_name("Flags"), texpdf_new_number(flags));
@@ -216,7 +216,7 @@ do_widths (pdf_font *font, double *widths)
     return;
   }
 #ifdef TEXLIVE_INTERNAL
-  tfm_id = tfm_open(pdf_font_get_mapname(font), 0);
+  tfm_id = texpdf_tfm_open(pdf_font_get_mapname(font), 0);
 #endif
   for (code = firstchar; code <= lastchar; code++) {
     if (usedchars[code]) {
@@ -229,16 +229,16 @@ do_widths (pdf_font *font, double *widths)
 #else
       width = widths[code];
 #endif
-      pdf_add_array(tmparray,
+      texpdf_add_array(tmparray,
                     texpdf_new_number(ROUND(width, 0.1)));
     } else {
-      pdf_add_array(tmparray, texpdf_new_number(0.0));
+      texpdf_add_array(tmparray, texpdf_new_number(0.0));
     }
   }
 
-  if (pdf_array_length(tmparray) > 0) {
+  if (texpdf_array_length(tmparray) > 0) {
     texpdf_add_dict(fontdict,
-                 texpdf_new_name("Widths"), pdf_ref_obj(tmparray));
+                 texpdf_new_name("Widths"), texpdf_ref_obj(tmparray));
   }
   texpdf_release_obj(tmparray);
 
@@ -967,7 +967,7 @@ pdf_font_load_truetype (pdf_font *font)
     MESG("[%ld bytes]", pdf_stream_length(fontfile));
 
   texpdf_add_dict(descriptor,
-               texpdf_new_name("FontFile2"), pdf_ref_obj(fontfile)); /* XXX */
+               texpdf_new_name("FontFile2"), texpdf_ref_obj(fontfile)); /* XXX */
   texpdf_release_obj(fontfile);
 
   return  0;
