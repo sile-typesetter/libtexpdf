@@ -1,0 +1,4 @@
+* Rename all exported identifiers
+* Move remaining shared variables into appropriate structure
+* Reduce visibility of those which are not part of API
+* Document everything
