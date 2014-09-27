@@ -1,6 +1,39 @@
 #ifndef _LIBTEXPDF_H
 #define _LIBTEXPDF_H
-#include <stdlib.h>
+#include "config.h"
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+extern int compat_mode;
+
+/* Stolen from kpathsea, to avoid depending on it */
+#ifndef FOPEN_A_MODE
+#define FOPEN_A_MODE "ab"
+#endif
+
+#ifndef FOPEN_R_MODE
+#define FOPEN_R_MODE "r"
+#endif
+
+#ifndef FOPEN_W_MODE
+#define FOPEN_W_MODE "wb"
+#endif
+
+/* How to open a binary file for reading:  */
+#ifndef FOPEN_RBIN_MODE
+#define FOPEN_RBIN_MODE "rb"
+#endif /* not FOPEN_RBIN_MODE */
+
+/* How to open a binary file for writing:  */
+#ifndef FOPEN_WBIN_MODE
+#define FOPEN_WBIN_MODE "wb"
+#endif /* not FOPEN_WBIN_MODE */
 
 #include "agl.h"
 #include "bmpimage.h"

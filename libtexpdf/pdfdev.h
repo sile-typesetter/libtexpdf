@@ -112,7 +112,7 @@ extern void   pdf_dev_set_rule   (pdf_doc *p, spt_t xpos, spt_t ypos,
 
 /* Place XObject */
 extern int    pdf_dev_put_image  (pdf_doc *doc, int xobj_id,
-				  transform_info *p, double ref_x, double ref_y);
+				  transform_info *p, double ref_x, double ref_y, int track_boxes);
 
 /* The design_size and ptsize required by PK font support...
  */
