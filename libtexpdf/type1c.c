@@ -32,37 +32,7 @@
  *
  */ 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "dpxfile.h"
-
-#include "pdfobj.h"
-#include "pdffont.h"
-
-#include "pdfencoding.h"
-#include "unicode.h"
-
-/* Font info. from OpenType tables */
-#include "sfnt.h"
-#include "tt_aux.h"
-
-#include "cff_types.h"
-#include "cff_limits.h"
-#include "cff.h"
-#include "cff_dict.h"
-#include "cs_type2.h"
-
-#include "type1c.h"
-
-#include "tfm.h"
+#include "libtexpdf.h"
 
 int
 pdf_font_open_type1c (pdf_font *font)
@@ -160,7 +130,10 @@ add_SimpleMetrics (pdf_font *font, cff_font *cffont,
 		   double *widths, card16 num_glyphs)
 {
   pdf_obj *fontdict;
-  int      code, firstchar, lastchar, tfm_id;
+  int      code, firstchar, lastchar;
+#ifdef TEXLIVE_INTERNAL
+  int tfm_id;
+#endif
   char    *usedchars;
   pdf_obj *tmp_array;
   double   scaling;
@@ -195,14 +168,20 @@ add_SimpleMetrics (pdf_font *font, cff_font *cffont,
       pdf_release_obj(tmp_array);
       return;
     }
+#ifdef TEXLIVE_INTERNAL    
     tfm_id = tfm_open(pdf_font_get_mapname(font), 0);
+#endif    
     for (code = firstchar; code <= lastchar; code++) {
       if (usedchars[code]) {
         double width;
+#ifdef TEXLIVE_INTERNAL
         if (tfm_id < 0) /* tfm is not found */
           width = scaling * widths[code];
         else
           width = 1000. * tfm_get_width(tfm_id, code);
+#else
+        width = scaling * widths[code];
+#endif
 	pdf_add_array(tmp_array,
 		      pdf_new_number(ROUND(width, 0.1)));
       } else {

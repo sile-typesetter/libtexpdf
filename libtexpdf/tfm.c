@@ -20,22 +20,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "mfileio.h"
-#include "error.h"
-
-#include "numbers.h"
-#include "dpxutil.h"
-
-#include "tfm.h"
-
+#include "libtexpdf.h"
+#ifdef TEXLIVE_INTERNAL
 #define TFM_FORMAT 1
 #define OFM_FORMAT 2
 
@@ -1220,3 +1206,4 @@ tfm_exists (const char *tfm_name)
 
   return 0;
 }
+#endif

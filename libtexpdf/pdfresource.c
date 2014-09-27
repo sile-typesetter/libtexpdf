@@ -24,19 +24,7 @@
  * Currently, this is nearly useless.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-
-#include "pdfresource.h"
+#include "libtexpdf.h"
 
 #define PDF_RESOURCE_DEBUG_STR "PDF"
 #define PDF_RESOURCE_DEBUG     3

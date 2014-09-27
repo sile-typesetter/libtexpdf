@@ -85,8 +85,6 @@ libtexpdf_la_SOURCES = \
 	pdfresource.h \
 	pdfximage.c \
 	pdfximage.h \
-	pkfont.c \
-	pkfont.h \
 	pngimage.c \
 	pngimage.h \
 	pst.c \
@@ -102,8 +100,6 @@ libtexpdf_la_SOURCES = \
 	t1_char.h \
 	t1_load.c \
 	t1_load.h \
-	tfm.c \
-	tfm.h \
 	truetype.c \
 	truetype.h \
 	tt_aux.c \
@@ -126,5 +122,13 @@ libtexpdf_la_SOURCES = \
 	type1c.h \
 	unicode.c \
 	unicode.h
+
+if TEXLIVE_INTERNAL
+libtexpdf_la_SOURCES += \
+	pkfont.c \
+	pkfont.h \
+	tfm.c \
+	tfm.h
+endif
 
 libtexpdf_la_LIBADD = $(FREETYPE_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
