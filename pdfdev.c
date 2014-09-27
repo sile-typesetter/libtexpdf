@@ -25,14 +25,14 @@
 static int verbose = 0;
 
 void
-pdf_dev_set_verbose (void)
+texpdf_dev_set_verbose (void)
 {
   verbose++;
 }
 
 /* Not working yet... */
 double
-pdf_dev_scale (void)
+texpdf_dev_scale (void)
 {
   return 1.0;
 }
@@ -842,8 +842,8 @@ dev_set_font (pdf_doc *doc, int font_id)
   text_state.matrix.rotate = text_rotate;
 
   if (!real_font->resource) {
-    real_font->resource   = pdf_get_font_reference(real_font->font_id);
-    real_font->used_chars = pdf_get_font_usedchars(real_font->font_id);
+    real_font->resource   = texpdf_get_font_reference(real_font->font_id);
+    real_font->used_chars = texpdf_get_font_usedchars(real_font->font_id);
   }
 
   if (!real_font->used_on_this_page) { 
@@ -881,13 +881,13 @@ dev_set_font (pdf_doc *doc, int font_id)
  */
 #if 0
 int
-pdf_dev_currentfont (void)
+texpdf_dev_currentfont (void)
 {
   return text_state.font_id;
 }
 
 double
-pdf_dev_get_font_ptsize (int font_id)
+texpdf_dev_get_font_ptsize (int font_id)
 {
   struct dev_font *font;
 
@@ -901,7 +901,7 @@ pdf_dev_get_font_ptsize (int font_id)
 #endif
 
 int
-pdf_dev_get_font_wmode (int font_id)
+texpdf_dev_get_font_wmode (int font_id)
 {
   struct dev_font *font;
 
@@ -1044,7 +1044,7 @@ static pdf_coord *dev_coords = NULL;
 static int num_dev_coords = 0;
 static int max_dev_coords = 0;
 
-void pdf_dev_get_coord(double *xpos, double *ypos)
+void texpdf_dev_get_coord(double *xpos, double *ypos)
 {
   if (num_dev_coords > 0) {
     *xpos = dev_coords[num_dev_coords-1].x;
@@ -1054,7 +1054,7 @@ void pdf_dev_get_coord(double *xpos, double *ypos)
   }
 }
 
-void pdf_dev_push_coord(double xpos, double ypos)
+void texpdf_dev_push_coord(double xpos, double ypos)
 {
   if (num_dev_coords >= max_dev_coords) {
     max_dev_coords += 4;
@@ -1065,7 +1065,7 @@ void pdf_dev_push_coord(double xpos, double ypos)
   num_dev_coords++;
 }
 
-void pdf_dev_pop_coord(void)
+void texpdf_dev_pop_coord(void)
 {
   if (num_dev_coords > 0) num_dev_coords--;
 }
@@ -1084,7 +1084,7 @@ void pdf_dev_pop_coord(void)
  * selectfont(font_name, point_size) and show_string(pos, string)
  */
 void
-pdf_dev_set_string (pdf_doc *p, spt_t xpos, spt_t ypos,
+texpdf_dev_set_string (pdf_doc *p, spt_t xpos, spt_t ypos,
                     const void *instr_ptr, int instr_len,
                     spt_t width,
                     int   font_id, int ctype)
@@ -1240,7 +1240,7 @@ pdf_dev_set_string (pdf_doc *p, spt_t xpos, spt_t ypos,
 }
 
 void
-pdf_init_device (pdf_doc *p, double dvi2pts, int precision, int black_and_white)
+texpdf_init_device (pdf_doc *p, double dvi2pts, int precision, int black_and_white)
 {
   if (precision < 0 ||
       precision > DEV_PRECISION_MAX)
@@ -1262,8 +1262,8 @@ pdf_init_device (pdf_doc *p, double dvi2pts, int precision, int black_and_white)
   dev_param.colormode = (black_and_white ? 0 : 1);
 
   graphics_mode(p);
-  pdf_color_clear_stack();
-  pdf_dev_init_gstates();
+  texpdf_color_clear_stack();
+  texpdf_dev_init_gstates();
 
   num_dev_fonts  = max_dev_fonts = 0;
   dev_fonts      = NULL;
@@ -1272,7 +1272,7 @@ pdf_init_device (pdf_doc *p, double dvi2pts, int precision, int black_and_white)
 }
 
 void
-pdf_close_device (void)
+texpdf_close_device (void)
 {
   if (dev_fonts) {
     int    i;
@@ -1281,7 +1281,7 @@ pdf_close_device (void)
       if (dev_fonts[i].tex_name)
         RELEASE(dev_fonts[i].tex_name);
       if (dev_fonts[i].resource)
-        pdf_release_obj(dev_fonts[i].resource);
+        texpdf_release_obj(dev_fonts[i].resource);
       dev_fonts[i].tex_name = NULL;
       dev_fonts[i].resource = NULL;
       dev_fonts[i].cff_charsets = NULL;
@@ -1289,7 +1289,7 @@ pdf_close_device (void)
     RELEASE(dev_fonts);
   }
   if (dev_coords) RELEASE(dev_coords);
-  pdf_dev_clear_gstates();
+  texpdf_dev_clear_gstates();
 }
 
 /*
@@ -1298,7 +1298,7 @@ pdf_close_device (void)
  * as the font stuff.
  */
 void
-pdf_dev_reset_fonts (void)
+texpdf_dev_reset_fonts (void)
 {
   int  i;
 
@@ -1318,59 +1318,59 @@ pdf_dev_reset_fonts (void)
 }
 
 void
-pdf_dev_reset_color (pdf_doc *p, int force)
+texpdf_dev_reset_color (pdf_doc *p, int force)
 {
   pdf_color *sc, *fc;
 
-  pdf_color_get_current(&sc, &fc);
-  pdf_dev_set_color(p, sc,    0, force);
-  pdf_dev_set_color(p, fc, 0x20, force);
+  texpdf_color_get_current(&sc, &fc);
+  texpdf_dev_set_color(p, sc,    0, force);
+  texpdf_dev_set_color(p, fc, 0x20, force);
 }
 
 #if 0
 /* Not working */
 void
-pdf_dev_set_origin (double phys_x, double phys_y)
+texpdf_dev_set_origin (double phys_x, double phys_y)
 {
   pdf_tmatrix M0, M1;
 
-  pdf_dev_currentmatrix(&M0);
-  pdf_dev_currentmatrix(&M1);
+  texpdf_dev_currentmatrix(&M0);
+  texpdf_dev_currentmatrix(&M1);
   pdf_invertmatrix(&M1);
   M0.e = phys_x; M0.f = phys_y;
   pdf_concatmatrix(&M1, &M0);
 
-  pdf_dev_concat(&M1);
+  texpdf_dev_concat(&M1);
 }
 #endif
 
 void
-pdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M)
+texpdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M)
 {
   graphics_mode(p);
 
   text_state.force_reset  = 0;
 
-  pdf_dev_gsave(p);
-  pdf_dev_concat(p, M);
+  texpdf_dev_gsave(p);
+  texpdf_dev_concat(p, M);
 
-  pdf_dev_reset_fonts();
-  pdf_dev_reset_color(p, 0);
+  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_color(p, 0);
 }
 
 void
-pdf_dev_eop (pdf_doc *p)
+texpdf_dev_eop (pdf_doc *p)
 {
   int  depth;
 
   graphics_mode(p);
 
-  depth = pdf_dev_current_depth();
+  depth = texpdf_dev_current_depth();
   if (depth != 1) {
     WARN("Unbalenced q/Q nesting...: %d", depth);
-    pdf_dev_grestore_to(p, 0);
+    texpdf_dev_grestore_to(p, 0);
   } else {
-    pdf_dev_grestore(p);
+    texpdf_dev_grestore(p);
   }
 }
 
@@ -1422,7 +1422,7 @@ print_fontmap (const char *font_name, fontmap_rec *mrec)
  * of the same font at different sizes.
  */
 int
-pdf_dev_locate_font (const char *font_name, spt_t ptsize)
+texpdf_dev_locate_font (const char *font_name, spt_t ptsize)
 {
   int              i;
   fontmap_rec     *mrec;
@@ -1432,7 +1432,7 @@ pdf_dev_locate_font (const char *font_name, spt_t ptsize)
     return  -1;
 
   if (ptsize == 0) {
-    ERROR("pdf_dev_locate_font() called with the zero ptsize.");
+    ERROR("texpdf_dev_locate_font() called with the zero ptsize.");
     return -1;
   }
 
@@ -1457,7 +1457,7 @@ pdf_dev_locate_font (const char *font_name, spt_t ptsize)
   font = &dev_fonts[num_dev_fonts];
 
   /* New font */
-  mrec = pdf_lookup_fontmap_record(font_name);
+  mrec = texpdf_lookup_fontmap_record(font_name);
 
   if (verbose > 1)
     print_fontmap(font_name, mrec);
@@ -1487,7 +1487,7 @@ pdf_dev_locate_font (const char *font_name, spt_t ptsize)
   strcpy(font->tex_name, font_name);
   font->sptsize  = ptsize;
 
-  switch (pdf_get_font_subtype(font->font_id)) {
+  switch (texpdf_get_font_subtype(font->font_id)) {
   case PDF_FONT_FONTTYPE_TYPE3:
     font->format = PDF_FONTTYPE_BITMAP;
     break;
@@ -1499,8 +1499,8 @@ pdf_dev_locate_font (const char *font_name, spt_t ptsize)
     break;
   }
 
-  font->wmode      = pdf_get_font_wmode   (font->font_id);
-  font->enc_id     = pdf_get_font_encoding(font->font_id);
+  font->wmode      = texpdf_get_font_wmode   (font->font_id);
+  font->enc_id     = texpdf_get_font_encoding(font->font_id);
 
   font->resource   = NULL; /* Don't ref obj until font is actually used. */  
   font->used_chars = NULL;
@@ -1575,7 +1575,7 @@ dev_sprint_line (char *buf, spt_t width,
 /* Not optimized. */
 #define PDF_LINE_THICKNESS_MAX 5.0
 void
-pdf_dev_set_rule (pdf_doc *p, spt_t xpos, spt_t ypos, spt_t width, spt_t height)
+texpdf_dev_set_rule (pdf_doc *p, spt_t xpos, spt_t ypos, spt_t width, spt_t height)
 {
   int    len = 0;
   double width_in_bp;
@@ -1643,7 +1643,7 @@ pdf_dev_set_rule (pdf_doc *p, spt_t xpos, spt_t ypos, spt_t width, spt_t height)
 
 /* Rectangle in device space coordinate. */
 void
-pdf_dev_set_rect (pdf_rect *rect,
+texpdf_dev_set_rect (pdf_rect *rect,
                   spt_t x_user, spt_t y_user,
                   spt_t width,  spt_t height, spt_t depth)
 {
@@ -1673,10 +1673,10 @@ pdf_dev_set_rect (pdf_rect *rect,
     p3.y = p2.y;
   }
 
-  pdf_dev_transform(&p0, NULL); /* currentmatrix */
-  pdf_dev_transform(&p1, NULL);
-  pdf_dev_transform(&p2, NULL);
-  pdf_dev_transform(&p3, NULL);
+  texpdf_dev_transform(&p0, NULL); /* currentmatrix */
+  texpdf_dev_transform(&p1, NULL);
+  texpdf_dev_transform(&p2, NULL);
+  texpdf_dev_transform(&p3, NULL);
 
   min_x = MIN(p0.x , p1.x);
   min_x = MIN(min_x, p2.x);
@@ -1703,13 +1703,13 @@ pdf_dev_set_rect (pdf_rect *rect,
 }
 
 int
-pdf_dev_get_dirmode (void)
+texpdf_dev_get_dirmode (void)
 {
   return text_state.dir_mode;
 }
 
 void
-pdf_dev_set_dirmode (int text_dir)
+texpdf_dev_set_dirmode (int text_dir)
 {
   struct dev_font *font;
   int text_rotate;
@@ -1758,7 +1758,7 @@ dev_set_param_autorotate (int auto_rotate)
 }
 
 int
-pdf_dev_get_param (int param_type)
+texpdf_dev_get_param (int param_type)
 {
   int value = 0;
 
@@ -1777,7 +1777,7 @@ pdf_dev_get_param (int param_type)
 }
 
 void
-pdf_dev_set_param (int param_type, int value)
+texpdf_dev_set_param (int param_type, int value)
 {
   switch (param_type) {
   case PDF_DEV_PARAM_AUTOROTATE:
@@ -1795,7 +1795,7 @@ pdf_dev_set_param (int param_type, int value)
 
 
 int
-pdf_dev_put_image (pdf_doc *doc,
+texpdf_dev_put_image (pdf_doc *doc,
                    int             id,
                    transform_info *p,
                    double          ref_x,
@@ -1823,37 +1823,37 @@ pdf_dev_put_image (pdf_doc *doc,
   }
 
   graphics_mode(doc);
-  pdf_dev_gsave(doc);
+  texpdf_dev_gsave(doc);
 
-  pdf_ximage_scale_image(id, &M1, &r, p);
+  texpdf_ximage_scale_image(id, &M1, &r, p);
   pdf_concatmatrix(&M, &M1);
-  pdf_dev_concat(doc, &M);
+  texpdf_dev_concat(doc, &M);
 
   /* Clip */
   if (p->flags & INFO_DO_CLIP) {
 #if  0
-    pdf_dev_newpath();
-    pdf_dev_moveto(r.llx, r.lly);
-    pdf_dev_lineto(r.urx, r.lly);
-    pdf_dev_lineto(r.urx, r.ury);
-    pdf_dev_lineto(r.llx, r.ury);
-    pdf_dev_closepath();
-    pdf_dev_clip();
-    pdf_dev_newpath();
+    texpdf_dev_newpath();
+    texpdf_dev_moveto(r.llx, r.lly);
+    texpdf_dev_lineto(r.urx, r.lly);
+    texpdf_dev_lineto(r.urx, r.ury);
+    texpdf_dev_lineto(r.llx, r.ury);
+    texpdf_dev_closepath();
+    texpdf_dev_clip();
+    texpdf_dev_newpath();
 #else
-    pdf_dev_rectclip(doc, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
+    texpdf_dev_rectclip(doc, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
 #endif
   }
 
-  res_name = pdf_ximage_get_resname(id);
+  res_name = texpdf_ximage_get_resname(id);
   len = sprintf(work_buffer, " /%s Do", res_name);
   texpdf_doc_add_page_content(doc, work_buffer, len);  /* op: Do */
 
-  pdf_dev_grestore(doc);
+  texpdf_dev_grestore(doc);
 
   texpdf_doc_add_page_resource(doc, "XObject",
                             res_name,
-                            pdf_ximage_get_reference(id));
+                            texpdf_ximage_get_reference(id));
 
 #ifdef XETEX
   if (track_boxes) {
@@ -1862,7 +1862,7 @@ pdf_dev_put_image (pdf_doc *doc,
     pdf_rect rect;
     pdf_coord corner[4];
 
-    pdf_dev_set_rect(&rect, 65536 * ref_x, 65536 * ref_y,
+    texpdf_dev_set_rect(&rect, 65536 * ref_x, 65536 * ref_y,
 	65536 * (r.urx - r.llx), 65536 * (r.ury - r.lly), 0);
 
     corner[0].x = rect.llx; corner[0].y = rect.lly;
@@ -1874,7 +1874,7 @@ pdf_dev_put_image (pdf_doc *doc,
     for (i = 0; i < 4; ++i) {
       corner[i].x -= rect.llx;
       corner[i].y -= rect.lly;
-      pdf_dev_transform(&(corner[i]), &P);
+      texpdf_dev_transform(&(corner[i]), &P);
       corner[i].x += rect.llx;
       corner[i].y += rect.lly;
     }

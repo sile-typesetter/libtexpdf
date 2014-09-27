@@ -277,7 +277,7 @@ scan_file (ximage_info *info, FILE *fp)
 }
 
 int
-check_for_jp2 (FILE *fp)
+texpdf_check_for_jp2 (FILE *fp)
 {
   unsigned long len, lbox, tbox;
 
@@ -307,13 +307,13 @@ jp2_include_image (pdf_ximage *ximage, FILE *fp)
   pdf_obj *stream, *stream_dict;
   ximage_info info;
 
-  pdf_version = pdf_get_version();
+  pdf_version = texpdf_get_version();
   if (pdf_version < 5) {
     WARN("JPEG 2000 support requires PDF version >= 1.5 (Current setting 1.%d)\n", pdf_version);
     return -1;
   }
 
-  pdf_ximage_init_image_info(&info);
+  texpdf_ximage_init_image_info(&info);
   stream = stream_dict = NULL;
 
   rewind(fp);
@@ -322,10 +322,10 @@ jp2_include_image (pdf_ximage *ximage, FILE *fp)
     return -1;
   }
 
-  stream      = pdf_new_stream(0);
-  stream_dict = pdf_stream_dict(stream);
-  pdf_add_dict(stream_dict,
-        pdf_new_name("Filter"), pdf_new_name("JPXDecode"));
+  stream      = texpdf_new_stream(0);
+  stream_dict = texpdf_stream_dict(stream);
+  texpdf_add_dict(stream_dict,
+        texpdf_new_name("Filter"), texpdf_new_name("JPXDecode"));
   /* Read whole file */
   {
     long nb_read;
@@ -335,7 +335,7 @@ jp2_include_image (pdf_ximage *ximage, FILE *fp)
       pdf_add_stream(stream, work_buffer, nb_read);
   }
 
-  pdf_ximage_set_image(ximage, &info, stream);
+  texpdf_ximage_set_image(ximage, &info, stream);
 
   return 0;
 }
@@ -347,7 +347,7 @@ jp2_get_bbox (FILE *fp, long *width, long *height,
   int r;
   ximage_info info;
 
-  pdf_ximage_init_image_info(&info);
+  texpdf_ximage_init_image_info(&info);
 
   rewind(fp);
   r = scan_file(&info, fp);

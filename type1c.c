@@ -112,8 +112,8 @@ pdf_font_open_type1c (pdf_font *font)
     ERROR("Could not obtain neccesary font info from OpenType table.");
     return -1;
   }
-  pdf_merge_dict (descriptor, tmp); /* copy */
-  pdf_release_obj(tmp);
+  texpdf_merge_dict (descriptor, tmp); /* copy */
+  texpdf_release_obj(tmp);
   if (!embedding) { /* tt_get_fontdesc may have changed this */
     pdf_font_set_flags(font, PDF_FONT_FLAG_NOEMBED);
   }
@@ -150,11 +150,11 @@ add_SimpleMetrics (pdf_font *font, cff_font *cffont,
   else
     scaling = 1;
 
-  tmp_array = pdf_new_array();
+  tmp_array = texpdf_new_array();
   if (num_glyphs <= 1) {
     /* This should be error. */
     firstchar = lastchar = 0;
-    pdf_add_array(tmp_array, pdf_new_number(0.0));
+    pdf_add_array(tmp_array, texpdf_new_number(0.0));
   } else {
     firstchar = 255; lastchar = 0;
     for (code = 0; code < 256; code++) {
@@ -165,7 +165,7 @@ add_SimpleMetrics (pdf_font *font, cff_font *cffont,
     }
     if (firstchar > lastchar) {
       ERROR("No glyphs used at all!");
-      pdf_release_obj(tmp_array);
+      texpdf_release_obj(tmp_array);
       return;
     }
 #ifdef TEXLIVE_INTERNAL    
@@ -178,28 +178,28 @@ add_SimpleMetrics (pdf_font *font, cff_font *cffont,
         if (tfm_id < 0) /* tfm is not found */
           width = scaling * widths[code];
         else
-          width = 1000. * tfm_get_width(tfm_id, code);
+          width = 1000. * texpdf_tfm_get_width(tfm_id, code);
 #else
         width = scaling * widths[code];
 #endif
 	pdf_add_array(tmp_array,
-		      pdf_new_number(ROUND(width, 0.1)));
+		      texpdf_new_number(ROUND(width, 0.1)));
       } else {
-	pdf_add_array(tmp_array, pdf_new_number(0.0));
+	pdf_add_array(tmp_array, texpdf_new_number(0.0));
       }
     }
   }
 
   if (pdf_array_length(tmp_array) > 0) {
-    pdf_add_dict(fontdict,
-		 pdf_new_name("Widths"),  pdf_ref_obj(tmp_array));
+    texpdf_add_dict(fontdict,
+		 texpdf_new_name("Widths"),  pdf_ref_obj(tmp_array));
   }
-  pdf_release_obj(tmp_array);
+  texpdf_release_obj(tmp_array);
 
-  pdf_add_dict(fontdict,
-	       pdf_new_name("FirstChar"), pdf_new_number(firstchar));
-  pdf_add_dict(fontdict,
-	       pdf_new_name("LastChar"),  pdf_new_number(lastchar));
+  texpdf_add_dict(fontdict,
+	       texpdf_new_name("FirstChar"), texpdf_new_number(firstchar));
+  texpdf_add_dict(fontdict,
+	       texpdf_new_name("LastChar"),  texpdf_new_number(lastchar));
 
   return;
 }
@@ -323,14 +323,14 @@ pdf_font_load_type1c (pdf_font *font)
 	enc_vec[code] = NULL;
       }
     }
-    if (!pdf_lookup_dict(fontdict, "ToUnicode")) {
+    if (!texpdf_lookup_dict(fontdict, "ToUnicode")) {
       tounicode = pdf_create_ToUnicode_CMap(fullname,
 					    enc_vec, usedchars);
       if (tounicode) {
-	pdf_add_dict(fontdict,
-                     pdf_new_name("ToUnicode"),
+	texpdf_add_dict(fontdict,
+                     texpdf_new_name("ToUnicode"),
                      pdf_ref_obj (tounicode));
-	pdf_release_obj(tounicode);
+	texpdf_release_obj(tounicode);
       }
     }
   }
@@ -382,8 +382,8 @@ pdf_font_load_type1c (pdf_font *font)
     double stemv;
 
     stemv = cff_dict_get(cffont->private[0], "StdVW", 0);
-    pdf_add_dict(descriptor,
-		 pdf_new_name("StemV"), pdf_new_number(stemv));
+    texpdf_add_dict(descriptor,
+		 texpdf_new_name("StemV"), texpdf_new_number(stemv));
   }
   
   /*
@@ -703,14 +703,14 @@ pdf_font_load_type1c (pdf_font *font)
   /*
    * Write PDF FontFile data.
    */
-  fontfile    = pdf_new_stream(STREAM_COMPRESS);
-  stream_dict = pdf_stream_dict(fontfile);
-  pdf_add_dict(descriptor,
-	       pdf_new_name("FontFile3"), pdf_ref_obj (fontfile));
-  pdf_add_dict(stream_dict,
-	       pdf_new_name("Subtype"),   pdf_new_name("Type1C"));
+  fontfile    = texpdf_new_stream(STREAM_COMPRESS);
+  stream_dict = texpdf_stream_dict(fontfile);
+  texpdf_add_dict(descriptor,
+	       texpdf_new_name("FontFile3"), pdf_ref_obj (fontfile));
+  texpdf_add_dict(stream_dict,
+	       texpdf_new_name("Subtype"),   texpdf_new_name("Type1C"));
   pdf_add_stream (fontfile, (void *) stream_data_ptr, offset);
-  pdf_release_obj(fontfile);
+  texpdf_release_obj(fontfile);
 
   RELEASE(stream_data_ptr);
 

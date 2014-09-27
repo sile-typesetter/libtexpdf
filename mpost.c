@@ -89,7 +89,7 @@ mp_setfont (const char *font_name, double pt_size)
     currentfont = 0;
   }
 
-  mrec = pdf_lookup_fontmap_record(font_name);
+  mrec = texpdf_lookup_fontmap_record(font_name);
   if (mrec && mrec->charmap.sfd_name && mrec->charmap.subfont_id) {
     subfont_id = sfd_load_record(mrec->charmap.sfd_name, mrec->charmap.subfont_id);
   }
@@ -110,7 +110,7 @@ mp_setfont (const char *font_name, double pt_size)
 #ifdef TEXLIVE_INTERNAL  
   font->tfm_id     = tfm_open(font_name, 0); /* Need not exist in MP mode */
 #endif  
-  font->font_id    = pdf_dev_locate_font(name,
+  font->font_id    = texpdf_dev_locate_font(name,
                                          (spt_t) (pt_size * dev_unit_dviunit()));
 
   if (font->font_id < 0) {
@@ -177,7 +177,7 @@ is_fontname (const char *token)
 {
   fontmap_rec *mrec;
 
-  mrec = pdf_lookup_fontmap_record(token);
+  mrec = texpdf_lookup_fontmap_record(token);
   if (mrec)
     return  1;
 #ifdef TEXLIVE_INTERNAL
@@ -207,7 +207,7 @@ mps_scan_bbox (const char **pp, const char *endptr, pdf_rect *bbox)
 
       for (i = 0; i < 4; i++) {
 	skip_white(pp, endptr);
-	number = parse_number(pp, endptr);
+	number = texpdf_parse_number(pp, endptr);
 	if (!number) {
 	  break;
 	}
@@ -496,7 +496,7 @@ do_clear (void)
   while (top_stack > 0) {
     tmp = POP_STACK();
     if (tmp)
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
   }
 
   return 0;
@@ -514,7 +514,7 @@ mps_stack_clear_to (int depth)
   while (top_stack > depth) {
     tmp = POP_STACK();
     if (tmp)
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
   }
 
   return;
@@ -532,11 +532,11 @@ pop_get_numbers (double *values, int count)
       break;
     } else if (!PDF_OBJ_NUMBERTYPE(tmp)) {
       WARN("mpost: Not a number!");
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
       break;
     }
     values[count] = pdf_number_value(tmp);
-    pdf_release_obj(tmp);
+    texpdf_release_obj(tmp);
   }
 
   return (count + 1);
@@ -551,7 +551,7 @@ cvr_array (pdf_obj *array, double *values, int count)
     pdf_obj *tmp;
 
     while (count-- > 0) {
-      tmp = pdf_get_array(array, count);
+      tmp = texpdf_get_array(array, count);
       if (!PDF_OBJ_NUMBERTYPE(tmp)) {
 	WARN("mpost: Not a number!");
 	break;
@@ -560,7 +560,7 @@ cvr_array (pdf_obj *array, double *values, int count)
     }
   }
   if (array)
-    pdf_release_obj(array);
+    texpdf_release_obj(array);
 
   return (count + 1);
 }
@@ -573,18 +573,18 @@ is_fontdict (pdf_obj *dict)
   if (!PDF_OBJ_DICTTYPE(dict))
     return 0;
 
-  tmp = pdf_lookup_dict(dict, "Type");
+  tmp = texpdf_lookup_dict(dict, "Type");
   if (!tmp || !PDF_OBJ_NAMETYPE(tmp) ||
       strcmp(pdf_name_value(tmp), "Font")) {
     return 0;
   }
 
-  tmp = pdf_lookup_dict(dict, "FontName");
+  tmp = texpdf_lookup_dict(dict, "FontName");
   if (!tmp || !PDF_OBJ_NAMETYPE(tmp)) {
     return 0;
   }
 
-  tmp = pdf_lookup_dict(dict, "FontScale");
+  tmp = texpdf_lookup_dict(dict, "FontScale");
   if (!tmp || !PDF_OBJ_NUMBERTYPE(tmp)) {
     return 0;
   }
@@ -607,26 +607,26 @@ do_findfont (void)
      * The reason for this is that we cannot locate PK font without
      * font scale.
      */
-    font_dict = pdf_new_dict();
-    pdf_add_dict(font_dict,
-		 pdf_new_name("Type"), pdf_new_name("Font"));
+    font_dict = texpdf_new_dict();
+    texpdf_add_dict(font_dict,
+		 texpdf_new_name("Type"), texpdf_new_name("Font"));
     if (PDF_OBJ_STRINGTYPE(font_name)) {
-      pdf_add_dict(font_dict,
-		   pdf_new_name("FontName"),
-		   pdf_new_name(pdf_string_value(font_name)));
-      pdf_release_obj(font_name);
+      texpdf_add_dict(font_dict,
+		   texpdf_new_name("FontName"),
+		   texpdf_new_name(texpdf_string_value(font_name)));
+      texpdf_release_obj(font_name);
     } else {
-      pdf_add_dict(font_dict,
-		   pdf_new_name("FontName"), font_name);
+      texpdf_add_dict(font_dict,
+		   texpdf_new_name("FontName"), font_name);
     }
-    pdf_add_dict(font_dict,
-		 pdf_new_name("FontScale"), pdf_new_number(1.0));
+    texpdf_add_dict(font_dict,
+		 texpdf_new_name("FontScale"), texpdf_new_number(1.0));
 
     if (top_stack < PS_STACK_SIZE) {
       stack[top_stack++] = font_dict;
     } else {
       WARN("PS stack overflow including MetaPost file or inline PS code");
-      pdf_release_obj(font_dict);
+      texpdf_release_obj(font_dict);
       error = 1;
     }
   } else {
@@ -652,13 +652,13 @@ do_scalefont (void)
   if (!font_dict)
     error = 1;
   else if (is_fontdict(font_dict)) {
-    font_scale  = pdf_lookup_dict(font_dict, "FontScale");
-    pdf_set_number(font_scale, pdf_number_value(font_scale)*scale);
+    font_scale  = texpdf_lookup_dict(font_dict, "FontScale");
+    texpdf_set_number(font_scale, pdf_number_value(font_scale)*scale);
     if (top_stack < PS_STACK_SIZE) {
       stack[top_stack++] = font_dict;
     } else {
       WARN("PS stack overflow including MetaPost file or inline PS code");
-      pdf_release_obj(font_dict);
+      texpdf_release_obj(font_dict);
       error = 1;
     }
   } else {
@@ -683,12 +683,12 @@ do_setfont (void)
     /* Subfont support prevent us from managing
      * font in a single place...
      */
-    font_name  = pdf_name_value  (pdf_lookup_dict(font_dict, "FontName"));
-    font_scale = pdf_number_value(pdf_lookup_dict(font_dict, "FontScale"));
+    font_name  = pdf_name_value  (texpdf_lookup_dict(font_dict, "FontName"));
+    font_scale = pdf_number_value(texpdf_lookup_dict(font_dict, "FontScale"));
 
     error = mp_setfont(font_name, font_scale);
   }
-  pdf_release_obj(font_dict);
+  texpdf_release_obj(font_dict);
 
   return error;
 }
@@ -706,21 +706,21 @@ do_currentfont (void)
     WARN("Currentfont undefined...");
     return 1;
   } else {
-    font_dict = pdf_new_dict();
-    pdf_add_dict(font_dict,
-		 pdf_new_name("Type"),
-		 pdf_new_name("Font"));
-    pdf_add_dict(font_dict,
-		 pdf_new_name("FontName"),
-		 pdf_new_name(font->font_name));
-    pdf_add_dict(font_dict,
-		 pdf_new_name("FontScale"),
-		 pdf_new_number(font->pt_size));
+    font_dict = texpdf_new_dict();
+    texpdf_add_dict(font_dict,
+		 texpdf_new_name("Type"),
+		 texpdf_new_name("Font"));
+    texpdf_add_dict(font_dict,
+		 texpdf_new_name("FontName"),
+		 texpdf_new_name(font->font_name));
+    texpdf_add_dict(font_dict,
+		 texpdf_new_name("FontScale"),
+		 texpdf_new_number(font->pt_size));
     if (top_stack < PS_STACK_SIZE) {
       stack[top_stack++] = font_dict;
     } else {
       WARN("PS stack overflow...");
-      pdf_release_obj(font_dict);
+      texpdf_release_obj(font_dict);
       error = 1;
     }
   }
@@ -744,22 +744,22 @@ do_show (pdf_doc *p)
     return 1;
   }
 
-  pdf_dev_currentpoint(&cp);
+  texpdf_dev_currentpoint(&cp);
 
   text_str = POP_STACK();
   if (!PDF_OBJ_STRINGTYPE(text_str)) {
     if (text_str)
-      pdf_release_obj(text_str);
+      texpdf_release_obj(text_str);
     return 1;
   }
   if (font->font_id < 0) {
     WARN("mpost: not set."); /* Should not be error... */
-    pdf_release_obj(text_str);
+    texpdf_release_obj(text_str);
     return 1;
   }
 
-  strptr = pdf_string_value (text_str);
-  length = pdf_string_length(text_str);
+  strptr = texpdf_string_value (text_str);
+  length = texpdf_string_length(text_str);
 
 #ifdef TEXLIVE_INTERNAL
   if (font->tfm_id < 0) {
@@ -781,13 +781,13 @@ do_show (pdf_doc *p)
       ustr[2*i+1] = uch & 0xff;
 #ifdef TEXLIVE_INTERNAL      
       if (font->tfm_id >= 0) {
-	text_width += tfm_get_width(font->tfm_id, strptr[i]);
+	text_width += texpdf_tfm_get_width(font->tfm_id, strptr[i]);
       }
 #endif      
     }
     text_width *= font->pt_size;
 
-    pdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
+    texpdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
 		       (spt_t)(cp.y * dev_unit_dviunit()),
 		       ustr, length * 2,
 		       (spt_t)(text_width*dev_unit_dviunit()),
@@ -801,21 +801,21 @@ do_show (pdf_doc *p)
       text_width *= font->pt_size;
     }
 #endif    
-    pdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
+    texpdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
 		       (spt_t)(cp.y * dev_unit_dviunit()),
 		       strptr, length,
 		       (spt_t)(text_width*dev_unit_dviunit()),
 		       font->font_id, 0);
   }
 
-  if (pdf_dev_get_font_wmode(font->font_id)) {
-    pdf_dev_rmoveto(0.0, -text_width);
+  if (texpdf_dev_get_font_wmode(font->font_id)) {
+    texpdf_dev_rmoveto(0.0, -text_width);
   } else {
-    pdf_dev_rmoveto(text_width, 0.0);
+    texpdf_dev_rmoveto(text_width, 0.0);
   }
 
   graphics_mode(p);
-  pdf_release_obj(text_str);
+  texpdf_release_obj(text_str);
 
   return 0;
 }
@@ -875,7 +875,7 @@ do_texfig_operator (pdf_doc *p, int opcode, double x_user, double y_user)
       ERROR("endTexFig without valid startTexFig!.");
 
     texpdf_doc_end_grabbing(p, NULL);
-    pdf_dev_put_image(p, xobj_id, &fig_p, x_user, y_user, 0); /* XXX tracking_boxes */
+    texpdf_dev_put_image(p, xobj_id, &fig_p, x_user, y_user, 0); /* XXX tracking_boxes */
     in_tfig = 0;
     break;
   default:
@@ -898,7 +898,7 @@ do_texfig_operator (pdf_doc *p, int opcode, double x_user, double y_user)
 static int
 ps_dev_CTM (pdf_tmatrix *M)
 {
-  pdf_dev_currentmatrix(M);
+  texpdf_dev_currentmatrix(M);
   M->a *= DEVICE_RESOLUTION; M->b *= DEVICE_RESOLUTION;
   M->c *= DEVICE_RESOLUTION; M->d *= DEVICE_RESOLUTION;
   M->e *= DEVICE_RESOLUTION; M->f *= DEVICE_RESOLUTION;
@@ -941,32 +941,32 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
   case ADD:
     error = pop_get_numbers(values, 2);
     if (!error)
-      PUSH(pdf_new_number(values[0] + values[1]));
+      PUSH(texpdf_new_number(values[0] + values[1]));
     break;
   case MUL:
     error = pop_get_numbers(values, 2);
     if (!error)
-      PUSH(pdf_new_number(values[0]*values[1]));
+      PUSH(texpdf_new_number(values[0]*values[1]));
     break;
   case NEG:
     error = pop_get_numbers(values, 1);
     if (!error)
-      PUSH(pdf_new_number(-values[0]));
+      PUSH(texpdf_new_number(-values[0]));
     break;
   case SUB:
     error = pop_get_numbers(values, 2);
     if (!error)
-      PUSH(pdf_new_number(values[0] - values[1]));
+      PUSH(texpdf_new_number(values[0] - values[1]));
     break;
   case DIV:
     error = pop_get_numbers(values, 2);
     if (!error)
-      PUSH(pdf_new_number(values[0]/values[1]));
+      PUSH(texpdf_new_number(values[0]/values[1]));
     break;
   case TRUNCATE: /* Round toward zero. */
     error = pop_get_numbers(values, 1);
     if (!error)
-      PUSH(pdf_new_number(((values[0] > 0) ? floor(values[0]) : ceil(values[0]))));
+      PUSH(texpdf_new_number(((values[0] > 0) ? floor(values[0]) : ceil(values[0]))));
     break;
 
     /* Stack operation */
@@ -976,7 +976,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
   case POP:
     tmp = POP_STACK();
     if (tmp)
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
     break;
   case EXCH:
     error = do_exch();  
@@ -986,86 +986,86 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
   case MOVETO:
     error = pop_get_numbers(values, 2);
     if (!error)
-      error = pdf_dev_moveto(values[0], values[1]);
+      error = texpdf_dev_moveto(values[0], values[1]);
     break;
   case RMOVETO:
     error = pop_get_numbers(values, 2);
     if (!error)
-      error = pdf_dev_rmoveto(values[0], values[1]);
+      error = texpdf_dev_rmoveto(values[0], values[1]);
     break;
   case LINETO:
     error = pop_get_numbers(values, 2);
     if (!error)
-      error = pdf_dev_lineto(values[0], values[1]);
+      error = texpdf_dev_lineto(values[0], values[1]);
     break;
   case RLINETO:
     error = pop_get_numbers(values, 2);
     if (!error)
-      error = pdf_dev_rlineto(values[0], values[1]);
+      error = texpdf_dev_rlineto(values[0], values[1]);
     break;
   case CURVETO:
     error = pop_get_numbers(values, 6);
     if (!error)
-      error = pdf_dev_curveto(values[0], values[1],
+      error = texpdf_dev_curveto(values[0], values[1],
 			      values[2], values[3],
 			      values[4], values[5]);
     break;
   case RCURVETO:
     error = pop_get_numbers(values, 6);
     if (!error)
-      error = pdf_dev_rcurveto(values[0], values[1],
+      error = texpdf_dev_rcurveto(values[0], values[1],
 			       values[2], values[3],
 			       values[4], values[5]);
     break;
   case CLOSEPATH:
-    error = pdf_dev_closepath();
+    error = texpdf_dev_closepath();
     break;
   case ARC:
     error = pop_get_numbers(values, 5);
     if (!error)
-      error = pdf_dev_arc(values[0], values[1],
+      error = texpdf_dev_arc(values[0], values[1],
 			  values[2], /* rad */
 			  values[3], values[4]);
     break;
   case ARCN:
     error = pop_get_numbers(values, 5);
     if (!error)
-      error = pdf_dev_arcn(values[0], values[1],
+      error = texpdf_dev_arcn(values[0], values[1],
 			   values[2], /* rad */
 			   values[3], values[4]);
     break;
     
   case NEWPATH:
-    pdf_dev_newpath(p);
+    texpdf_dev_newpath(p);
     break;
   case STROKE:
     /* fill rule not supported yet */
-    pdf_dev_flushpath(p, 'S', PDF_FILL_RULE_NONZERO);
+    texpdf_dev_flushpath(p, 'S', PDF_FILL_RULE_NONZERO);
     break;
   case FILL:
-    pdf_dev_flushpath(p, 'f', PDF_FILL_RULE_NONZERO);
+    texpdf_dev_flushpath(p, 'f', PDF_FILL_RULE_NONZERO);
     break;
 
   case CLIP:
-    error = pdf_dev_clip(p);
+    error = texpdf_dev_clip(p);
     break;
   case EOCLIP:
-    error = pdf_dev_eoclip(p);
+    error = texpdf_dev_eoclip(p);
     break;
 
     /* Graphics state operators: */
   case GSAVE:
-    error = pdf_dev_gsave(p);
+    error = texpdf_dev_gsave(p);
     save_font();
     break;
   case GRESTORE:
-    error = pdf_dev_grestore(p);
+    error = texpdf_dev_grestore(p);
     restore_font();
     break;
 
   case CONCAT:
     tmp   = POP_STACK();
-    error = cvr_array(tmp, values, 6); /* This does pdf_release_obj() */
+    error = cvr_array(tmp, values, 6); /* This does texpdf_release_obj() */
     tmp   = NULL;
     if (error)
       WARN("Missing array before \"concat\".");
@@ -1074,7 +1074,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 		    values[0], values[1],
 		    values[2], values[3],
 		    values[4], values[5]);
-      error = pdf_dev_concat(p, &matrix);
+      error = texpdf_dev_concat(p, &matrix);
     }
     break;
   case SCALE:
@@ -1097,7 +1097,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	break;
       }
 
-      error = pdf_dev_concat(p, &matrix);
+      error = texpdf_dev_concat(p, &matrix);
     }
     break;
     /* Positive angle means clock-wise direction in graphicx-dvips??? */
@@ -1124,7 +1124,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 		      0.0,             0.0);
 	break;
       }
-      error = pdf_dev_concat(p, &matrix);
+      error = texpdf_dev_concat(p, &matrix);
     }
     break;
   case TRANSLATE:
@@ -1134,7 +1134,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 		    1.0,       0.0,
 		    0.0,       1.0,
 		    values[0], values[1]);
-      error = pdf_dev_concat(p, &matrix);
+      error = texpdf_dev_concat(p, &matrix);
     }
     break;
 
@@ -1150,80 +1150,80 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
       pattern = POP_STACK();
       if (!PDF_OBJ_ARRAYTYPE(pattern)) {
 	if (pattern)
-	  pdf_release_obj(pattern);
+	  texpdf_release_obj(pattern);
 	error = 1;
 	break;
       }
       num_dashes = pdf_array_length(pattern);
       if (num_dashes > PDF_DASH_SIZE_MAX) {
 	WARN("Too many dashes...");
-	pdf_release_obj(pattern);
+	texpdf_release_obj(pattern);
 	error = 1;
 	break;
       }
       for (i = 0;
 	   i < num_dashes && !error ; i++) {
-	dash = pdf_get_array(pattern, i);
+	dash = texpdf_get_array(pattern, i);
 	if (!PDF_OBJ_NUMBERTYPE(dash))
 	  error = 1;
 	else {
 	  dash_values[i] = pdf_number_value(dash);
 	}
       }
-      pdf_release_obj(pattern);
+      texpdf_release_obj(pattern);
       if (!error) {
-	error = pdf_dev_setdash(p, num_dashes, dash_values, offset);
+	error = texpdf_dev_setdash(p, num_dashes, dash_values, offset);
       }
     }
     break;
   case SETLINECAP:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setlinecap(p, (int)values[0]);
+      error = texpdf_dev_setlinecap(p, (int)values[0]);
     break;
   case SETLINEJOIN:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setlinejoin(p, (int)values[0]);
+      error = texpdf_dev_setlinejoin(p, (int)values[0]);
     break;
   case SETLINEWIDTH:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setlinewidth(p, values[0]);
+      error = texpdf_dev_setlinewidth(p, values[0]);
     break;
   case SETMITERLIMIT:
     error = pop_get_numbers(values, 1);
     if (!error)
-      error = pdf_dev_setmiterlimit(p, values[0]);
+      error = texpdf_dev_setmiterlimit(p, values[0]);
     break;
 
   case SETCMYKCOLOR:
     error = pop_get_numbers(values, 4);
     /* Not handled properly */
     if (!error) {
-      pdf_color_cmykcolor(&color,
+      texpdf_color_cmykcolor(&color,
 			  values[0], values[1],
 			  values[2], values[3]);
-      pdf_dev_set_strokingcolor(p, &color);
-      pdf_dev_set_nonstrokingcolor(p, &color);
+      texpdf_dev_set_strokingcolor(p, &color);
+      texpdf_dev_set_nonstrokingcolor(p, &color);
     }
     break;
   case SETGRAY:
     /* Not handled properly */
     error = pop_get_numbers(values, 1);
     if (!error) {
-      pdf_color_graycolor(&color, values[0]);
-      pdf_dev_set_strokingcolor(p, &color);
-      pdf_dev_set_nonstrokingcolor(p, &color);
+      texpdf_color_graycolor(&color, values[0]);
+      texpdf_dev_set_strokingcolor(p, &color);
+      texpdf_dev_set_nonstrokingcolor(p, &color);
     }
     break;
   case SETRGBCOLOR:
     error = pop_get_numbers(values, 3);
     if (!error) {
-      pdf_color_rgbcolor(&color,
+      texpdf_color_rgbcolor(&color,
 			 values[0], values[1], values[2]);
-      pdf_dev_set_strokingcolor(p, &color);
-      pdf_dev_set_nonstrokingcolor(p, &color);
+      texpdf_dev_set_strokingcolor(p, &color);
+      texpdf_dev_set_nonstrokingcolor(p, &color);
     }
     break;
 
@@ -1231,10 +1231,10 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
     break;
 
   case CURRENTPOINT:
-    error = pdf_dev_currentpoint(&cp);
+    error = texpdf_dev_currentpoint(&cp);
     if (!error) {
-      PUSH(pdf_new_number(cp.x));
-      PUSH(pdf_new_number(cp.y));
+      PUSH(texpdf_new_number(cp.x));
+      PUSH(texpdf_new_number(cp.y));
     }
     break;
 
@@ -1244,7 +1244,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 
       tmp = POP_STACK();
       if (PDF_OBJ_ARRAYTYPE(tmp)) {
-	error = cvr_array(tmp, values, 6); /* This does pdf_release_obj() */
+	error = cvr_array(tmp, values, 6); /* This does texpdf_release_obj() */
 	tmp   = NULL;
 	if (error)
 	  break;
@@ -1261,7 +1261,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	break;
       }
       cp.y = pdf_number_value(tmp);
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
 
       tmp = POP_STACK();
       if (!PDF_OBJ_NUMBERTYPE(tmp)) {
@@ -1269,14 +1269,14 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	break;
       }
       cp.x = pdf_number_value(tmp);
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
 
       if (!has_matrix) {
 	ps_dev_CTM(&matrix); /* Here, we need real PostScript CTM */
       }
-      pdf_dev_dtransform(&cp, &matrix);
-      PUSH(pdf_new_number(cp.x));
-      PUSH(pdf_new_number(cp.y));
+      texpdf_dev_dtransform(&cp, &matrix);
+      PUSH(texpdf_new_number(cp.x));
+      PUSH(texpdf_new_number(cp.y));
     }
     break;
 
@@ -1286,7 +1286,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 
       tmp = POP_STACK();
       if (PDF_OBJ_ARRAYTYPE(tmp)) {
-	error = cvr_array(tmp, values, 6); /* This does pdf_release_obj() */
+	error = cvr_array(tmp, values, 6); /* This does texpdf_release_obj() */
 	tmp   = NULL;
 	if (error)
 	  break;
@@ -1303,7 +1303,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	break;
       }
       cp.y = pdf_number_value(tmp);
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
 
       tmp = POP_STACK();
       if (!PDF_OBJ_NUMBERTYPE(tmp)) {
@@ -1311,14 +1311,14 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 	break;
       }
       cp.x = pdf_number_value(tmp);
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
 
       if (!has_matrix) {
 	ps_dev_CTM(&matrix); /* Here, we need real PostScript CTM */
       }
-      pdf_dev_idtransform(&cp, &matrix);
-      PUSH(pdf_new_number(cp.x));
-      PUSH(pdf_new_number(cp.y));
+      texpdf_dev_idtransform(&cp, &matrix);
+      PUSH(texpdf_new_number(cp.x));
+      PUSH(texpdf_new_number(cp.y));
       break;
     }
 
@@ -1372,7 +1372,7 @@ do_operator (pdf_doc *p, const char *token, double x_user, double y_user)
 
   default:
     if (is_fontname(token)) {
-      PUSH(pdf_new_name(token));
+      PUSH(texpdf_new_name(token));
     } else {
       WARN("Unknown token \"%s\"", token);
       error = 1;
@@ -1408,29 +1408,29 @@ mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, d
 	dump(*start, next);
 	error = 1;
       } else {
-	PUSH(pdf_new_number(value));
+	PUSH(texpdf_new_number(value));
 	*start = next;
       }
       /*
        * PDF parser can't handle PS operator inside arrays.
-       * This shouldn't use parse_pdf_array().
+       * This shouldn't use texpdf_parse_pdf_array().
        */
     } else if (**start == '[' &&
-	       (obj = parse_pdf_array(start, end, NULL))) {
+	       (obj = texpdf_parse_pdf_array(start, end, NULL))) {
       PUSH(obj);
       /* This cannot handle ASCII85 string. */
     } else if (*start < end - 1 &&
 	       (**start == '<' && *(*start+1) == '<') &&
-	       (obj = parse_pdf_dict(start, end, NULL))) {
+	       (obj = texpdf_parse_pdf_dict(start, end, NULL))) {
       PUSH(obj);
     } else if ((**start == '(' || **start == '<') &&
-	       (obj = parse_pdf_string (start, end))) {
+	       (obj = texpdf_parse_pdf_string (start, end))) {
       PUSH(obj);
     } else if (**start == '/' &&
-	       (obj = parse_pdf_name(start, end))) {
+	       (obj = texpdf_parse_pdf_name(start, end))) {
       PUSH(obj);
     } else {
-      token = parse_ident(start, end);
+      token = texpdf_parse_ident(start, end);
       if (!token)
 	error = 1;
       else {
@@ -1465,26 +1465,26 @@ mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
   int  dirmode, autorotate;
 
   /* Compatibility for dvipsk. */
-  dirmode = pdf_dev_get_dirmode();
+  dirmode = texpdf_dev_get_dirmode();
   if (dirmode) {
     mp_cmode = MP_CMODE_PTEXVERT;
   } else {
     mp_cmode = MP_CMODE_DVIPSK;
   }
 
-  autorotate = pdf_dev_get_param(PDF_DEV_PARAM_AUTOROTATE);
-  pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, 0);
-  //pdf_color_push(); /* ... */
+  autorotate = texpdf_dev_get_param(PDF_DEV_PARAM_AUTOROTATE);
+  texpdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, 0);
+  //texpdf_color_push(); /* ... */
 
   /* Comment in dvipdfm:
    * Remember that x_user and y_user are off by 0.02 %
    */
-  pdf_dev_moveto(x_user, y_user);
+  texpdf_dev_moveto(x_user, y_user);
   error = mp_parse_body(doc, p, endptr, x_user, y_user);
 
-  //pdf_color_pop(); /* ... */
-  pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, autorotate);
-  pdf_dev_set_dirmode(dirmode);
+  //texpdf_color_pop(); /* ... */
+  texpdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, autorotate);
+  texpdf_dev_set_dirmode(dirmode);
 
   return error;
 }
@@ -1495,7 +1495,7 @@ mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
  * it to record the image drawn there and bundle it
  * up in an xojbect.  This allows us to use the coordinates
  * in the MP file directly.  This appears to be the
- * easiest way to be able to use the pdf_dev_set_string()
+ * easiest way to be able to use the texpdf_dev_set_string()
  * command (with its scaled and extended fonts) without
  * getting all confused about the coordinate system.
  * After the xobject is created, the whole thing can
@@ -1545,19 +1545,19 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
   }
   skip_prolog(&p, endptr);
 
-  dirmode    = pdf_dev_get_dirmode();
-  autorotate = pdf_dev_get_param(PDF_DEV_PARAM_AUTOROTATE);
-  pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, 0);
-  //pdf_color_push();
+  dirmode    = texpdf_dev_get_dirmode();
+  autorotate = texpdf_dev_get_param(PDF_DEV_PARAM_AUTOROTATE);
+  texpdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, 0);
+  //texpdf_color_push();
 
   form_id  = texpdf_doc_begin_grabbing(doc, ident, Xorigin, Yorigin, &(info.bbox));
 
   mp_cmode = MP_CMODE_MPOST;
-  gs_depth = pdf_dev_current_depth();
+  gs_depth = texpdf_dev_current_depth();
   st_depth = mps_stack_depth();
   /* At this point the gstate must be initialized, since it starts a new
    * XObject. Note that it increase gs_depth by 1. */
-  pdf_dev_push_gstate();
+  texpdf_dev_push_gstate();
 
   error = mp_parse_body(doc, &p, endptr, 0.0, 0.0);
   RELEASE(buffer);
@@ -1569,15 +1569,15 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
   }
 
   /* It's time to pop the new gstate above. */
-  pdf_dev_pop_gstate();
+  texpdf_dev_pop_gstate();
   mps_stack_clear_to (st_depth);
-  pdf_dev_grestore_to(doc, gs_depth);
+  texpdf_dev_grestore_to(doc, gs_depth);
 
   texpdf_doc_end_grabbing(doc,NULL);
 
-  //pdf_color_pop();
-  pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, autorotate);
-  pdf_dev_set_dirmode(dirmode);
+  //texpdf_color_pop();
+  texpdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, autorotate);
+  texpdf_dev_set_dirmode(dirmode);
 
   return form_id;
 }
@@ -1616,8 +1616,8 @@ mps_do_page (pdf_doc *p, FILE *image_file)
   texpdf_doc_begin_page  (p, 1.0, -Xorigin, -Yorigin); /* scale, xorig, yorig */
   texpdf_doc_set_mediabox(p, texpdf_doc_current_page_number(p), &bbox);
 
-  dir_mode = pdf_dev_get_dirmode();
-  pdf_dev_set_autorotate(0);
+  dir_mode = texpdf_dev_get_dirmode();
+  texpdf_dev_set_autorotate(0);
 
   skip_prolog(&start, end);
 
@@ -1627,8 +1627,8 @@ mps_do_page (pdf_doc *p, FILE *image_file)
     WARN("Errors occured while interpreting MetaPost file.");
   }
 
-  pdf_dev_set_autorotate(1);
-  pdf_dev_set_dirmode(dir_mode);
+  texpdf_dev_set_autorotate(1);
+  texpdf_dev_set_dirmode(dir_mode);
 
   texpdf_doc_end_page(p);
 
@@ -1642,7 +1642,7 @@ mps_do_page (pdf_doc *p, FILE *image_file)
 }
 
 int
-check_for_mp (FILE *image_file) 
+texpdf_check_for_mp (FILE *image_file) 
 {
   int try_count = 10;
 

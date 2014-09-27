@@ -41,26 +41,26 @@
 
 #include "pdfdoc.h"
 
-extern void       pdf_color_set_verbose   (void);
+extern void       texpdf_color_set_verbose   (void);
 
-extern int        pdf_color_rgbcolor      (pdf_color *color,
+extern int        texpdf_color_rgbcolor      (pdf_color *color,
                                            double r, double g, double b);
-extern int        pdf_color_cmykcolor     (pdf_color *color,
+extern int        texpdf_color_cmykcolor     (pdf_color *color,
                                            double c, double m, double y, double k);
-extern int        pdf_color_graycolor     (pdf_color *color, double g);
-extern void       pdf_color_copycolor     (pdf_color *color1, const pdf_color *color2);
+extern int        texpdf_color_graycolor     (pdf_color *color, double g);
+extern void       texpdf_color_copycolor     (pdf_color *color1, const pdf_color *color2);
 
-#define pdf_color_black(c)   pdf_color_graycolor(c, 0.0);
-#define pdf_color_white(c)   pdf_color_graycolor(c, 1.0);
+#define texpdf_color_black(c)   texpdf_color_graycolor(c, 0.0);
+#define texpdf_color_white(c)   texpdf_color_graycolor(c, 1.0);
 
-extern void       pdf_color_brighten_color (pdf_color *dst, const pdf_color *src, double f);
+extern void       texpdf_color_brighten_color (pdf_color *dst, const pdf_color *src, double f);
 
-extern int        pdf_color_type          (const pdf_color *color);
-extern int        pdf_color_compare       (const pdf_color *color1, const pdf_color *color2);
-extern int        pdf_color_to_string     (const pdf_color *color, char *buffer);
+extern int        texpdf_color_type          (const pdf_color *color);
+extern int        texpdf_color_compare       (const pdf_color *color1, const pdf_color *color2);
+extern int        texpdf_color_to_string     (const pdf_color *color, char *buffer);
 
-extern int        pdf_color_is_white      (const pdf_color *color);
-extern int        pdf_color_is_valid      (const pdf_color *color);
+extern int        texpdf_color_is_white      (const pdf_color *color);
+extern int        texpdf_color_is_valid      (const pdf_color *color);
 
 /* Not check size */
 extern pdf_obj *iccp_get_rendering_intent (const void *profile, long proflen);
@@ -71,13 +71,13 @@ extern int      iccp_check_colorspace     (int colortype,
 extern int      iccp_load_profile (const char *ident,
 				   const void *profile, long proflen);
 
-extern void     pdf_init_colors  (void);
-extern void     pdf_close_colors (void);
+extern void     texpdf_init_colors  (void);
+extern void     texpdf_close_colors (void);
 
-extern pdf_obj *pdf_get_colorspace_reference      (int cspc_id);
+extern pdf_obj *texpdf_get_colorspace_reference      (int cspc_id);
 #if 0
-extern int      pdf_get_colorspace_num_components (int cspc_id);
-extern int      pdf_get_colorspace_subtype        (int cspc_id);
+extern int      texpdf_get_colorspace_num_components (int cspc_id);
+extern int      texpdf_get_colorspace_subtype        (int cspc_id);
 
 /* Not working */
 extern int      pdf_colorspace_load_ICCBased      (const char *ident,
@@ -87,19 +87,19 @@ extern int      pdf_colorspace_load_ICCBased      (const char *ident,
 /* Color special
  * See remark in spc_color.c.
  */
-extern void     pdf_color_set   (pdf_doc *p, pdf_color *sc, pdf_color *fc);
-extern void     pdf_color_set_default (const pdf_color *color);
-extern void     pdf_color_push  (pdf_doc *p, pdf_color *sc, pdf_color *fc);
-extern void     pdf_color_pop   (pdf_doc *p);
+extern void     texpdf_color_set   (pdf_doc *p, pdf_color *sc, pdf_color *fc);
+extern void     texpdf_color_set_default (const pdf_color *color);
+extern void     texpdf_color_push  (pdf_doc *p, pdf_color *sc, pdf_color *fc);
+extern void     texpdf_color_pop   (pdf_doc *p);
 
 /* Color stack
  */
-extern void     pdf_color_clear_stack (void);
-extern void     pdf_color_get_current (pdf_color **sc, pdf_color **fc);
+extern void     texpdf_color_clear_stack (void);
+extern void     texpdf_color_get_current (pdf_color **sc, pdf_color **fc);
 
 #if 0
 /* Reinstall color */
-extern void     pdf_dev_preserve_color(void);
+extern void     texpdf_dev_preserve_color(void);
 #endif
 
 #endif /* _PDF_COLOR_H_ */

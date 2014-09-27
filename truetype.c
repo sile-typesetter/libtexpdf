@@ -118,8 +118,8 @@ pdf_font_open_truetype (pdf_font *font)
     }
     ASSERT(pdf_obj_typeof(tmp) == PDF_DICT);
 
-    pdf_merge_dict(descriptor, tmp);
-    pdf_release_obj(tmp);
+    texpdf_merge_dict(descriptor, tmp);
+    texpdf_release_obj(tmp);
   }
 
   if (!embedding) {
@@ -144,12 +144,12 @@ pdf_font_open_truetype (pdf_font *font)
       ERROR("Font file=\"%s\" can't be embedded due to liscence restrictions.", ident);
 #endif /* ENABLE_NOEMBED */
       pdf_font_set_flags(font, PDF_FONT_FLAG_NOEMBED);
-      tmp = pdf_lookup_dict(descriptor, "Flags");
+      tmp = texpdf_lookup_dict(descriptor, "Flags");
       if (tmp && pdf_obj_typeof(tmp) == PDF_NUMBER) {
         flags  = (long) pdf_number_value(tmp);
         flags &= (1 << 2); /* clear Symbolic */
         flags |= (1 << 5); /* set Nonsymbolic */
-        pdf_add_dict(descriptor, pdf_new_name("Flags"), pdf_new_number(flags));
+        texpdf_add_dict(descriptor, texpdf_new_name("Flags"), texpdf_new_number(flags));
       }
     }
   }
@@ -158,10 +158,10 @@ pdf_font_open_truetype (pdf_font *font)
   if (fp)
     DPXFCLOSE(fp);
 
-  pdf_add_dict(fontdict,
-               pdf_new_name("Type"),    pdf_new_name("Font"));
-  pdf_add_dict(fontdict,
-               pdf_new_name("Subtype"), pdf_new_name("TrueType"));
+  texpdf_add_dict(fontdict,
+               texpdf_new_name("Type"),    texpdf_new_name("Font"));
+  texpdf_add_dict(fontdict,
+               texpdf_new_name("Subtype"), texpdf_new_name("TrueType"));
 
   return  0;
 }
@@ -203,7 +203,7 @@ do_widths (pdf_font *font, double *widths)
   fontdict   = pdf_font_get_resource  (font);
   usedchars  = pdf_font_get_usedchars (font);
 
-  tmparray = pdf_new_array();
+  tmparray = texpdf_new_array();
   for (firstchar = 255, lastchar = 0, code = 0; code < 256; code++) {
     if (usedchars[code]) {
       if (code < firstchar) firstchar = code;
@@ -212,7 +212,7 @@ do_widths (pdf_font *font, double *widths)
   }
   if (firstchar > lastchar) {
     WARN("No glyphs actually used???");
-    pdf_release_obj(tmparray);
+    texpdf_release_obj(tmparray);
     return;
   }
 #ifdef TEXLIVE_INTERNAL
@@ -225,27 +225,27 @@ do_widths (pdf_font *font, double *widths)
       if (tfm_id < 0) /* tfm is not found */      
         width = widths[code];
       else
-        width = 1000. * tfm_get_width(tfm_id, code);
+        width = 1000. * texpdf_tfm_get_width(tfm_id, code);
 #else
       width = widths[code];
 #endif
       pdf_add_array(tmparray,
-                    pdf_new_number(ROUND(width, 0.1)));
+                    texpdf_new_number(ROUND(width, 0.1)));
     } else {
-      pdf_add_array(tmparray, pdf_new_number(0.0));
+      pdf_add_array(tmparray, texpdf_new_number(0.0));
     }
   }
 
   if (pdf_array_length(tmparray) > 0) {
-    pdf_add_dict(fontdict,
-                 pdf_new_name("Widths"), pdf_ref_obj(tmparray));
+    texpdf_add_dict(fontdict,
+                 texpdf_new_name("Widths"), pdf_ref_obj(tmparray));
   }
-  pdf_release_obj(tmparray);
+  texpdf_release_obj(tmparray);
 
-  pdf_add_dict(fontdict,
-               pdf_new_name("FirstChar"), pdf_new_number(firstchar));
-  pdf_add_dict(fontdict,
-               pdf_new_name("LastChar"),  pdf_new_number(lastchar));
+  texpdf_add_dict(fontdict,
+               texpdf_new_name("FirstChar"), texpdf_new_number(firstchar));
+  texpdf_add_dict(fontdict,
+               texpdf_new_name("LastChar"),  texpdf_new_number(lastchar));
 
   return;
 }
@@ -966,9 +966,9 @@ pdf_font_load_truetype (pdf_font *font)
   if (verbose > 1)
     MESG("[%ld bytes]", pdf_stream_length(fontfile));
 
-  pdf_add_dict(descriptor,
-               pdf_new_name("FontFile2"), pdf_ref_obj(fontfile)); /* XXX */
-  pdf_release_obj(fontfile);
+  texpdf_add_dict(descriptor,
+               texpdf_new_name("FontFile2"), pdf_ref_obj(fontfile)); /* XXX */
+  texpdf_release_obj(fontfile);
 
   return  0;
 }

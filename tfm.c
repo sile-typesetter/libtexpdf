@@ -391,7 +391,7 @@ tfm_check_size (struct tfm_font *tfm, off_t tfm_file_size)
 }
 
 static void
-tfm_get_sizes (FILE *tfm_file, off_t tfm_file_size, struct tfm_font *tfm)
+texpdf_tfm_get_sizes (FILE *tfm_file, off_t tfm_file_size, struct tfm_font *tfm)
 {
 #ifndef WITHOUT_ASCII_PTEX
   {
@@ -769,7 +769,7 @@ read_tfm (struct font_metric *fm, FILE *tfm_file, off_t tfm_file_size)
 
   tfm_font_init(&tfm);
 
-  tfm_get_sizes(tfm_file, tfm_file_size, &tfm);
+  texpdf_tfm_get_sizes(tfm_file, tfm_file_size, &tfm);
   fm->firstchar = tfm.bc;
   fm->lastchar  = tfm.ec;
   if (tfm.wlenheader > 0) {
@@ -954,7 +954,7 @@ tfm_close_all (void)
 } while (0)
 
 fixword
-tfm_get_fw_width (int font_id, int32_t ch)
+texpdf_tfm_get_fw_width (int font_id, int32_t ch)
 {
   struct font_metric *fm;
   int idx = 0;
@@ -985,7 +985,7 @@ tfm_get_fw_width (int font_id, int32_t ch)
 }
 
 fixword
-tfm_get_fw_height (int font_id, int32_t ch)
+texpdf_tfm_get_fw_height (int font_id, int32_t ch)
 {
   struct font_metric *fm;
   int idx = 0;
@@ -1016,7 +1016,7 @@ tfm_get_fw_height (int font_id, int32_t ch)
 }
 
 fixword
-tfm_get_fw_depth (int font_id, int32_t ch)
+texpdf_tfm_get_fw_depth (int font_id, int32_t ch)
 {
   struct font_metric *fm;
   int idx = 0;
@@ -1048,26 +1048,26 @@ tfm_get_fw_depth (int font_id, int32_t ch)
 
 
 /*
- * tfm_get_width returns the width of the font
+ * texpdf_tfm_get_width returns the width of the font
  * as a (double) fraction of the design size.
  */
 double
-tfm_get_width (int font_id, int32_t ch)
+texpdf_tfm_get_width (int font_id, int32_t ch)
 {
-  return ((double) tfm_get_fw_width(font_id, ch)/FWBASE);
+  return ((double) texpdf_tfm_get_fw_width(font_id, ch)/FWBASE);
 }
 
 #if 0
 double
-tfm_get_height (int font_id, int32_t ch)
+texpdf_tfm_get_height (int font_id, int32_t ch)
 {
-  return ((double) tfm_get_fw_height(font_id, ch)/FWBASE);
+  return ((double) texpdf_tfm_get_fw_height(font_id, ch)/FWBASE);
 }
 
 double
-tfm_get_depth (int font_id, Sint32_t ch)
+texpdf_tfm_get_depth (int font_id, Sint32_t ch)
 {
-  return ((double) tfm_get_fw_depth(font_id, ch)/FWBASE);
+  return ((double) texpdf_tfm_get_fw_depth(font_id, ch)/FWBASE);
 }
 #endif
 
@@ -1088,12 +1088,12 @@ tfm_string_width (int font_id, const unsigned char *s, unsigned len)
       int32_t ch;
 
       ch = (s[2*i] << 8)|s[2*i+1];
-      result += tfm_get_fw_width(font_id, ch);
+      result += texpdf_tfm_get_fw_width(font_id, ch);
     }
   } else
 #endif
     for (i = 0; i < len; i++) {
-      result += tfm_get_fw_width(font_id, s[i]);
+      result += texpdf_tfm_get_fw_width(font_id, s[i]);
     }
 
   return result;
@@ -1115,12 +1115,12 @@ tfm_string_depth (int font_id, const unsigned char *s, unsigned len)
       int32_t ch;
 
       ch = (s[2*i] << 8)|s[2*i+1];
-      result += tfm_get_fw_depth(font_id, ch);
+      result += texpdf_tfm_get_fw_depth(font_id, ch);
     }
   } else
 #endif
     for (i = 0; i < len; i++) {
-      result = MAX(result, tfm_get_fw_depth(font_id, s[i]));
+      result = MAX(result, texpdf_tfm_get_fw_depth(font_id, s[i]));
     }
 
   return result;
@@ -1142,19 +1142,19 @@ tfm_string_height (int font_id, const unsigned char *s, unsigned len)
       int32_t ch;
 
       ch = (s[2*i] << 8)|s[2*i+1];
-      result += tfm_get_fw_height(font_id, ch);
+      result += texpdf_tfm_get_fw_height(font_id, ch);
     }
   } else
 #endif
     for (i = 0; i < len; i++) {
-      result = MAX(result, tfm_get_fw_height(font_id, s[i]));
+      result = MAX(result, texpdf_tfm_get_fw_height(font_id, s[i]));
     }
 
   return result;
 }
 
 double
-tfm_get_design_size (int font_id)
+texpdf_tfm_get_design_size (int font_id)
 {
   CHECK_ID(font_id);
 
@@ -1163,7 +1163,7 @@ tfm_get_design_size (int font_id)
 
 #if 0
 char *
-tfm_get_codingscheme (int font_id)
+texpdf_tfm_get_codingscheme (int font_id)
 {
   CHECK_ID(font_id);
 

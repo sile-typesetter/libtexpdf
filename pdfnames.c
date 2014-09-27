@@ -61,7 +61,7 @@ hval_free (void *hval)
   value = (struct obj_data *) hval;
 
   if (value->object) {
-    pdf_release_obj(value->object);
+    texpdf_release_obj(value->object);
     value->object     = NULL;
   }
 
@@ -71,7 +71,7 @@ hval_free (void *hval)
 }
 
 struct ht_table *
-pdf_new_name_tree (void)
+texpdf_new_name_tree (void)
 {
   struct ht_table *names;
 
@@ -96,7 +96,7 @@ check_objects_defined (struct ht_table *ht_tab)
       value = ht_iter_getval(&iter);
       ASSERT(value->object);
       if (PDF_OBJ_UNDEFINED(value->object)) {
-	pdf_names_add_object(ht_tab, key, keylen, pdf_new_null());
+	texpdf_names_add_object(ht_tab, key, keylen, texpdf_new_null());
 	WARN("Object @%s used, but not defined. Replaced by null.",
 	     printable_key(key, keylen));
       }
@@ -106,7 +106,7 @@ check_objects_defined (struct ht_table *ht_tab)
 }
 
 void
-pdf_delete_name_tree (struct ht_table **names)
+texpdf_delete_name_tree (struct ht_table **names)
 {
   ASSERT(names && *names);
 
@@ -118,7 +118,7 @@ pdf_delete_name_tree (struct ht_table **names)
 }
 
 int
-pdf_names_add_object (struct ht_table *names,
+texpdf_names_add_object (struct ht_table *names,
 		      const void *key, int keylen, pdf_obj *object)
 {
   struct obj_data *value;
@@ -140,11 +140,11 @@ pdf_names_add_object (struct ht_table *names,
     ASSERT(value->object);
     if (PDF_OBJ_UNDEFINED(value->object)) {
       pdf_transfer_label(object, value->object);
-      pdf_release_obj(value->object);
+      texpdf_release_obj(value->object);
       value->object = object;
     } else {
       WARN("Object @%s already defined.", printable_key(key, keylen));
-      pdf_release_obj(object);
+      texpdf_release_obj(object);
       return -1;
     }
   }
@@ -156,7 +156,7 @@ pdf_names_add_object (struct ht_table *names,
  * The following routine returns copies, not the original object.
  */
 pdf_obj *
-pdf_names_lookup_reference (struct ht_table *names,
+texpdf_names_lookup_reference (struct ht_table *names,
 			    const void *key, int keylen)
 {
   struct obj_data *value;
@@ -174,15 +174,15 @@ pdf_names_lookup_reference (struct ht_table *names,
      * of a dictionary entry, a null object is be equivalent to no entry
      * at all. This matters for optimization of PDF destinations.
      */
-    object = pdf_new_undefined();
-    pdf_names_add_object(names, key, keylen, object);
+    object = texpdf_new_undefined();
+    texpdf_names_add_object(names, key, keylen, object);
   }
 
   return pdf_ref_obj(object);
 }
 
 pdf_obj *
-pdf_names_lookup_object (struct ht_table *names,
+texpdf_names_lookup_object (struct ht_table *names,
 			 const void *key, int keylen)
 {
   struct obj_data *value;
@@ -198,7 +198,7 @@ pdf_names_lookup_object (struct ht_table *names,
 }
 
 int
-pdf_names_close_object (struct ht_table *names,
+texpdf_names_close_object (struct ht_table *names,
 			const void *key, int keylen)
 {
   struct obj_data *value;
@@ -260,7 +260,7 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
   pdf_obj *result;
   int      i;
 
-  result = pdf_new_dict();
+  result = texpdf_new_dict();
   /*
    * According to PDF Refrence, Third Edition (p.101-102), a name tree
    * always has exactly one root node, which contains a SINGLE entry:
@@ -274,11 +274,11 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
     struct named_object *last;
     pdf_obj *limits;
 
-    limits = pdf_new_array();
+    limits = texpdf_new_array();
     last   = &first[num_leaves - 1];
-    pdf_add_array(limits, pdf_new_string(first->key, first->keylen));
-    pdf_add_array(limits, pdf_new_string(last->key , last->keylen ));
-    pdf_add_dict (result, pdf_new_name("Limits"),    limits);
+    pdf_add_array(limits, texpdf_new_string(first->key, first->keylen));
+    pdf_add_array(limits, texpdf_new_string(last->key , last->keylen ));
+    texpdf_add_dict (result, texpdf_new_name("Limits"),    limits);
   }
 
   if (num_leaves > 0 &&
@@ -286,12 +286,12 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
     pdf_obj *names;
 
     /* Create leaf nodes. */
-    names = pdf_new_array();
+    names = texpdf_new_array();
     for (i = 0; i < num_leaves; i++) {
       struct named_object *cur;
 
       cur = &first[i];
-      pdf_add_array(names, pdf_new_string(cur->key, cur->keylen));
+      pdf_add_array(names, texpdf_new_string(cur->key, cur->keylen));
       switch (PDF_OBJ_TYPEOF(cur->value)) {
       case PDF_ARRAY:
       case PDF_DICT:
@@ -305,15 +305,15 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
 	pdf_add_array(names, pdf_link_obj(cur->value));
 	break;
       }
-      pdf_release_obj(cur->value);
+      texpdf_release_obj(cur->value);
       cur->value = NULL;
     }
-    pdf_add_dict(result, pdf_new_name("Names"), names);
+    texpdf_add_dict(result, texpdf_new_name("Names"), names);
   } else if (num_leaves > 0) {
     pdf_obj *kids;
 
     /* Intermediate node */
-    kids = pdf_new_array();
+    kids = texpdf_new_array();
     for (i = 0; i < NAME_CLUSTER; i++) {
       pdf_obj *subtree;
       long     start, end;
@@ -322,9 +322,9 @@ build_name_tree (struct named_object *first, long num_leaves, int is_root)
       end   = ((i+1)*num_leaves) / NAME_CLUSTER;
       subtree = build_name_tree(&first[start], (end - start), 0);
       pdf_add_array  (kids, pdf_ref_obj(subtree));
-      pdf_release_obj(subtree);
+      texpdf_release_obj(subtree);
     }
-    pdf_add_dict(result, pdf_new_name("Kids"), kids);
+    texpdf_add_dict(result, texpdf_new_name("Kids"), kids);
   }
 
   return result;
@@ -356,8 +356,8 @@ flat_table (struct ht_table *ht_tab, long *num_entries,
 	if (!new_obj)
 	  continue;
 
-	key = pdf_string_value(new_obj);
-	keylen = pdf_string_length(new_obj);
+	key = texpdf_string_value(new_obj);
+	keylen = texpdf_string_length(new_obj);
       }
 
       value = ht_iter_getval(&iter);
@@ -367,7 +367,7 @@ flat_table (struct ht_table *ht_tab, long *num_entries,
 	     printable_key(key, keylen));
 	objects[count].key    = (char *) key;
 	objects[count].keylen = keylen;
-	objects[count].value  = pdf_new_null();
+	objects[count].value  = texpdf_new_null();
       } else if (value->object) {
 	objects[count].key    = (char *) key;
 	objects[count].keylen = keylen;
@@ -385,7 +385,7 @@ flat_table (struct ht_table *ht_tab, long *num_entries,
 }
 
 pdf_obj *
-pdf_names_create_tree (struct ht_table *names, long *count,
+texpdf_names_create_tree (struct ht_table *names, long *count,
 		       struct ht_table *filter)
 {
   pdf_obj *name_tree;

@@ -184,7 +184,7 @@ static void     jpeg_get_density (struct JPEG_info *j_info,
 				  double *xdensity, double *ydensity);
 
 int
-check_for_jpeg (FILE *fp)
+texpdf_check_for_jpeg (FILE *fp)
 {
   unsigned char jpeg_sig[2];
 
@@ -207,14 +207,14 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
   ximage_info info;
   struct JPEG_info j_info;
 
-  if (!check_for_jpeg(fp)) {
+  if (!texpdf_check_for_jpeg(fp)) {
     WARN("%s: Not a JPEG file?", JPEG_DEBUG_STR);
     rewind(fp);
     return -1;
   }
   /* File position is 2 here... */
 
-  pdf_ximage_init_image_info(&info);
+  texpdf_ximage_init_image_info(&info);
 
   JPEG_info_init(&j_info);
 
@@ -242,10 +242,10 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
   }
 
   /* JPEG image use DCTDecode. */
-  stream      = pdf_new_stream (0);
-  stream_dict = pdf_stream_dict(stream);
-  pdf_add_dict(stream_dict,
-	       pdf_new_name("Filter"), pdf_new_name("DCTDecode"));
+  stream      = texpdf_new_stream (0);
+  stream_dict = texpdf_stream_dict(stream);
+  texpdf_add_dict(stream_dict,
+	       texpdf_new_name("Filter"), texpdf_new_name("DCTDecode"));
 
   colorspace  = NULL;
   if (j_info.flags & HAVE_APPn_ICC) {
@@ -269,14 +269,14 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
 	if (cspc_id < 0)
 	  colorspace = NULL;
 	else {
-	  colorspace = pdf_get_colorspace_reference(cspc_id);
+	  colorspace = texpdf_get_colorspace_reference(cspc_id);
 	  intent     = iccp_get_rendering_intent(pdf_stream_dataptr(icc_stream),
 						 pdf_stream_length (icc_stream));
 	  if (intent)
-	    pdf_add_dict(stream_dict, pdf_new_name("Intent"), intent);
+	    texpdf_add_dict(stream_dict, texpdf_new_name("Intent"), intent);
 	}
       }
-      pdf_release_obj(icc_stream);
+      texpdf_release_obj(icc_stream);
     }
   }
 
@@ -284,17 +284,17 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
   if (!colorspace) {
     switch (colortype) {
     case PDF_COLORSPACE_TYPE_GRAY:
-      colorspace = pdf_new_name("DeviceGray");
+      colorspace = texpdf_new_name("DeviceGray");
       break;
     case PDF_COLORSPACE_TYPE_RGB:
-      colorspace = pdf_new_name("DeviceRGB");
+      colorspace = texpdf_new_name("DeviceRGB");
       break;
     case PDF_COLORSPACE_TYPE_CMYK:
-      colorspace = pdf_new_name("DeviceCMYK");
+      colorspace = texpdf_new_name("DeviceCMYK");
       break;
     }
   }
-  pdf_add_dict(stream_dict, pdf_new_name("ColorSpace"), colorspace);
+  texpdf_add_dict(stream_dict, texpdf_new_name("ColorSpace"), colorspace);
 
 #define IS_ADOBE_CMYK(j) (((j).flags & HAVE_APPn_ADOBE) && (j).num_components == 4)
 
@@ -303,12 +303,12 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
     int      i;
 
     WARN("Adobe CMYK JPEG: Inverted color assumed.");
-    decode = pdf_new_array();
+    decode = texpdf_new_array();
     for (i = 0; i < j_info.num_components; i++) {
-      pdf_add_array(decode, pdf_new_number(1.0));
-      pdf_add_array(decode, pdf_new_number(0.0));
+      pdf_add_array(decode, texpdf_new_number(1.0));
+      pdf_add_array(decode, texpdf_new_number(0.0));
     }
-    pdf_add_dict(stream_dict, pdf_new_name("Decode"), decode);
+    texpdf_add_dict(stream_dict, texpdf_new_name("Decode"), decode);
   }
 
   /* Copy file */
@@ -321,7 +321,7 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
 
   jpeg_get_density(&j_info, &info.xdensity, &info.ydensity);
 
-  pdf_ximage_set_image(ximage, &info, stream);
+  texpdf_ximage_set_image(ximage, &info, stream);
   JPEG_info_clear(&j_info);
 
   return 0;
@@ -441,7 +441,7 @@ JPEG_get_iccp (struct JPEG_info *j_info)
   struct JPEG_APPn_ICC *icc;
   int i, prev_id = 0, num_icc_seg = -1;
 
-  icc_stream = pdf_new_stream(STREAM_COMPRESS);
+  icc_stream = texpdf_new_stream(STREAM_COMPRESS);
   for (i = 0; i < j_info->num_appn; i++) {
     if (j_info->appn[i].marker  != JM_APP2 ||
 	j_info->appn[i].app_sig != JS_APPn_ICC)
@@ -455,7 +455,7 @@ JPEG_get_iccp (struct JPEG_info *j_info)
 	       icc->seq_id  > icc->num_chunks) {
       WARN("Invalid JPEG ICC chunk: %d (p:%d, n:%d)",
 	   icc->seq_id, prev_id, icc->num_chunks);
-      pdf_release_obj(icc_stream);
+      texpdf_release_obj(icc_stream);
       icc_stream = NULL;
       break;
     }

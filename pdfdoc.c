@@ -64,19 +64,19 @@ read_thumbnail (pdf_doc *p, const char *thumb_filename)
     WARN("Could not open thumbnail file \"%s\"", thumb_filename);
     return NULL;
   }
-  if (!check_for_png(fp) && !check_for_jpeg(fp)) {
+  if (!texpdf_check_for_png(fp) && !texpdf_check_for_jpeg(fp)) {
     WARN("Thumbnail \"%s\" not a png/jpeg file!", thumb_filename);
     MFCLOSE(fp);
     return NULL;
   }
   MFCLOSE(fp);
 
-  xobj_id = pdf_ximage_findresource(p, thumb_filename, 0, NULL);
+  xobj_id = texpdf_ximage_findresource(p, thumb_filename, 0, NULL);
   if (xobj_id < 0) {
     WARN("Could not read thumbnail file \"%s\".", thumb_filename);
     image_ref = NULL;
   } else {
-    image_ref = pdf_ximage_get_reference(xobj_id);
+    image_ref = texpdf_ximage_get_reference(xobj_id);
   }
 
   return image_ref;
@@ -87,8 +87,8 @@ texpdf_doc_set_verbose (void)
 {
   verbose++;
   pdf_font_set_verbose();
-  pdf_color_set_verbose();
-  pdf_ximage_set_verbose();
+  texpdf_color_set_verbose();
+  texpdf_ximage_set_verbose();
 }
 
 typedef struct pdf_form
@@ -128,8 +128,8 @@ pdf_doc_init_catalog (pdf_doc *p)
   p->root.names      = NULL;
   p->root.threads    = NULL;
   
-  p->root.dict = pdf_new_dict();
-  pdf_set_root(p->root.dict);
+  p->root.dict = texpdf_new_dict();
+  texpdf_set_root(p->root.dict);
 
   return;
 }
@@ -140,43 +140,43 @@ pdf_doc_close_catalog (pdf_doc *p)
   pdf_obj *tmp;
 
   if (p->root.viewerpref) {
-    tmp = pdf_lookup_dict(p->root.dict, "ViewerPreferences");
+    tmp = texpdf_lookup_dict(p->root.dict, "ViewerPreferences");
     if (!tmp) {
-      pdf_add_dict(p->root.dict,
-                   pdf_new_name("ViewerPreferences"),
+      texpdf_add_dict(p->root.dict,
+                   texpdf_new_name("ViewerPreferences"),
                    pdf_ref_obj (p->root.viewerpref));
     } else if (PDF_OBJ_DICTTYPE(tmp)) {
-      pdf_merge_dict(p->root.viewerpref, tmp);
-      pdf_add_dict(p->root.dict,
-                   pdf_new_name("ViewerPreferences"),
+      texpdf_merge_dict(p->root.viewerpref, tmp);
+      texpdf_add_dict(p->root.dict,
+                   texpdf_new_name("ViewerPreferences"),
                    pdf_ref_obj (p->root.viewerpref));
     } else { /* Maybe reference */
       /* What should I do? */
       WARN("Could not modify ViewerPreferences.");
     }
-    pdf_release_obj(p->root.viewerpref);
+    texpdf_release_obj(p->root.viewerpref);
     p->root.viewerpref = NULL;
   }
 
   if (p->root.pagelabels) {
-    tmp = pdf_lookup_dict(p->root.dict, "PageLabels");
+    tmp = texpdf_lookup_dict(p->root.dict, "PageLabels");
     if (!tmp) {
-      tmp = pdf_new_dict();
-      pdf_add_dict(tmp, pdf_new_name("Nums"),  pdf_link_obj(p->root.pagelabels));
-      pdf_add_dict(p->root.dict,
-                   pdf_new_name("PageLabels"), pdf_ref_obj(tmp));
-      pdf_release_obj(tmp);
+      tmp = texpdf_new_dict();
+      texpdf_add_dict(tmp, texpdf_new_name("Nums"),  pdf_link_obj(p->root.pagelabels));
+      texpdf_add_dict(p->root.dict,
+                   texpdf_new_name("PageLabels"), pdf_ref_obj(tmp));
+      texpdf_release_obj(tmp);
     } else { /* Maybe reference */
       /* What should I do? */
       WARN("Could not modify PageLabels.");
     }
-    pdf_release_obj(p->root.pagelabels);
+    texpdf_release_obj(p->root.pagelabels);
     p->root.pagelabels = NULL;
   }
 
-  pdf_add_dict(p->root.dict,
-               pdf_new_name("Type"), pdf_new_name("Catalog"));
-  pdf_release_obj(p->root.dict);
+  texpdf_add_dict(p->root.dict,
+               texpdf_new_name("Type"), texpdf_new_name("Catalog"));
+  texpdf_release_obj(p->root.dict);
   p->root.dict = NULL;
 
   return;
@@ -260,12 +260,12 @@ texpdf_doc_set_bop_content (pdf_doc *p, const char *content, unsigned length)
   ASSERT(p);
 
   if (p->pages.bop) {
-    pdf_release_obj(p->pages.bop);
+    texpdf_release_obj(p->pages.bop);
     p->pages.bop = NULL;
   }
 
   if (length > 0) {
-    p->pages.bop = pdf_new_stream(STREAM_COMPRESS);
+    p->pages.bop = texpdf_new_stream(STREAM_COMPRESS);
     pdf_add_stream(p->pages.bop, content, length);
   } else {
     p->pages.bop = NULL;
@@ -278,12 +278,12 @@ void
 texpdf_doc_set_eop_content (pdf_doc *p, const char *content, unsigned length)
 {
   if (p->pages.eop) {
-    pdf_release_obj(p->pages.eop);
+    texpdf_release_obj(p->pages.eop);
     p->pages.eop = NULL;
   }
 
   if (length > 0) {
-    p->pages.eop = pdf_new_stream(STREAM_COMPRESS);
+    p->pages.eop = texpdf_new_stream(STREAM_COMPRESS);
     pdf_add_stream(p->pages.eop, content, length);
   } else {
     p->pages.eop = NULL;
@@ -350,8 +350,8 @@ asn_date (char *date_string)
 static void
 pdf_doc_init_docinfo (pdf_doc *p)
 {
-  p->info = pdf_new_dict();
-  pdf_set_info(p->info);
+  p->info = texpdf_new_dict();
+  texpdf_set_info(p->info);
 
   return;
 }
@@ -383,40 +383,40 @@ pdf_doc_close_docinfo (pdf_doc *p)
   int      i;
 
   for (i = 0; keys[i] != NULL; i++) {
-    value = pdf_lookup_dict(docinfo, keys[i]);
+    value = texpdf_lookup_dict(docinfo, keys[i]);
     if (value) {
       if (!PDF_OBJ_STRINGTYPE(value)) {
         WARN("\"%s\" in DocInfo dictionary not string type.", keys[i]);
-        pdf_remove_dict(docinfo, keys[i]);
+        texpdf_remove_dict(docinfo, keys[i]);
         WARN("\"%s\" removed from DocInfo.", keys[i]);
-      } else if (pdf_string_length(value) == 0) {
+      } else if (texpdf_string_length(value) == 0) {
         /* The hyperref package often uses emtpy strings. */
-        pdf_remove_dict(docinfo, keys[i]);
+        texpdf_remove_dict(docinfo, keys[i]);
       }
     }
   }
 
-  if (!pdf_lookup_dict(docinfo, "Producer")) {
+  if (!texpdf_lookup_dict(docinfo, "Producer")) {
     char *banner;
 
     banner = NEW(strlen(my_name)+strlen(VERSION)+4, char);
     sprintf(banner, "%s (%s)", my_name, VERSION);
-    pdf_add_dict(docinfo,
-                 pdf_new_name("Producer"),
-                 pdf_new_string(banner, strlen(banner)));
+    texpdf_add_dict(docinfo,
+                 texpdf_new_name("Producer"),
+                 texpdf_new_string(banner, strlen(banner)));
     RELEASE(banner);
   }
   
-  if (!pdf_lookup_dict(docinfo, "CreationDate")) {
+  if (!texpdf_lookup_dict(docinfo, "CreationDate")) {
     char now[32];
 
     asn_date(now);
-    pdf_add_dict(docinfo, 
-                 pdf_new_name ("CreationDate"),
-                 pdf_new_string(now, strlen(now)));
+    texpdf_add_dict(docinfo, 
+                 texpdf_new_name ("CreationDate"),
+                 texpdf_new_string(now, strlen(now)));
   }
 
-  pdf_release_obj(docinfo);
+  texpdf_release_obj(docinfo);
   p->info = NULL;
 
   return;
@@ -437,20 +437,20 @@ texpdf_doc_get_page_resources (pdf_doc *p, const char *category)
     if (p->pending_forms->form.resources) {
       res_dict = p->pending_forms->form.resources;
     } else {
-      res_dict = p->pending_forms->form.resources = pdf_new_dict();
+      res_dict = p->pending_forms->form.resources = texpdf_new_dict();
     }
   } else {
     currentpage = LASTPAGE(p);
     if (currentpage->resources) {
       res_dict = currentpage->resources;
     } else {
-      res_dict = currentpage->resources = pdf_new_dict();
+      res_dict = currentpage->resources = texpdf_new_dict();
     }
   }
-  resources = pdf_lookup_dict(res_dict, category);
+  resources = texpdf_lookup_dict(res_dict, category);
   if (!resources) {
-    resources = pdf_new_dict();
-    pdf_add_dict(res_dict, pdf_new_name(category), resources);
+    resources = texpdf_new_dict();
+    texpdf_add_dict(res_dict, texpdf_new_name(category), resources);
   }
 
   return resources;
@@ -468,14 +468,14 @@ texpdf_doc_add_page_resource (pdf_doc *p, const char *category,
     resource_ref = pdf_ref_obj(resource_ref); /* leak */
   }
   resources = texpdf_doc_get_page_resources(p, category);
-  duplicate = pdf_lookup_dict(resources, resource_name);
+  duplicate = texpdf_lookup_dict(resources, resource_name);
   if (duplicate && pdf_compare_reference(duplicate, resource_ref)) {
     WARN("Conflicting page resource found (page: %ld, category: %s, name: %s).",
          texpdf_doc_current_page_number(p), category, resource_name);
     WARN("Ignoring...");
-    pdf_release_obj(resource_ref);
+    texpdf_release_obj(resource_ref);
   } else {
-    pdf_add_dict(resources, pdf_new_name(resource_name), resource_ref);
+    texpdf_add_dict(resources, texpdf_new_name(resource_name), resource_ref);
   }
 
   return;
@@ -487,10 +487,10 @@ doc_flush_page (pdf_doc *p, pdf_page *page, pdf_obj *parent_ref)
   pdf_obj *contents_array;
   int      count;
 
-  pdf_add_dict(page->page_obj,
-               pdf_new_name("Type"), pdf_new_name("Page"));
-  pdf_add_dict(page->page_obj,
-               pdf_new_name("Parent"), parent_ref);
+  texpdf_add_dict(page->page_obj,
+               texpdf_new_name("Type"), texpdf_new_name("Page"));
+  texpdf_add_dict(page->page_obj,
+               texpdf_new_name("Parent"), parent_ref);
 
   /*
    * Clipping area specified by CropBox is affected by MediaBox which
@@ -501,20 +501,20 @@ doc_flush_page (pdf_doc *p, pdf_page *page, pdf_obj *parent_ref)
   if (page->flags & USE_MY_MEDIABOX) {
     pdf_obj *mediabox;
 
-    mediabox = pdf_new_array();
+    mediabox = texpdf_new_array();
     pdf_add_array(mediabox,
-                  pdf_new_number(ROUND(page->cropbox.llx, 0.01)));
+                  texpdf_new_number(ROUND(page->cropbox.llx, 0.01)));
     pdf_add_array(mediabox,
-                  pdf_new_number(ROUND(page->cropbox.lly, 0.01)));
+                  texpdf_new_number(ROUND(page->cropbox.lly, 0.01)));
     pdf_add_array(mediabox,
-                  pdf_new_number(ROUND(page->cropbox.urx, 0.01)));
+                  texpdf_new_number(ROUND(page->cropbox.urx, 0.01)));
     pdf_add_array(mediabox,
-                  pdf_new_number(ROUND(page->cropbox.ury, 0.01)));
-    pdf_add_dict(page->page_obj, pdf_new_name("MediaBox"),  mediabox);
+                  texpdf_new_number(ROUND(page->cropbox.ury, 0.01)));
+    texpdf_add_dict(page->page_obj, texpdf_new_name("MediaBox"),  mediabox);
   }
 
   count = 0;
-  contents_array = pdf_new_array();
+  contents_array = texpdf_new_array();
   if (page->content_refs[0]) { /* global bop */
     pdf_add_array(contents_array, page->content_refs[0]);
     count++;
@@ -548,22 +548,22 @@ doc_flush_page (pdf_doc *p, pdf_page *page, pdf_obj *parent_ref)
   page->content_refs[2] = NULL;
   page->content_refs[3] = NULL;
 
-  pdf_add_dict(page->page_obj,
-               pdf_new_name("Contents"), contents_array);
+  texpdf_add_dict(page->page_obj,
+               texpdf_new_name("Contents"), contents_array);
 
 
   if (page->annots) {
-    pdf_add_dict(page->page_obj,
-                 pdf_new_name("Annots"), pdf_ref_obj(page->annots));
-    pdf_release_obj(page->annots);
+    texpdf_add_dict(page->page_obj,
+                 texpdf_new_name("Annots"), pdf_ref_obj(page->annots));
+    texpdf_release_obj(page->annots);
   }
   if (page->beads) {
-    pdf_add_dict(page->page_obj,
-                 pdf_new_name("B"), pdf_ref_obj(page->beads));
-    pdf_release_obj(page->beads);
+    texpdf_add_dict(page->page_obj,
+                 texpdf_new_name("B"), pdf_ref_obj(page->beads));
+    texpdf_release_obj(page->beads);
   }
-  pdf_release_obj(page->page_obj);
-  pdf_release_obj(page->page_ref);
+  texpdf_release_obj(page->page_obj);
+  texpdf_release_obj(page->page_ref);
 
   page->page_obj = NULL;
   page->page_ref = NULL;
@@ -583,7 +583,7 @@ build_page_tree (pdf_doc  *p,
   pdf_obj *self, *self_ref, *kids;
   long     i;
 
-  self = pdf_new_dict();
+  self = texpdf_new_dict();
   /*
    * This is a slight kludge which allow the subtree dictionary
    * generated by this routine to be merged with the real
@@ -592,13 +592,13 @@ build_page_tree (pdf_doc  *p,
    */
   self_ref = parent_ref ? pdf_ref_obj(self) : pdf_ref_obj(p->root.pages);
 
-  pdf_add_dict(self, pdf_new_name("Type"),  pdf_new_name("Pages"));
-  pdf_add_dict(self, pdf_new_name("Count"), pdf_new_number((double) num_pages));
+  texpdf_add_dict(self, texpdf_new_name("Type"),  texpdf_new_name("Pages"));
+  texpdf_add_dict(self, texpdf_new_name("Count"), texpdf_new_number((double) num_pages));
 
   if (parent_ref != NULL)
-    pdf_add_dict(self, pdf_new_name("Parent"), parent_ref);
+    texpdf_add_dict(self, texpdf_new_name("Parent"), parent_ref);
 
-  kids = pdf_new_array();
+  kids = texpdf_new_array();
   if (num_pages > 0 && num_pages <= PAGE_CLUSTER) {
     for (i = 0; i < num_pages; i++) {
       pdf_page *page;
@@ -621,7 +621,7 @@ build_page_tree (pdf_doc  *p,
         subtree = build_page_tree(p, firstpage + start, end - start,
                                   pdf_link_obj(self_ref));
         pdf_add_array(kids, pdf_ref_obj(subtree));
-        pdf_release_obj(subtree);
+        texpdf_release_obj(subtree);
       } else {
         pdf_page *page;
 
@@ -633,8 +633,8 @@ build_page_tree (pdf_doc  *p,
       }
     }
   }
-  pdf_add_dict(self, pdf_new_name("Kids"), kids);
-  pdf_release_obj(self_ref);
+  texpdf_add_dict(self, texpdf_new_name("Kids"), kids);
+  texpdf_release_obj(self_ref);
 
   return self;
 }
@@ -647,7 +647,7 @@ pdf_doc_init_page_tree (pdf_doc *p, double media_width, double media_height)
    * The docroot.pages is kept open until the document is closed.
    * This allows the user to write to pages if he so choses.
    */
-  p->root.pages = pdf_new_dict();
+  p->root.pages = texpdf_new_dict();
 
   p->pages.num_entries = 0;
   p->pages.max_entries = 0;
@@ -680,26 +680,26 @@ pdf_doc_close_page_tree (pdf_doc *p)
     page = doc_get_page_entry(p, page_no);
     if (page->page_obj) {
       WARN("Nonexistent page #%ld refered.", page_no);
-      pdf_release_obj(page->page_ref);
+      texpdf_release_obj(page->page_ref);
       page->page_ref = NULL;
     }
     if (page->page_obj) {
       WARN("Entry for a nonexistent page #%ld created.", page_no);
-      pdf_release_obj(page->page_obj);
+      texpdf_release_obj(page->page_obj);
       page->page_obj = NULL;
     }
     if (page->annots) {
       WARN("Annotation attached to a nonexistent page #%ld.", page_no);
-      pdf_release_obj(page->annots);
+      texpdf_release_obj(page->annots);
       page->annots = NULL;
     }
     if (page->beads) {
       WARN("Article beads attached to a nonexistent page #%ld.", page_no);
-      pdf_release_obj(page->beads);
+      texpdf_release_obj(page->beads);
       page->beads = NULL;
     }
     if (page->resources) {
-      pdf_release_obj(page->resources);
+      texpdf_release_obj(page->resources);
       page->resources = NULL;
     }
   }
@@ -708,33 +708,33 @@ pdf_doc_close_page_tree (pdf_doc *p)
    * Connect page tree to root node.
    */
   page_tree_root = build_page_tree(p, FIRSTPAGE(p), PAGECOUNT(p), NULL);
-  pdf_merge_dict (p->root.pages, page_tree_root);
-  pdf_release_obj(page_tree_root);
+  texpdf_merge_dict (p->root.pages, page_tree_root);
+  texpdf_release_obj(page_tree_root);
 
   /* They must be after build_page_tree() */
   if (p->pages.bop) {
     pdf_add_stream (p->pages.bop, "\n", 1);
-    pdf_release_obj(p->pages.bop);
+    texpdf_release_obj(p->pages.bop);
     p->pages.bop = NULL;
   }
   if (p->pages.eop) {
     pdf_add_stream (p->pages.eop, "\n", 1);
-    pdf_release_obj(p->pages.eop);
+    texpdf_release_obj(p->pages.eop);
     p->pages.eop = NULL;
   }
 
   /* Create media box at root node and let the other pages inherit it. */
-  mediabox = pdf_new_array();
-  pdf_add_array(mediabox, pdf_new_number(ROUND(p->pages.mediabox.llx, 0.01)));
-  pdf_add_array(mediabox, pdf_new_number(ROUND(p->pages.mediabox.lly, 0.01)));
-  pdf_add_array(mediabox, pdf_new_number(ROUND(p->pages.mediabox.urx, 0.01)));
-  pdf_add_array(mediabox, pdf_new_number(ROUND(p->pages.mediabox.ury, 0.01)));
-  pdf_add_dict(p->root.pages, pdf_new_name("MediaBox"), mediabox);
+  mediabox = texpdf_new_array();
+  pdf_add_array(mediabox, texpdf_new_number(ROUND(p->pages.mediabox.llx, 0.01)));
+  pdf_add_array(mediabox, texpdf_new_number(ROUND(p->pages.mediabox.lly, 0.01)));
+  pdf_add_array(mediabox, texpdf_new_number(ROUND(p->pages.mediabox.urx, 0.01)));
+  pdf_add_array(mediabox, texpdf_new_number(ROUND(p->pages.mediabox.ury, 0.01)));
+  texpdf_add_dict(p->root.pages, texpdf_new_name("MediaBox"), mediabox);
 
-  pdf_add_dict(p->root.dict,
-               pdf_new_name("Pages"),
+  texpdf_add_dict(p->root.dict,
+               texpdf_new_name("Pages"),
                pdf_ref_obj (p->root.pages));
-  pdf_release_obj(p->root.pages);
+  texpdf_release_obj(p->root.pages);
   p->root.pages  = NULL;
 
   RELEASE(p->pages.entries);
@@ -806,21 +806,21 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
 
   catalog = pdf_file_get_catalog(pf);
 
-  page_tree = pdf_deref_obj(pdf_lookup_dict(catalog, "Pages"));
+  page_tree = pdf_deref_obj(texpdf_lookup_dict(catalog, "Pages"));
 
   if (!PDF_OBJ_DICTTYPE(page_tree))
     goto error;
 
   {
     long count;
-    pdf_obj *tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Count"));
+    pdf_obj *tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Count"));
     if (!PDF_OBJ_NUMBERTYPE(tmp)) {
       if (tmp)
-	pdf_release_obj(tmp);
+	texpdf_release_obj(tmp);
       goto error;
     }
     count = pdf_number_value(tmp);
-    pdf_release_obj(tmp);
+    texpdf_release_obj(tmp);
     if (count_p)
       *count_p = count;
     if (page_no <= 0 || page_no > count) {
@@ -839,35 +839,35 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
     long page_idx = page_no-1, kids_length = 1, i = 0;
 
     while (--depth && i != kids_length) {
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "MediaBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "MediaBox")))) {
 	if (media_box)
-	  pdf_release_obj(media_box);
+	  texpdf_release_obj(media_box);
 	media_box = tmp;
       }
 
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "CropBox")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "CropBox")))) {
 	if (crop_box)
-	  pdf_release_obj(crop_box);
+	  texpdf_release_obj(crop_box);
 	crop_box = tmp;
       }
 
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Rotate")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Rotate")))) {
 	if (rotate)
-	  pdf_release_obj(rotate);
+	  texpdf_release_obj(rotate);
 	rotate = tmp;
       }
 
-      if ((tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Resources")))) {
+      if ((tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Resources")))) {
 	if (resources)
-	  pdf_release_obj(resources);
+	  texpdf_release_obj(resources);
 	resources = tmp;
       }
 
-      kids = pdf_deref_obj(pdf_lookup_dict(page_tree, "Kids"));
+      kids = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Kids"));
       if (!kids)
 	break;
       else if (!PDF_OBJ_ARRAYTYPE(kids)) {
-	pdf_release_obj(kids);
+	texpdf_release_obj(kids);
 	goto error;
       }
       kids_length = pdf_array_length(kids);
@@ -875,21 +875,21 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
       for (i = 0; i < kids_length; i++) {
 	long count;
 
-	pdf_release_obj(page_tree);
-	page_tree = pdf_deref_obj(pdf_get_array(kids, i));
+	texpdf_release_obj(page_tree);
+	page_tree = pdf_deref_obj(texpdf_get_array(kids, i));
 	if (!PDF_OBJ_DICTTYPE(page_tree))
 	  goto error;
 
-	tmp = pdf_deref_obj(pdf_lookup_dict(page_tree, "Count"));
+	tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Count"));
 	if (PDF_OBJ_NUMBERTYPE(tmp)) {
 	  /* Pages object */
 	  count = pdf_number_value(tmp);
-	  pdf_release_obj(tmp);
+	  texpdf_release_obj(tmp);
 	} else if (!tmp)
 	  /* Page object */
 	  count = 1;
 	else {
-	  pdf_release_obj(tmp);
+	  texpdf_release_obj(tmp);
 	  goto error;
 	}
 
@@ -899,29 +899,29 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
 	page_idx -= count;
       }
       
-      pdf_release_obj(kids);
+      texpdf_release_obj(kids);
     }
 
     if (!depth || kids_length == i) {
       if (media_box)
-	pdf_release_obj(media_box);
+	texpdf_release_obj(media_box);
      if (crop_box)
-	pdf_release_obj(crop_box);
+	texpdf_release_obj(crop_box);
       goto error;
     }
 
     if (crop_box)
       box = crop_box;
     else
-      if (!(box = pdf_deref_obj(pdf_lookup_dict(page_tree, "ArtBox"))) &&
-	  !(box = pdf_deref_obj(pdf_lookup_dict(page_tree, "TrimBox"))) &&
-	  !(box = pdf_deref_obj(pdf_lookup_dict(page_tree, "BleedBox"))) &&
+      if (!(box = pdf_deref_obj(texpdf_lookup_dict(page_tree, "ArtBox"))) &&
+	  !(box = pdf_deref_obj(texpdf_lookup_dict(page_tree, "TrimBox"))) &&
+	  !(box = pdf_deref_obj(texpdf_lookup_dict(page_tree, "BleedBox"))) &&
 	  media_box) {
 	  box = media_box;
 	  media_box = NULL;
       }
     if (media_box)
-      pdf_release_obj(media_box);
+      texpdf_release_obj(media_box);
   }
 
   if (!PDF_OBJ_ARRAYTYPE(box) || pdf_array_length(box) != 4 ||
@@ -932,7 +932,7 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
     if (pdf_number_value(rotate))
       WARN("<< /Rotate %d >> found. (Not supported yet)", 
 	   (int) pdf_number_value(rotate));
-    pdf_release_obj(rotate);
+    texpdf_release_obj(rotate);
     rotate = NULL;
   } else if (rotate)
     goto error;
@@ -942,9 +942,9 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
 
     for (i = 4; i--; ) {
       double x;
-      pdf_obj *tmp = pdf_deref_obj(pdf_get_array(box, i));
+      pdf_obj *tmp = pdf_deref_obj(texpdf_get_array(box, i));
       if (!PDF_OBJ_NUMBERTYPE(tmp)) {
-	pdf_release_obj(tmp);
+	texpdf_release_obj(tmp);
 	goto error;
       }
       x = pdf_number_value(tmp);
@@ -954,16 +954,16 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
       case 2: bbox->urx = x; break;
       case 3: bbox->ury = x; break;
       }
-      pdf_release_obj(tmp);
+      texpdf_release_obj(tmp);
     }
   }
 
-  pdf_release_obj(box);
+  texpdf_release_obj(box);
 
   if (resources_p)
     *resources_p = resources;
   else if (resources)
-    pdf_release_obj(resources);
+    texpdf_release_obj(resources);
 
   return page_tree;
 
@@ -971,13 +971,13 @@ texpdf_doc_get_page (pdf_file *pf, long page_no, long *count_p,
   WARN("Cannot parse document. Broken PDF file?");
  error_silent:
   if (box)
-    pdf_release_obj(box);
+    texpdf_release_obj(box);
   if (rotate)
-    pdf_release_obj(rotate);
+    texpdf_release_obj(rotate);
   if (resources)
-    pdf_release_obj(resources);
+    texpdf_release_obj(resources);
   if (page_tree)
-    pdf_release_obj(page_tree);
+    texpdf_release_obj(page_tree);
 
   return NULL;
 }
@@ -1024,7 +1024,7 @@ clean_bookmarks (pdf_olitem *item)
   while (item) {
     next = item->next;
     if (item->dict)
-      pdf_release_obj(item->dict);
+      texpdf_release_obj(item->dict);
     if (item->first)
       clean_bookmarks(item->first);
     RELEASE(item);
@@ -1047,8 +1047,8 @@ flush_bookmarks (pdf_olitem *node,
   ASSERT(node->dict);
 
   this_ref = pdf_ref_obj(node->dict);
-  pdf_add_dict(parent_dict,
-               pdf_new_name("First"), pdf_link_obj(this_ref));
+  texpdf_add_dict(parent_dict,
+               texpdf_new_name("First"), pdf_link_obj(this_ref));
 
   retval = 0;
   for (item = node, prev_ref = NULL;
@@ -1056,34 +1056,34 @@ flush_bookmarks (pdf_olitem *node,
     if (item->first && item->first->dict) {
       count = flush_bookmarks(item->first, this_ref, item->dict);
       if (item->is_open) {
-        pdf_add_dict(item->dict,
-                     pdf_new_name("Count"),
-                     pdf_new_number(count));
+        texpdf_add_dict(item->dict,
+                     texpdf_new_name("Count"),
+                     texpdf_new_number(count));
         retval += count;
       } else {
-        pdf_add_dict(item->dict,
-                     pdf_new_name("Count"),
-                     pdf_new_number(-count));
+        texpdf_add_dict(item->dict,
+                     texpdf_new_name("Count"),
+                     texpdf_new_number(-count));
       }
     }
-    pdf_add_dict(item->dict,
-                 pdf_new_name("Parent"),
+    texpdf_add_dict(item->dict,
+                 texpdf_new_name("Parent"),
                  pdf_link_obj(parent_ref));
     if (prev_ref) {
-      pdf_add_dict(item->dict,
-                   pdf_new_name("Prev"),
+      texpdf_add_dict(item->dict,
+                   texpdf_new_name("Prev"),
                    prev_ref);
     }
     if (item->next && item->next->dict) {
       next_ref = pdf_ref_obj(item->next->dict);
-      pdf_add_dict(item->dict,
-                   pdf_new_name("Next"),
+      texpdf_add_dict(item->dict,
+                   texpdf_new_name("Next"),
                    pdf_link_obj(next_ref));
     } else {
       next_ref = NULL;
     }
 
-    pdf_release_obj(item->dict);
+    texpdf_release_obj(item->dict);
     item->dict = NULL;
 
     prev_ref = this_ref;
@@ -1091,12 +1091,12 @@ flush_bookmarks (pdf_olitem *node,
     retval++;    
   }
 
-  pdf_add_dict(parent_dict,
-               pdf_new_name("Last"),
+  texpdf_add_dict(parent_dict,
+               texpdf_new_name("Last"),
                pdf_link_obj(prev_ref));
 
-  pdf_release_obj(prev_ref);
-  pdf_release_obj(node->dict);
+  texpdf_release_obj(prev_ref);
+  texpdf_release_obj(node->dict);
   node->dict = NULL;
 
   return retval;
@@ -1140,33 +1140,33 @@ texpdf_doc_bookmarks_down (pdf_doc *p)
     WARN("Empty bookmark node!");
     WARN("You have tried to jump more than 1 level.");
 
-    item->dict = pdf_new_dict();
+    item->dict = texpdf_new_dict();
 
 #define TITLE_STRING "<No Title>"
-    pdf_add_dict(item->dict,
-                 pdf_new_name("Title"),
-                 pdf_new_string(TITLE_STRING, strlen(TITLE_STRING)));
+    texpdf_add_dict(item->dict,
+                 texpdf_new_name("Title"),
+                 texpdf_new_string(TITLE_STRING, strlen(TITLE_STRING)));
 
-    tcolor = pdf_new_array();
-    pdf_add_array(tcolor, pdf_new_number(1.0));
-    pdf_add_array(tcolor, pdf_new_number(0.0));
-    pdf_add_array(tcolor, pdf_new_number(0.0));
-    pdf_add_dict (item->dict,
-                  pdf_new_name("C"), pdf_link_obj(tcolor));
-    pdf_release_obj(tcolor);
+    tcolor = texpdf_new_array();
+    pdf_add_array(tcolor, texpdf_new_number(1.0));
+    pdf_add_array(tcolor, texpdf_new_number(0.0));
+    pdf_add_array(tcolor, texpdf_new_number(0.0));
+    texpdf_add_dict (item->dict,
+                  texpdf_new_name("C"), pdf_link_obj(tcolor));
+    texpdf_release_obj(tcolor);
 
-    pdf_add_dict (item->dict,
-                  pdf_new_name("F"), pdf_new_number(1.0));
+    texpdf_add_dict (item->dict,
+                  texpdf_new_name("F"), texpdf_new_number(1.0));
 
 #define JS_CODE "app.alert(\"The author of this document made this bookmark item empty!\", 3, 0)"
-    action = pdf_new_dict();
-    pdf_add_dict(action,
-                 pdf_new_name("S"), pdf_new_name("JavaScript"));
-    pdf_add_dict(action, 
-                 pdf_new_name("JS"), pdf_new_string(JS_CODE, strlen(JS_CODE)));
-    pdf_add_dict(item->dict,
-                 pdf_new_name("A"), pdf_link_obj(action));
-    pdf_release_obj(action);
+    action = texpdf_new_dict();
+    texpdf_add_dict(action,
+                 texpdf_new_name("S"), texpdf_new_name("JavaScript"));
+    texpdf_add_dict(action, 
+                 texpdf_new_name("JS"), texpdf_new_string(JS_CODE, strlen(JS_CODE)));
+    texpdf_add_dict(item->dict,
+                 texpdf_new_name("A"), pdf_link_obj(action));
+    texpdf_release_obj(action);
   }
 
   item->first    = first = NEW(1, pdf_olitem);
@@ -1238,16 +1238,16 @@ pdf_doc_close_bookmarks (pdf_doc *p)
   
   item = p->outlines.first;
   if (item->dict) {
-    bm_root     = pdf_new_dict();
+    bm_root     = texpdf_new_dict();
     bm_root_ref = pdf_ref_obj(bm_root);
     count       = flush_bookmarks(item, bm_root_ref, bm_root);
-    pdf_add_dict(bm_root,
-                 pdf_new_name("Count"),
-                 pdf_new_number(count));
-    pdf_add_dict(catalog,
-                 pdf_new_name("Outlines"),
+    texpdf_add_dict(bm_root,
+                 texpdf_new_name("Count"),
+                 texpdf_new_number(count));
+    texpdf_add_dict(catalog,
+                 texpdf_new_name("Outlines"),
                  bm_root_ref);
-    pdf_release_obj(bm_root);
+    texpdf_release_obj(bm_root);
   }
   clean_bookmarks(item);
 
@@ -1277,7 +1277,7 @@ pdf_doc_init_names (pdf_doc *p, int check_gotos)
   for (i = 0; i < NUM_NAME_CATEGORY; i++) {
     p->names[i].category = name_dict_categories[i];
     p->names[i].data     = strcmp(name_dict_categories[i], "Dests") ?
-                             NULL : pdf_new_name_tree();
+                             NULL : texpdf_new_name_tree();
     /*
      * We need a non-null entry for PDF destinations in order to find
      * broken links even if no destination is defined in the DVI file.
@@ -1287,7 +1287,7 @@ pdf_doc_init_names (pdf_doc *p, int check_gotos)
   p->names[NUM_NAME_CATEGORY].data     = NULL;
 
   p->check_gotos   = check_gotos;
-  ht_init_table(&p->gotos, (void (*) (void *)) pdf_release_obj);
+  ht_init_table(&p->gotos, (void (*) (void *)) texpdf_release_obj);
 
   return;
 }
@@ -1308,10 +1308,10 @@ texpdf_doc_add_names (pdf_doc *p, const char *category,
     return -1;
   }
   if (!p->names[i].data) {
-    p->names[i].data = pdf_new_name_tree();
+    p->names[i].data = texpdf_new_name_tree();
   }
 
-  return pdf_names_add_object(p->names[i].data, key, keylen, value);
+  return texpdf_names_add_object(p->names[i].data, key, keylen, value);
 }
 
 static void
@@ -1328,7 +1328,7 @@ pdf_doc_add_goto (pdf_doc *p, pdf_obj *annot_dict)
    * must have a "Subtype". An annotation dictionary coming from
    * an outline special has none.
    */
-  subtype = pdf_deref_obj(pdf_lookup_dict(annot_dict, "Subtype"));
+  subtype = pdf_deref_obj(texpdf_lookup_dict(annot_dict, "Subtype"));
   if (subtype) {
     if (PDF_OBJ_UNDEFINED(subtype))
       goto undefined;
@@ -1340,18 +1340,18 @@ pdf_doc_add_goto (pdf_doc *p, pdf_obj *annot_dict)
 
   dict = annot_dict;
   key = "Dest";
-  D = pdf_deref_obj(pdf_lookup_dict(annot_dict, key));
+  D = pdf_deref_obj(texpdf_lookup_dict(annot_dict, key));
   if (PDF_OBJ_UNDEFINED(D))
     goto undefined;
 
-  A = pdf_deref_obj(pdf_lookup_dict(annot_dict, "A"));
+  A = pdf_deref_obj(texpdf_lookup_dict(annot_dict, "A"));
   if (A) {
     if (PDF_OBJ_UNDEFINED(A))
       goto undefined;
     else if (D || !PDF_OBJ_DICTTYPE(A))
       goto error;
     else {
-      S = pdf_deref_obj(pdf_lookup_dict(A, "S"));
+      S = pdf_deref_obj(texpdf_lookup_dict(A, "S"));
       if (PDF_OBJ_UNDEFINED(S))
 	goto undefined;
       else if (!PDF_OBJ_NAMETYPE(S))
@@ -1361,12 +1361,12 @@ pdf_doc_add_goto (pdf_doc *p, pdf_obj *annot_dict)
 
       dict = A;
       key = "D";
-      D = pdf_deref_obj(pdf_lookup_dict(A, key));
+      D = pdf_deref_obj(texpdf_lookup_dict(A, key));
     }
   }
 
   if (PDF_OBJ_STRINGTYPE(D))
-    dest = (char *) pdf_string_value(D);
+    dest = (char *) texpdf_string_value(D);
 #if 0
   /* Names as destinations are not supported by dvipdfmx */
   else if (PDF_OBJ_NAMETYPE(D))
@@ -1387,25 +1387,25 @@ pdf_doc_add_goto (pdf_doc *p, pdf_obj *annot_dict)
      * Other bases (e.g., 10+26 or 10+2*26) would be more efficient.
      */
     sprintf(buf, "%lx", ht_table_size(&p->gotos));
-    D_new = pdf_new_string(buf, strlen(buf));
+    D_new = texpdf_new_string(buf, strlen(buf));
     ht_append_table(&p->gotos, dest, strlen(dest), D_new);
   }
 
   {
-    pdf_obj *key_obj = pdf_new_name(key);
-    if (!pdf_add_dict(dict, key_obj, pdf_link_obj(D_new)))
-      pdf_release_obj(key_obj);
+    pdf_obj *key_obj = texpdf_new_name(key);
+    if (!texpdf_add_dict(dict, key_obj, pdf_link_obj(D_new)))
+      texpdf_release_obj(key_obj);
   }
 
  cleanup:
   if (subtype)
-    pdf_release_obj(subtype);
+    texpdf_release_obj(subtype);
   if (A)
-    pdf_release_obj(A);
+    texpdf_release_obj(A);
   if (S)
-    pdf_release_obj(S);
+    texpdf_release_obj(S);
   if (D)
-    pdf_release_obj(D);
+    texpdf_release_obj(D);
 
   return;
 
@@ -1455,9 +1455,9 @@ pdf_doc_close_names (pdf_doc *p)
       long count;
 
       if (!p->check_gotos || strcmp(p->names[i].category, "Dests"))
-	name_tree = pdf_names_create_tree(data, &count, NULL);
+	name_tree = texpdf_names_create_tree(data, &count, NULL);
       else {
-	name_tree = pdf_names_create_tree(data, &count, &p->gotos);
+	name_tree = texpdf_names_create_tree(data, &count, &p->gotos);
 
 	if (verbose && count < data->count)
 	  MESG("\nRemoved %ld unused PDF destinations\n", data->count-count);
@@ -1468,32 +1468,32 @@ pdf_doc_close_names (pdf_doc *p)
 
       if (name_tree) {
         if (!p->root.names)
-          p->root.names = pdf_new_dict();
-        pdf_add_dict(p->root.names,
-                     pdf_new_name(p->names[i].category),
+          p->root.names = texpdf_new_dict();
+        texpdf_add_dict(p->root.names,
+                     texpdf_new_name(p->names[i].category),
                      pdf_ref_obj(name_tree));
-        pdf_release_obj(name_tree);
+        texpdf_release_obj(name_tree);
       }
-      pdf_delete_name_tree(&p->names[i].data);
+      texpdf_delete_name_tree(&p->names[i].data);
     }
   }
 
   if (p->root.names) {
-    tmp = pdf_lookup_dict(p->root.dict, "Names");
+    tmp = texpdf_lookup_dict(p->root.dict, "Names");
     if (!tmp) {
-      pdf_add_dict(p->root.dict,
-                   pdf_new_name("Names"),
+      texpdf_add_dict(p->root.dict,
+                   texpdf_new_name("Names"),
                    pdf_ref_obj (p->root.names));
     } else if (PDF_OBJ_DICTTYPE(tmp)) {
-      pdf_merge_dict(p->root.names, tmp);
-      pdf_add_dict(p->root.dict,
-                   pdf_new_name("Names"),
+      texpdf_merge_dict(p->root.names, tmp);
+      texpdf_add_dict(p->root.dict,
+                   texpdf_new_name("Names"),
                    pdf_ref_obj (p->root.names));
     } else { /* Maybe reference */
       /* What should I do? */
       WARN("Could not modify Names dictionary.");
     }
-    pdf_release_obj(p->root.names);
+    texpdf_release_obj(p->root.names);
     p->root.names = NULL;
   }
 
@@ -1518,13 +1518,13 @@ texpdf_doc_add_annot (pdf_doc *p, unsigned page_no, const pdf_rect *rect,
 
   page = doc_get_page_entry(p, page_no);
   if (!page->annots)
-    page->annots = pdf_new_array();
+    page->annots = texpdf_new_array();
 
   {
     pdf_rect  mediabox;
 
     texpdf_doc_get_mediabox(p, page_no, &mediabox);
-    pdf_dev_get_coord(&xpos, &ypos);
+    texpdf_dev_get_coord(&xpos, &ypos);
     annbox.llx = rect->llx - xpos; annbox.lly = rect->lly - ypos;
     annbox.urx = rect->urx - xpos; annbox.ury = rect->ury - ypos;
 
@@ -1543,12 +1543,12 @@ texpdf_doc_add_annot (pdf_doc *p, unsigned page_no, const pdf_rect *rect,
     }
   }
 
-  rect_array = pdf_new_array();
-  pdf_add_array(rect_array, pdf_new_number(ROUND(annbox.llx - annot_grow, 0.001)));
-  pdf_add_array(rect_array, pdf_new_number(ROUND(annbox.lly - annot_grow, 0.001)));
-  pdf_add_array(rect_array, pdf_new_number(ROUND(annbox.urx + annot_grow, 0.001)));
-  pdf_add_array(rect_array, pdf_new_number(ROUND(annbox.ury + annot_grow, 0.001)));
-  pdf_add_dict (annot_dict, pdf_new_name("Rect"), rect_array);
+  rect_array = texpdf_new_array();
+  pdf_add_array(rect_array, texpdf_new_number(ROUND(annbox.llx - annot_grow, 0.001)));
+  pdf_add_array(rect_array, texpdf_new_number(ROUND(annbox.lly - annot_grow, 0.001)));
+  pdf_add_array(rect_array, texpdf_new_number(ROUND(annbox.urx + annot_grow, 0.001)));
+  pdf_add_array(rect_array, texpdf_new_number(ROUND(annbox.ury + annot_grow, 0.001)));
+  texpdf_add_dict (annot_dict, texpdf_new_name("Rect"), rect_array);
 
   pdf_add_array(page->annots, pdf_ref_obj(annot_dict));
 
@@ -1692,7 +1692,7 @@ make_article (pdf_doc *p,
   if (!article)
     return NULL;
 
-  art_dict = pdf_new_dict();
+  art_dict = texpdf_new_dict();
   first = prev = last = NULL;
   /*
    * The bead_ids represents logical order of beads in an article thread.
@@ -1707,19 +1707,19 @@ make_article (pdf_doc *p,
     if (!bead || bead->page_no < 0) {
       continue;
     }
-    last = pdf_new_dict();
+    last = texpdf_new_dict();
     if (prev == NULL) {
       first = last;
-      pdf_add_dict(first,
-                   pdf_new_name("T"), pdf_ref_obj(art_dict));
+      texpdf_add_dict(first,
+                   texpdf_new_name("T"), pdf_ref_obj(art_dict));
     } else {
-      pdf_add_dict(prev,
-                   pdf_new_name("N"), pdf_ref_obj(last));
-      pdf_add_dict(last,
-                   pdf_new_name("V"), pdf_ref_obj(prev));
+      texpdf_add_dict(prev,
+                   texpdf_new_name("N"), pdf_ref_obj(last));
+      texpdf_add_dict(last,
+                   texpdf_new_name("V"), pdf_ref_obj(prev));
       /* We must link first to last. */
       if (prev != first)
-        pdf_release_obj(prev);
+        texpdf_release_obj(prev);
     }
 
     /* Realize bead now. */
@@ -1729,15 +1729,15 @@ make_article (pdf_doc *p,
 
       page = doc_get_page_entry(p, bead->page_no);
       if (!page->beads) {
-        page->beads = pdf_new_array();
+        page->beads = texpdf_new_array();
       }
-      pdf_add_dict(last, pdf_new_name("P"), pdf_link_obj(page->page_ref));
-      rect = pdf_new_array();
-      pdf_add_array(rect, pdf_new_number(ROUND(bead->rect.llx, 0.01)));
-      pdf_add_array(rect, pdf_new_number(ROUND(bead->rect.lly, 0.01)));
-      pdf_add_array(rect, pdf_new_number(ROUND(bead->rect.urx, 0.01)));
-      pdf_add_array(rect, pdf_new_number(ROUND(bead->rect.ury, 0.01)));
-      pdf_add_dict (last, pdf_new_name("R"), rect);
+      texpdf_add_dict(last, texpdf_new_name("P"), pdf_link_obj(page->page_ref));
+      rect = texpdf_new_array();
+      pdf_add_array(rect, texpdf_new_number(ROUND(bead->rect.llx, 0.01)));
+      pdf_add_array(rect, texpdf_new_number(ROUND(bead->rect.lly, 0.01)));
+      pdf_add_array(rect, texpdf_new_number(ROUND(bead->rect.urx, 0.01)));
+      pdf_add_array(rect, texpdf_new_number(ROUND(bead->rect.ury, 0.01)));
+      texpdf_add_dict (last, texpdf_new_name("R"), rect);
       pdf_add_array(page->beads, pdf_ref_obj(last));
     }
 
@@ -1745,28 +1745,28 @@ make_article (pdf_doc *p,
   }
 
   if (first && last) {
-    pdf_add_dict(last,
-                 pdf_new_name("N"), pdf_ref_obj(first));
-    pdf_add_dict(first,
-                 pdf_new_name("V"), pdf_ref_obj(last));
+    texpdf_add_dict(last,
+                 texpdf_new_name("N"), pdf_ref_obj(first));
+    texpdf_add_dict(first,
+                 texpdf_new_name("V"), pdf_ref_obj(last));
     if (first != last) {
-      pdf_release_obj(last);
+      texpdf_release_obj(last);
     }
-    pdf_add_dict(art_dict,
-                 pdf_new_name("F"), pdf_ref_obj(first));
+    texpdf_add_dict(art_dict,
+                 texpdf_new_name("F"), pdf_ref_obj(first));
     /* If article_info is supplied, we override article->info. */
     if (article_info) {
-      pdf_add_dict(art_dict,
-                   pdf_new_name("I"), article_info);
+      texpdf_add_dict(art_dict,
+                   texpdf_new_name("I"), article_info);
     } else if (article->info) {
-      pdf_add_dict(art_dict,
-                   pdf_new_name("I"), pdf_ref_obj(article->info));
-      pdf_release_obj(article->info);
+      texpdf_add_dict(art_dict,
+                   texpdf_new_name("I"), pdf_ref_obj(article->info));
+      texpdf_release_obj(article->info);
       article->info = NULL; /* We do not write as object reference. */
     }
-    pdf_release_obj(first);
+    texpdf_release_obj(first);
   } else {
-    pdf_release_obj(art_dict);
+    texpdf_release_obj(art_dict);
     art_dict = NULL;
   }
 
@@ -1813,10 +1813,10 @@ pdf_doc_close_articles (pdf_doc *p)
 
       art_dict = make_article(p, article, NULL, 0, NULL);
       if (!p->root.threads) {
-        p->root.threads = pdf_new_array();
+        p->root.threads = texpdf_new_array();
       }
       pdf_add_array(p->root.threads, pdf_ref_obj(art_dict));
-      pdf_release_obj(art_dict);
+      texpdf_release_obj(art_dict);
     }
     clean_article(article);
   }
@@ -1826,10 +1826,10 @@ pdf_doc_close_articles (pdf_doc *p)
   p->articles.max_entries = 0;
 
   if (p->root.threads) {
-    pdf_add_dict(p->root.dict,
-                 pdf_new_name("Threads"),
+    texpdf_add_dict(p->root.dict,
+                 texpdf_new_name("Threads"),
                  pdf_ref_obj (p->root.threads));
-    pdf_release_obj(p->root.threads);
+    texpdf_release_obj(p->root.threads);
     p->root.threads = NULL;
   }
 
@@ -1897,14 +1897,14 @@ texpdf_doc_current_page_resources (pdf_doc *p)
     if (p->pending_forms->form.resources) {
       resources = p->pending_forms->form.resources;
     } else {
-      resources = p->pending_forms->form.resources = pdf_new_dict();
+      resources = p->pending_forms->form.resources = texpdf_new_dict();
     }
   } else {
     currentpage = LASTPAGE(p);
     if (currentpage->resources) {
       resources = currentpage->resources;
     } else {
-      resources = currentpage->resources = pdf_new_dict();
+      resources = currentpage->resources = texpdf_new_dict();
     }
   }
 
@@ -1920,19 +1920,19 @@ texpdf_doc_get_dictionary (pdf_doc *p, const char *category)
 
   if (!strcmp(category, "Names")) {
     if (!p->root.names)
-      p->root.names = pdf_new_dict();
+      p->root.names = texpdf_new_dict();
     dict = p->root.names;
   } else if (!strcmp(category, "Pages")) {
     if (!p->root.pages)
-      p->root.pages = pdf_new_dict();
+      p->root.pages = texpdf_new_dict();
     dict = p->root.pages;
   } else if (!strcmp(category, "Catalog")) {
     if (!p->root.dict)
-      p->root.dict = pdf_new_dict();
+      p->root.dict = texpdf_new_dict();
     dict = p->root.dict;
   } else if (!strcmp(category, "Info")) {
     if (!p->info)
-      p->info = pdf_new_dict();
+      p->info = texpdf_new_dict();
     dict = p->info;
   } else if (!strcmp(category, "@THISPAGE")) {
     /* Sorry for this... */
@@ -1962,7 +1962,7 @@ texpdf_doc_ref_page (pdf_doc *p, unsigned long page_no)
 
   page = doc_get_page_entry(p, page_no);
   if (!page->page_obj) {
-    page->page_obj = pdf_new_dict();
+    page->page_obj = texpdf_new_dict();
     page->page_ref = pdf_ref_obj(page->page_obj);
   }
 
@@ -2011,13 +2011,13 @@ pdf_doc_new_page (pdf_doc *p)
   currentpage = LASTPAGE(p);
   /* Was this page already instantiated by a forward reference to it? */
   if (!currentpage->page_ref) {
-    currentpage->page_obj = pdf_new_dict();
+    currentpage->page_obj = texpdf_new_dict();
     currentpage->page_ref = pdf_ref_obj(currentpage->page_obj);
   }
 
   currentpage->background = NULL;
-  currentpage->contents   = pdf_new_stream(STREAM_COMPRESS);
-  currentpage->resources  = pdf_new_dict();
+  currentpage->contents   = texpdf_new_stream(STREAM_COMPRESS);
+  currentpage->resources  = texpdf_new_dict();
 
   currentpage->annots = NULL;
   currentpage->beads  = NULL;
@@ -2037,7 +2037,7 @@ pdf_doc_finish_page (pdf_doc *p)
 
   currentpage = LASTPAGE(p);
   if (!currentpage->page_obj)
-    currentpage->page_obj = pdf_new_dict();
+    currentpage->page_obj = texpdf_new_dict();
 
   /*
    * Make Contents array.
@@ -2064,7 +2064,7 @@ pdf_doc_finish_page (pdf_doc *p)
       currentpage->content_refs[1] = pdf_ref_obj(currentpage->background);
       pdf_add_stream (currentpage->background, "\n", 1);
     }
-    pdf_release_obj(currentpage->background);
+    texpdf_release_obj(currentpage->background);
     currentpage->background = NULL;
   } else {
     currentpage->content_refs[1] = NULL;
@@ -2073,7 +2073,7 @@ pdf_doc_finish_page (pdf_doc *p)
   /* Content body of current page */
   currentpage->content_refs[2] = pdf_ref_obj(currentpage->contents);
   pdf_add_stream (currentpage->contents, "\n", 1);
-  pdf_release_obj(currentpage->contents);
+  texpdf_release_obj(currentpage->contents);
   currentpage->contents = NULL;
 
   /*
@@ -2095,18 +2095,18 @@ pdf_doc_finish_page (pdf_doc *p)
      * ProcSet is obsolete in PDF-1.4 but recommended for compatibility.
      */
 
-    procset = pdf_new_array ();
-    pdf_add_array(procset, pdf_new_name("PDF"));
-    pdf_add_array(procset, pdf_new_name("Text"));
-    pdf_add_array(procset, pdf_new_name("ImageC"));
-    pdf_add_array(procset, pdf_new_name("ImageB"));
-    pdf_add_array(procset, pdf_new_name("ImageI"));
-    pdf_add_dict(currentpage->resources, pdf_new_name("ProcSet"), procset);
+    procset = texpdf_new_array ();
+    pdf_add_array(procset, texpdf_new_name("PDF"));
+    pdf_add_array(procset, texpdf_new_name("Text"));
+    pdf_add_array(procset, texpdf_new_name("ImageC"));
+    pdf_add_array(procset, texpdf_new_name("ImageB"));
+    pdf_add_array(procset, texpdf_new_name("ImageI"));
+    texpdf_add_dict(currentpage->resources, texpdf_new_name("ProcSet"), procset);
 
-    pdf_add_dict(currentpage->page_obj,
-                 pdf_new_name("Resources"),
+    texpdf_add_dict(currentpage->page_obj,
+                 texpdf_new_name("Resources"),
                  pdf_ref_obj(currentpage->resources));
-    pdf_release_obj(currentpage->resources);
+    texpdf_release_obj(currentpage->resources);
     currentpage->resources = NULL;
   }
 
@@ -2120,7 +2120,7 @@ pdf_doc_finish_page (pdf_doc *p)
     thumb_ref = read_thumbnail(p, thumb_filename);
     RELEASE(thumb_filename);
     if (thumb_ref)
-      pdf_add_dict(currentpage->page_obj, pdf_new_name("Thumb"), thumb_ref);
+      texpdf_add_dict(currentpage->page_obj, texpdf_new_name("Thumb"), thumb_ref);
   }
 
   p->pages.num_entries++;
@@ -2132,9 +2132,9 @@ void
 texpdf_doc_set_bgcolor (pdf_doc *p, const pdf_color *color)
 {
   if (color)
-    pdf_color_copycolor(&p->bgcolor, color);
+    texpdf_color_copycolor(&p->bgcolor, color);
   else { /* as clear... */
-    pdf_color_white(&p->bgcolor);
+    texpdf_color_white(&p->bgcolor);
   }
 }
 
@@ -2146,8 +2146,8 @@ doc_fill_page_background (pdf_doc *p)
   int        cm;
   pdf_obj   *saved_content;
 
-  cm = pdf_dev_get_param(PDF_DEV_PARAM_COLORMODE);
-  if (!cm || pdf_color_is_white(&p->bgcolor)) {
+  cm = texpdf_dev_get_param(PDF_DEV_PARAM_COLORMODE);
+  if (!cm || texpdf_color_is_white(&p->bgcolor)) {
     return;
   }
 
@@ -2157,15 +2157,15 @@ doc_fill_page_background (pdf_doc *p)
   ASSERT(currentpage);
 
   if (!currentpage->background)
-    currentpage->background = pdf_new_stream(STREAM_COMPRESS);
+    currentpage->background = texpdf_new_stream(STREAM_COMPRESS);
 
   saved_content = currentpage->contents;
   currentpage->contents = currentpage->background;
 
-  pdf_dev_gsave(p);
-  pdf_dev_set_nonstrokingcolor(p, &p->bgcolor);
-  pdf_dev_rectfill(p, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
-  pdf_dev_grestore(p);
+  texpdf_dev_gsave(p);
+  texpdf_dev_set_nonstrokingcolor(p, &p->bgcolor);
+  texpdf_dev_rectfill(p, r.llx, r.lly, r.urx - r.llx, r.ury - r.lly);
+  texpdf_dev_grestore(p);
 
   currentpage->contents = saved_content;
 
@@ -2184,7 +2184,7 @@ texpdf_doc_begin_page (pdf_doc *p, double scale, double x_origin, double y_origi
 
   /* pdf_doc_new_page() allocates page content stream. */
   pdf_doc_new_page(p);
-  pdf_dev_bop(p, &M);
+  texpdf_dev_bop(p, &M);
 
   return;
 }
@@ -2192,7 +2192,7 @@ texpdf_doc_begin_page (pdf_doc *p, double scale, double x_origin, double y_origi
 void
 texpdf_doc_end_page (pdf_doc *p)
 {
-  pdf_dev_eop(p);
+  texpdf_dev_eop(p);
   doc_fill_page_background(p);
 
   pdf_doc_finish_page(p);
@@ -2243,17 +2243,17 @@ texpdf_open_document (const char *filename,
   p->opt.annot_grow = annot_grow_amount;
   p->opt.outline_open_depth = bookmark_open_depth;
 
-  pdf_init_resources();
-  pdf_init_colors();
-  pdf_init_fonts();
+  texpdf_init_resources();
+  texpdf_init_colors();
+  texpdf_init_fonts();
   /* Thumbnail want this to be initialized... */
-  pdf_init_images();
+  texpdf_init_images();
 
   pdf_doc_init_docinfo(p);
   if (p->doccreator) {
-    pdf_add_dict(p->info,
-                 pdf_new_name("Creator"),
-                 pdf_new_string(p->doccreator, strlen(p->doccreator)));
+    texpdf_add_dict(p->info,
+                 texpdf_new_name("Creator"),
+                 texpdf_new_string(p->doccreator, strlen(p->doccreator)));
     RELEASE(p->doccreator); p->doccreator = NULL;
   }
 
@@ -2266,10 +2266,10 @@ texpdf_open_document (const char *filename,
 
   if (do_encryption) {
     pdf_obj *encrypt = pdf_encrypt_obj();
-    pdf_set_encrypt(encrypt);
-    pdf_release_obj(encrypt);
+    texpdf_set_encrypt(encrypt);
+    texpdf_release_obj(encrypt);
   }
-  pdf_set_id(pdf_enc_id_array());
+  texpdf_set_id(texpdf_enc_id_array());
 
   /* Create a default name for thumbnail image files */
   if (p->manual_thumb_enabled) {
@@ -2316,11 +2316,11 @@ texpdf_close_document (pdf_doc *p)
 
   pdf_doc_close_catalog  (p);
 
-  pdf_close_images();
-  pdf_close_fonts ();
-  pdf_close_colors();
+  texpdf_close_images();
+  texpdf_close_fonts ();
+  texpdf_close_colors();
 
-  pdf_close_resources(); /* Should be at last. */
+  texpdf_close_resources(); /* Should be at last. */
 
   pdf_out_flush();
 
@@ -2344,40 +2344,40 @@ pdf_doc_make_xform (pdf_obj     *xform,
   pdf_obj *xform_dict;
   pdf_obj *tmp;
 
-  xform_dict = pdf_stream_dict(xform);
-  pdf_add_dict(xform_dict,
-               pdf_new_name("Type"),     pdf_new_name("XObject"));
-  pdf_add_dict(xform_dict,
-               pdf_new_name("Subtype"),  pdf_new_name("Form"));
-  pdf_add_dict(xform_dict,
-               pdf_new_name("FormType"), pdf_new_number(1.0));
+  xform_dict = texpdf_stream_dict(xform);
+  texpdf_add_dict(xform_dict,
+               texpdf_new_name("Type"),     texpdf_new_name("XObject"));
+  texpdf_add_dict(xform_dict,
+               texpdf_new_name("Subtype"),  texpdf_new_name("Form"));
+  texpdf_add_dict(xform_dict,
+               texpdf_new_name("FormType"), texpdf_new_number(1.0));
 
   if (!bbox)
     ERROR("No BoundingBox supplied.");
 
-  tmp = pdf_new_array();
-  pdf_add_array(tmp, pdf_new_number(ROUND(bbox->llx, .001)));
-  pdf_add_array(tmp, pdf_new_number(ROUND(bbox->lly, .001)));
-  pdf_add_array(tmp, pdf_new_number(ROUND(bbox->urx, .001)));
-  pdf_add_array(tmp, pdf_new_number(ROUND(bbox->ury, .001)));
-  pdf_add_dict(xform_dict, pdf_new_name("BBox"), tmp);
+  tmp = texpdf_new_array();
+  pdf_add_array(tmp, texpdf_new_number(ROUND(bbox->llx, .001)));
+  pdf_add_array(tmp, texpdf_new_number(ROUND(bbox->lly, .001)));
+  pdf_add_array(tmp, texpdf_new_number(ROUND(bbox->urx, .001)));
+  pdf_add_array(tmp, texpdf_new_number(ROUND(bbox->ury, .001)));
+  texpdf_add_dict(xform_dict, texpdf_new_name("BBox"), tmp);
 
   if (matrix) {
-    tmp = pdf_new_array();
-    pdf_add_array(tmp, pdf_new_number(ROUND(matrix->a, .00001)));
-    pdf_add_array(tmp, pdf_new_number(ROUND(matrix->b, .00001)));
-    pdf_add_array(tmp, pdf_new_number(ROUND(matrix->c, .00001)));
-    pdf_add_array(tmp, pdf_new_number(ROUND(matrix->d, .00001)));
-    pdf_add_array(tmp, pdf_new_number(ROUND(matrix->e, .001  )));
-    pdf_add_array(tmp, pdf_new_number(ROUND(matrix->f, .001  )));
-    pdf_add_dict(xform_dict, pdf_new_name("Matrix"), tmp);
+    tmp = texpdf_new_array();
+    pdf_add_array(tmp, texpdf_new_number(ROUND(matrix->a, .00001)));
+    pdf_add_array(tmp, texpdf_new_number(ROUND(matrix->b, .00001)));
+    pdf_add_array(tmp, texpdf_new_number(ROUND(matrix->c, .00001)));
+    pdf_add_array(tmp, texpdf_new_number(ROUND(matrix->d, .00001)));
+    pdf_add_array(tmp, texpdf_new_number(ROUND(matrix->e, .001  )));
+    pdf_add_array(tmp, texpdf_new_number(ROUND(matrix->f, .001  )));
+    texpdf_add_dict(xform_dict, texpdf_new_name("Matrix"), tmp);
   }
 
   if (attrib) {
-    pdf_merge_dict(xform_dict, attrib);
+    texpdf_merge_dict(xform_dict, attrib);
   }
 
-  pdf_add_dict(xform_dict, pdf_new_name("Resources"), resources);
+  texpdf_add_dict(xform_dict, texpdf_new_name("Resources"), resources);
 
   return;
 }
@@ -2396,12 +2396,12 @@ texpdf_doc_begin_grabbing (pdf_doc *p, const char *ident,
   struct form_list_node *fnode;
   xform_info  info;
 
-  pdf_dev_push_gstate();
+  texpdf_dev_push_gstate();
 
   fnode = NEW(1, struct form_list_node);
 
   fnode->prev    = p->pending_forms;
-  fnode->q_depth = pdf_dev_current_depth();
+  fnode->q_depth = texpdf_dev_current_depth();
   form           = &fnode->form;
 
   /*
@@ -2421,10 +2421,10 @@ texpdf_doc_begin_grabbing (pdf_doc *p, const char *ident,
   form->cropbox.urx = ref_x + cropbox->urx;
   form->cropbox.ury = ref_y + cropbox->ury;
 
-  form->contents  = pdf_new_stream(STREAM_COMPRESS);
-  form->resources = pdf_new_dict();
+  form->contents  = texpdf_new_stream(STREAM_COMPRESS);
+  form->resources = texpdf_new_dict();
 
-  pdf_ximage_init_form_info(&info);
+  texpdf_ximage_init_form_info(&info);
 
   info.matrix.a = 1.0; info.matrix.b = 0.0;
   info.matrix.c = 0.0; info.matrix.d = 1.0;
@@ -2437,7 +2437,7 @@ texpdf_doc_begin_grabbing (pdf_doc *p, const char *ident,
   info.bbox.ury = cropbox->ury;
 
   /* Use reference since content itself isn't available yet. */
-  xobj_id = pdf_ximage_defineresource(ident,
+  xobj_id = texpdf_ximage_defineresource(ident,
                                       PDF_XOBJECT_TYPE_FORM,
                                       &info, pdf_ref_obj(form->contents));
 
@@ -2447,8 +2447,8 @@ texpdf_doc_begin_grabbing (pdf_doc *p, const char *ident,
    * Make sure the object is self-contained by adding the
    * current font and color to the object stream.
    */
-  pdf_dev_reset_fonts();
-  pdf_dev_reset_color(p, 1);  /* force color operators to be added to stream */
+  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_color(p, 1);  /* force color operators to be added to stream */
 
   return xobj_id;
 }
@@ -2468,32 +2468,32 @@ texpdf_doc_end_grabbing (pdf_doc *p, pdf_obj *attrib)
   fnode = p->pending_forms;
   form  = &fnode->form;
 
-  pdf_dev_grestore_to(p, fnode->q_depth);
+  texpdf_dev_grestore_to(p, fnode->q_depth);
 
   /*
    * ProcSet is obsolete in PDF-1.4 but recommended for compatibility.
    */
-  procset = pdf_new_array();
-  pdf_add_array(procset, pdf_new_name("PDF"));
-  pdf_add_array(procset, pdf_new_name("Text"));
-  pdf_add_array(procset, pdf_new_name("ImageC"));
-  pdf_add_array(procset, pdf_new_name("ImageB"));
-  pdf_add_array(procset, pdf_new_name("ImageI"));
-  pdf_add_dict (form->resources, pdf_new_name("ProcSet"), procset);
+  procset = texpdf_new_array();
+  pdf_add_array(procset, texpdf_new_name("PDF"));
+  pdf_add_array(procset, texpdf_new_name("Text"));
+  pdf_add_array(procset, texpdf_new_name("ImageC"));
+  pdf_add_array(procset, texpdf_new_name("ImageB"));
+  pdf_add_array(procset, texpdf_new_name("ImageI"));
+  texpdf_add_dict (form->resources, texpdf_new_name("ProcSet"), procset);
 
   pdf_doc_make_xform(form->contents,
                      &form->cropbox, &form->matrix,
                      pdf_ref_obj(form->resources), attrib);
-  pdf_release_obj(form->resources);
-  pdf_release_obj(form->contents);
-  if (attrib) pdf_release_obj(attrib);
+  texpdf_release_obj(form->resources);
+  texpdf_release_obj(form->contents);
+  if (attrib) texpdf_release_obj(attrib);
 
   p->pending_forms = fnode->prev;
 
-  pdf_dev_pop_gstate();
+  texpdf_dev_pop_gstate();
 
-  pdf_dev_reset_fonts();
-  pdf_dev_reset_color(p, 0);
+  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_color(p, 0);
 
   RELEASE(fnode);
 
@@ -2539,11 +2539,11 @@ texpdf_doc_break_annot (pdf_doc *p)
     pdf_obj  *annot_dict;
 
     /* Copy dict */
-    annot_dict = pdf_new_dict();
-    pdf_merge_dict(annot_dict, breaking_state.annot_dict);
+    annot_dict = texpdf_new_dict();
+    texpdf_merge_dict(annot_dict, breaking_state.annot_dict);
     texpdf_doc_add_annot(p, texpdf_doc_current_page_number(p), &(breaking_state.rect),
 		      annot_dict, !breaking_state.broken);
-    pdf_release_obj(annot_dict);
+    texpdf_release_obj(annot_dict);
 
     breaking_state.broken = 1;
   }
@@ -2571,24 +2571,24 @@ pdf_doc_set_pagelabel (long  pg_start,
   pdf_obj *label_dict;
 
   if (!p->root.pagelabels)
-    p->root.pagelabels = pdf_new_array();
+    p->root.pagelabels = texpdf_new_array();
 
-  label_dict = pdf_new_dict();
+  label_dict = texpdf_new_dict();
   if (!type || type[0] == '\0') /* Set back to default. */
-    pdf_add_dict(label_dict, pdf_new_name("S"),  pdf_new_name("D"));
+    texpdf_add_dict(label_dict, texpdf_new_name("S"),  texpdf_new_name("D"));
   else {
     if (type)
-      pdf_add_dict(label_dict, pdf_new_name("S"), pdf_new_name(type));
+      texpdf_add_dict(label_dict, texpdf_new_name("S"), texpdf_new_name(type));
     if (prefix && prfx_len > 0)
-      pdf_add_dict(label_dict,
-                   pdf_new_name("P"),
-                   pdf_new_string(prefix, prfx_len));
+      texpdf_add_dict(label_dict,
+                   texpdf_new_name("P"),
+                   texpdf_new_string(prefix, prfx_len));
     if (start != 1)
-      pdf_add_dict(label_dict,
-                   pdf_new_name("St"), pdf_new_number(start));
+      texpdf_add_dict(label_dict,
+                   texpdf_new_name("St"), texpdf_new_number(start));
   }
 
-  pdf_add_array(p->root.pagelabels, pdf_new_number(pg_start));
+  pdf_add_array(p->root.pagelabels, texpdf_new_number(pg_start));
   pdf_add_array(p->root.pagelabels, label_dict);
 
   return;

@@ -39,7 +39,7 @@
 extern void   transform_info_clear (transform_info *info);
 
 
-extern void   pdf_dev_set_verbose (void);
+extern void   texpdf_dev_set_verbose (void);
 
 /* Not in spt_t. */
 extern int    pdf_sprint_matrix (char *buf, const pdf_tmatrix *p);
@@ -53,22 +53,22 @@ extern int    pdf_sprint_number (char *buf, double value);
  *            accuracy control).
  * is_bw:     Ignore color related special instructions.
  */
-extern void   pdf_init_device   (pdf_doc *p, double unit_conv, int precision, int is_bw);
-extern void   pdf_close_device  (void);
+extern void   texpdf_init_device   (pdf_doc *p, double unit_conv, int precision, int is_bw);
+extern void   texpdf_close_device  (void);
 
 /* returns 1.0/unit_conv */
 extern double dev_unit_dviunit  (void);
 
 #if 0
 /* DVI interpreter knows text positioning in relative motion.
- * However, pdf_dev_set_string() recieves text string with placement
+ * However, texpdf_dev_set_string() recieves text string with placement
  * in absolute position in user space, and it convert absolute
  * positioning back to relative positioning. It is quite wasteful.
  *
  * TeX using DVI register stack operation to do CR and then use down
  * command for LF. DVI interpreter knows hint for current leading
  * and others (raised or lowered), but they are mostly lost in
- * pdf_dev_set_string().
+ * texpdf_dev_set_string().
  */
 
 typedef struct
@@ -103,50 +103,50 @@ typedef struct
  *   1 - input string is in 8-bit encoding.
  *   2 - input string is in 16-bit encoding.
  */
-extern void   pdf_dev_set_string (pdf_doc *p, spt_t xpos, spt_t ypos,
+extern void   texpdf_dev_set_string (pdf_doc *p, spt_t xpos, spt_t ypos,
 				  const void *instr_ptr, int instr_len,
 				  spt_t text_width,
 				  int   font_id, int ctype);
-extern void   pdf_dev_set_rule   (pdf_doc *p, spt_t xpos, spt_t ypos,
+extern void   texpdf_dev_set_rule   (pdf_doc *p, spt_t xpos, spt_t ypos,
 				  spt_t width, spt_t height);
 
 /* Place XObject */
-extern int    pdf_dev_put_image  (pdf_doc *doc, int xobj_id,
+extern int    texpdf_dev_put_image  (pdf_doc *doc, int xobj_id,
 				  transform_info *p, double ref_x, double ref_y, int track_boxes);
 
 /* The design_size and ptsize required by PK font support...
  */
-extern int    pdf_dev_locate_font (const char *font_name, spt_t ptsize);
+extern int    texpdf_dev_locate_font (const char *font_name, spt_t ptsize);
 
-extern int    pdf_dev_setfont     (const char *font_name, spt_t ptsize);
+extern int    texpdf_dev_setfont     (const char *font_name, spt_t ptsize);
 
 /* The following two routines are NOT WORKING.
  * Dvipdfmx doesn't manage gstate well..
  */
 #if 0
-/* pdf_dev_translate() or pdf_dev_concat() should be used. */
-extern void   pdf_dev_set_origin (double orig_x, double orig_y);
+/* texpdf_dev_translate() or texpdf_dev_concat() should be used. */
+extern void   texpdf_dev_set_origin (double orig_x, double orig_y);
 #endif
 /* Always returns 1.0, please rename this. */
-extern double pdf_dev_scale      (void);
+extern double texpdf_dev_scale      (void);
 
 /* Access text state parameters. */
 #if 0
-extern int    pdf_dev_currentfont     (void); /* returns font_id */
-extern double pdf_dev_get_font_ptsize (int font_id);
+extern int    texpdf_dev_currentfont     (void); /* returns font_id */
+extern double texpdf_dev_get_font_ptsize (int font_id);
 #endif
-extern int    pdf_dev_get_font_wmode  (int font_id); /* ps: special support want this (pTeX). */
+extern int    texpdf_dev_get_font_wmode  (int font_id); /* ps: special support want this (pTeX). */
 
 /* Text composition (direction) mode
  * This affects only when auto_rotate is enabled.
  */
-extern int    pdf_dev_get_dirmode     (void);
-extern void   pdf_dev_set_dirmode     (int dir_mode);
+extern int    texpdf_dev_get_dirmode     (void);
+extern void   texpdf_dev_set_dirmode     (int dir_mode);
 
 /* Set rect to rectangle in device space.
  * Unit conversion spt_t to bp and transformation applied within it.
  */
-extern void   pdf_dev_set_rect   (pdf_rect *rect,
+extern void   texpdf_dev_set_rect   (pdf_rect *rect,
 				  spt_t x_pos, spt_t y_pos,
 				  spt_t width, spt_t height, spt_t depth);
 
@@ -155,15 +155,15 @@ extern void   pdf_dev_set_rect   (pdf_rect *rect,
 #define PDF_DEV_PARAM_AUTOROTATE  1
 #define PDF_DEV_PARAM_COLORMODE   2
 
-extern int    pdf_dev_get_param (int param_type);
-extern void   pdf_dev_set_param (int param_type, int value);
+extern int    texpdf_dev_get_param (int param_type);
+extern void   texpdf_dev_set_param (int param_type, int value);
 
 /* Text composition mode is ignored (always same as font's
  * writing mode) and glyph rotation is not enabled if
  * auto_rotate is unset.
  */
-#define pdf_dev_set_autorotate(v) pdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, (v))
-#define pdf_dev_set_colormode(v)  pdf_dev_set_param(PDF_DEV_PARAM_COLORMODE,  (v))
+#define texpdf_dev_set_autorotate(v) texpdf_dev_set_param(PDF_DEV_PARAM_AUTOROTATE, (v))
+#define texpdf_dev_set_colormode(v)  texpdf_dev_set_param(PDF_DEV_PARAM_COLORMODE,  (v))
 
 /*
  * For pdf_doc, pdf_draw and others.
@@ -172,23 +172,23 @@ extern void   pdf_dev_set_param (int param_type, int value);
 /* Force reselecting font and color:
  * XFrom (content grabbing) and Metapost support want them.
  */
-extern void   pdf_dev_reset_fonts (void);
-extern void   pdf_dev_reset_color (pdf_doc *p, int force);
+extern void   texpdf_dev_reset_fonts (void);
+extern void   texpdf_dev_reset_color (pdf_doc *p, int force);
 
 /* Initialization of transformation matrix with M and others.
  * They are called within pdf_doc_begin_page() and pdf_doc_end_page().
  */
-extern void   pdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M);
-extern void   pdf_dev_eop (pdf_doc *p);
+extern void   texpdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M);
+extern void   texpdf_dev_eop (pdf_doc *p);
 
 /* Text is normal and line art is not normal in dvipdfmx. So we don't have
  * begin_text (BT in PDF) and end_text (ET), but instead we have graphics_mode()
- * to terminate text section. pdf_dev_flushpath() and others call this.
+ * to terminate text section. texpdf_dev_flushpath() and others call this.
  */
 extern void   graphics_mode (pdf_doc *p);
 
-extern void   pdf_dev_get_coord(double *xpos, double *ypos);
-extern void   pdf_dev_push_coord(double xpos, double ypos);
-extern void   pdf_dev_pop_coord(void);
+extern void   texpdf_dev_get_coord(double *xpos, double *ypos);
+extern void   texpdf_dev_push_coord(double xpos, double ypos);
+extern void   texpdf_dev_pop_coord(void);
 
 #endif /* _PDFDEV_H_ */

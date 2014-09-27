@@ -78,7 +78,7 @@ static int      pdf_encoding_new_encoding (const char *enc_name,
 					   int flags);
 
 static void
-pdf_init_encoding_struct (pdf_encoding *encoding)
+texpdf_init_encoding_struct (pdf_encoding *encoding)
 {
   ASSERT(encoding);
 
@@ -114,11 +114,11 @@ create_encoding_resource (pdf_encoding *encoding, pdf_encoding *baseenc)
 					  encoding->is_used);
   
   if (differences) {
-    pdf_obj *resource = pdf_new_dict();
+    pdf_obj *resource = texpdf_new_dict();
     if (baseenc)
-      pdf_add_dict(resource, pdf_new_name("BaseEncoding"),
+      texpdf_add_dict(resource, texpdf_new_name("BaseEncoding"),
 		   pdf_link_obj(baseenc->resource));
-    pdf_add_dict(resource, pdf_new_name("Differences"),  differences);
+    texpdf_add_dict(resource, texpdf_new_name("Differences"),  differences);
     return resource; 
   } else {
     /* Fix a bug with the MinionPro package using MnSymbol fonts
@@ -142,11 +142,11 @@ pdf_flush_encoding (pdf_encoding *encoding)
   ASSERT(encoding);
 
   if (encoding->resource) {
-    pdf_release_obj(encoding->resource);
+    texpdf_release_obj(encoding->resource);
     encoding->resource  = NULL;
   }
   if (encoding->tounicode) {
-    pdf_release_obj(encoding->tounicode);
+    texpdf_release_obj(encoding->tounicode);
     encoding->tounicode = NULL;
   }
 
@@ -164,7 +164,7 @@ pdf_clean_encoding_struct (pdf_encoding *encoding)
     ERROR("Object not flushed.");
 
   if (encoding->tounicode)
-    pdf_release_obj(encoding->tounicode);
+    texpdf_release_obj(encoding->tounicode);
   if (encoding->ident)
     RELEASE(encoding->ident);
   if (encoding->enc_name)
@@ -228,7 +228,7 @@ make_encoding_differences (char **enc_vec, char **baseenc, const char *is_used)
    *  Write all entries (except .notdef) if baseenc is unknown.
    *  If is_used is given, write only used entries.
    */
-  differences = pdf_new_array();
+  differences = texpdf_new_array();
   for (code = 0; code < 256; code++) {
     /* We skip NULL (= ".notdef"). Any character code mapped to ".notdef"
      * glyph should not be used in the document.
@@ -241,8 +241,8 @@ make_encoding_differences (char **enc_vec, char **baseenc, const char *is_used)
        * Difference found.
        */
       if (skipping)
-        pdf_add_array(differences, pdf_new_number(code));
-      pdf_add_array(differences,   pdf_new_name(enc_vec[code]));
+        pdf_add_array(differences, texpdf_new_number(code));
+      pdf_add_array(differences,   texpdf_new_name(enc_vec[code]));
       skipping = 0;
       count++;
     } else
@@ -254,7 +254,7 @@ make_encoding_differences (char **enc_vec, char **baseenc, const char *is_used)
    * any differences. We return NULL.
    */
   if (count == 0) {
-    pdf_release_obj(differences);
+    texpdf_release_obj(differences);
     differences = NULL;
   }
 
@@ -306,19 +306,19 @@ load_encoding_file (const char *filename)
     skip_white(&p, endptr);
   }
   if (p[0] == '/')
-    enc_name = parse_pdf_name(&p, endptr);
+    enc_name = texpdf_parse_pdf_name(&p, endptr);
 
   skip_white(&p, endptr);
-  encoding_array = parse_pdf_array(&p, endptr, NULL);
+  encoding_array = texpdf_parse_pdf_array(&p, endptr, NULL);
   RELEASE(wbuf);
   if (!encoding_array) {
     if (enc_name)
-      pdf_release_obj(enc_name);
+      texpdf_release_obj(enc_name);
     return -1;
   }
 
   for (code = 0; code < 256; code++) {
-    enc_vec[code] = pdf_name_value(pdf_get_array(encoding_array, code));
+    enc_vec[code] = pdf_name_value(texpdf_get_array(encoding_array, code));
   }
   enc_id = pdf_encoding_new_encoding(enc_name ? pdf_name_value(enc_name) : NULL,
 				     filename, enc_vec, NULL, 0);
@@ -326,9 +326,9 @@ load_encoding_file (const char *filename)
   if (enc_name) {
     if (verbose > 1)
       MESG("[%s]", pdf_name_value(enc_name));
-    pdf_release_obj(enc_name);
+    texpdf_release_obj(enc_name);
   }
-  pdf_release_obj(encoding_array);
+  texpdf_release_obj(encoding_array);
 
   if (verbose) MESG(")");
 
@@ -352,7 +352,7 @@ struct {
 };
 
 void
-pdf_init_encodings (void)
+texpdf_init_encodings (void)
 {
   enc_cache.count     = 0;
   enc_cache.capacity  = 3;
@@ -401,7 +401,7 @@ pdf_encoding_new_encoding (const char *enc_name, const char *ident,
   }
   encoding = &enc_cache.encodings[enc_id];
 
-  pdf_init_encoding_struct(encoding);
+  texpdf_init_encoding_struct(encoding);
 
   encoding->ident = NEW(strlen(ident)+1, char);
   strcpy(encoding->ident, ident);
@@ -432,7 +432,7 @@ pdf_encoding_new_encoding (const char *enc_name, const char *ident,
   }
 
   if (flags & FLAG_IS_PREDEFINED)
-    encoding->resource = pdf_new_name(encoding->enc_name);
+    encoding->resource = texpdf_new_name(encoding->enc_name);
 
   return enc_id;
 }
@@ -454,7 +454,7 @@ void pdf_encoding_complete (void)
        * we do use a base encodings for PDF versions >= 1.3.
        */
       int with_base = !(encoding->flags & FLAG_USED_BY_TYPE3)
-	              || pdf_get_version() >= 4;
+	              || texpdf_get_version() >= 4;
       ASSERT(!encoding->resource);
       encoding->resource = create_encoding_resource(encoding,
 						    with_base ? encoding->baseenc : NULL);
@@ -467,7 +467,7 @@ void pdf_encoding_complete (void)
 }
 
 void
-pdf_close_encodings (void)
+texpdf_close_encodings (void)
 {
   int  enc_id;
 
@@ -526,7 +526,7 @@ pdf_encoding_get_encoding (int enc_id)
 }
 
 pdf_obj *
-pdf_get_encoding_obj (int enc_id)
+texpdf_get_encoding_obj (int enc_id)
 {
   pdf_encoding *encoding;
 
@@ -660,7 +660,7 @@ pdf_create_ToUnicode_CMap (const char *enc_name,
       /* Adobe glyph naming conventions are not used by viewers,
        * hence even ligatures (e.g, "f_i") must be explicitly defined
        */
-      if (pdf_get_version() < 5 || !agln || !agln->is_predef) {
+      if (texpdf_get_version() < 5 || !agln || !agln->is_predef) {
         wbuf[0] = (code & 0xff);
         p      = wbuf + 1;
         endptr = wbuf + WBUF_SIZE;

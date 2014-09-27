@@ -255,8 +255,8 @@ CMap_create_stream (CMap *cmap)
   if (cmap->type == CMAP_TYPE_IDENTITY)
     return NULL;
 
-  stream      = pdf_new_stream(STREAM_COMPRESS);
-  stream_dict = pdf_stream_dict(stream);
+  stream      = texpdf_new_stream(STREAM_COMPRESS);
+  stream_dict = texpdf_stream_dict(stream);
 
   csi = CMap_get_CIDSysInfo(cmap);
   if (!csi) {
@@ -267,29 +267,29 @@ CMap_create_stream (CMap *cmap)
   if (cmap->type != CMAP_TYPE_TO_UNICODE) {
     pdf_obj *csi_dict;
 
-    csi_dict = pdf_new_dict();
-    pdf_add_dict(csi_dict,
-		 pdf_new_name("Registry"),
-		 pdf_new_string(csi->registry, strlen(csi->registry)));
-    pdf_add_dict(csi_dict,
-		 pdf_new_name("Ordering"),
-		 pdf_new_string(csi->ordering, strlen(csi->ordering)));
-    pdf_add_dict(csi_dict,
-		 pdf_new_name("Supplement"),
-		 pdf_new_number(csi->supplement));
+    csi_dict = texpdf_new_dict();
+    texpdf_add_dict(csi_dict,
+		 texpdf_new_name("Registry"),
+		 texpdf_new_string(csi->registry, strlen(csi->registry)));
+    texpdf_add_dict(csi_dict,
+		 texpdf_new_name("Ordering"),
+		 texpdf_new_string(csi->ordering, strlen(csi->ordering)));
+    texpdf_add_dict(csi_dict,
+		 texpdf_new_name("Supplement"),
+		 texpdf_new_number(csi->supplement));
 
-    pdf_add_dict(stream_dict,
-		 pdf_new_name("Type"),
-		 pdf_new_name("CMap"));
-    pdf_add_dict(stream_dict,
-		 pdf_new_name("CMapName"),
-		 pdf_new_name(cmap->name));
-    pdf_add_dict(stream_dict,
-		 pdf_new_name("CIDSystemInfo"), csi_dict);
+    texpdf_add_dict(stream_dict,
+		 texpdf_new_name("Type"),
+		 texpdf_new_name("CMap"));
+    texpdf_add_dict(stream_dict,
+		 texpdf_new_name("CMapName"),
+		 texpdf_new_name(cmap->name));
+    texpdf_add_dict(stream_dict,
+		 texpdf_new_name("CIDSystemInfo"), csi_dict);
     if (cmap->wmode != 0)
-      pdf_add_dict(stream_dict,
-		   pdf_new_name("WMode"),
-		   pdf_new_number(cmap->wmode));
+      texpdf_add_dict(stream_dict,
+		   texpdf_new_name("WMode"),
+		   texpdf_new_number(cmap->wmode));
   }
 
   /* TODO:
@@ -299,13 +299,13 @@ CMap_create_stream (CMap *cmap)
     ERROR("UseCMap found (not supported yet)...");
     if (CMap_is_Identity(cmap->useCMap)) { /* not sure */
       if (CMap_get_wmode(cmap) == 1) {
-	pdf_add_dict(stream_dict,
-		     pdf_new_name("UseCMap"),
-		     pdf_new_name("Identity-V"));
+	texpdf_add_dict(stream_dict,
+		     texpdf_new_name("UseCMap"),
+		     texpdf_new_name("Identity-V"));
       } else {
-    	pdf_add_dict(stream_dict,
-		     pdf_new_name("UseCMap"),
-		     pdf_new_name("Identity-H"));
+    	texpdf_add_dict(stream_dict,
+		     texpdf_new_name("UseCMap"),
+		     texpdf_new_name("Identity-H"));
       }
     } else {
       long     res_id;
@@ -313,7 +313,7 @@ CMap_create_stream (CMap *cmap)
 
       res_id = pdf_findresource("CMap", CMap_get_name(cmap->useCMap));
       if (res_id >= 0) {
-	ucmap_ref = pdf_get_resource_reference(res_id);
+	ucmap_ref = texpdf_get_resource_reference(res_id);
       } else {
 	pdf_obj *ucmap_obj;
 
@@ -325,9 +325,9 @@ CMap_create_stream (CMap *cmap)
 	res_id = pdf_defineresource("CMap",
 				    CMap_get_name(cmap->useCMap),
 				    ucmap_obj, PDF_RES_FLUSH_IMMEDIATE);
-	ucmap_ref = pdf_get_resource_reference(res_id);
+	ucmap_ref = texpdf_get_resource_reference(res_id);
       }
-      pdf_add_dict(stream_dict, pdf_new_name("UseCMap"), ucmap_ref);
+      texpdf_add_dict(stream_dict, texpdf_new_name("UseCMap"), ucmap_ref);
     }
   }
 

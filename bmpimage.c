@@ -59,7 +59,7 @@ static long read_raster_rle4 (unsigned char *data_ptr,
 			      long width, long height, FILE *fp);
 
 int
-check_for_bmp (FILE *fp)
+texpdf_check_for_bmp (FILE *fp)
 {
  unsigned char sigbytes[2];
 
@@ -114,7 +114,7 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
   int  num_palette, flip;
   int  i;
  
-  pdf_ximage_init_image_info(&info);
+  texpdf_ximage_init_image_info(&info);
 
   stream = stream_dict = colorspace = NULL;
 
@@ -158,8 +158,8 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
   }
 
   /* Start reading raster data */
-  stream      = pdf_new_stream(STREAM_COMPRESS);
-  stream_dict = pdf_stream_dict(stream);
+  stream      = texpdf_new_stream(STREAM_COMPRESS);
+  stream_dict = texpdf_stream_dict(stream);
 
   /* Color space: Indexed or DeviceRGB */
   if (hdr.bit_count < 24) {
@@ -178,18 +178,18 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
       palette[3*i+1] = bgrq[1];
       palette[3*i+2] = bgrq[0];
     }
-    lookup = pdf_new_string(palette, num_palette*3);
+    lookup = texpdf_new_string(palette, num_palette*3);
     RELEASE(palette);
 
-    colorspace = pdf_new_array();
-    pdf_add_array(colorspace, pdf_new_name("Indexed"));
-    pdf_add_array(colorspace, pdf_new_name("DeviceRGB"));
-    pdf_add_array(colorspace, pdf_new_number(num_palette-1));
+    colorspace = texpdf_new_array();
+    pdf_add_array(colorspace, texpdf_new_name("Indexed"));
+    pdf_add_array(colorspace, texpdf_new_name("DeviceRGB"));
+    pdf_add_array(colorspace, texpdf_new_number(num_palette-1));
     pdf_add_array(colorspace, lookup);
   } else {
-    colorspace = pdf_new_name("DeviceRGB");
+    colorspace = texpdf_new_name("DeviceRGB");
   }
-  pdf_add_dict(stream_dict, pdf_new_name("ColorSpace"), colorspace);
+  texpdf_add_dict(stream_dict, texpdf_new_name("ColorSpace"), colorspace);
 
   /* Raster data of BMP is four-byte aligned. */
   {
@@ -210,7 +210,7 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
         p = stream_data_ptr + n * rowbytes;
         if (fread(p, 1, dib_rowbytes, fp) != dib_rowbytes) {
           WARN("Reading BMP raster data failed...");
-          pdf_release_obj(stream);
+          texpdf_release_obj(stream);
           RELEASE(stream_data_ptr);
           return -1;
         }
@@ -220,7 +220,7 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
       if (read_raster_rle8(stream_data_ptr,
           info.width, info.height, fp) < 0) {
 	       WARN("Reading BMP raster data failed...");
-	       pdf_release_obj(stream);
+	       texpdf_release_obj(stream);
 	       RELEASE(stream_data_ptr);
 	       return -1;
       }
@@ -229,13 +229,13 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
       if (read_raster_rle4(stream_data_ptr,
 			   info.width, info.height, fp) < 0) {
 	      WARN("Reading BMP raster data failed...");
-	      pdf_release_obj(stream);
+	      texpdf_release_obj(stream);
 	      RELEASE(stream_data_ptr);
 	      return -1;
       }
     } else {
       WARN("Unknown/Unsupported compression type for BMP image: %ld", hdr.compression);
-      pdf_release_obj(stream);
+      texpdf_release_obj(stream);
       return -1;
     }
 
@@ -260,7 +260,7 @@ bmp_include_image (pdf_ximage *ximage, FILE *fp)
     RELEASE(stream_data_ptr);
   }
 
-  pdf_ximage_set_image(ximage, &info, stream);
+  texpdf_ximage_set_image(ximage, &info, stream);
 
   return 0;
 }

@@ -49,8 +49,8 @@ extern void pdf_font_set_dpi (int font_dpi);
 typedef struct pdf_font pdf_font;
 
 /* pdf_open_document() call them. */
-extern void     pdf_init_fonts  (void);
-extern void     pdf_close_fonts (void);
+extern void     texpdf_init_fonts  (void);
+extern void     texpdf_close_fonts (void);
 
 /* font_name is used when mrec is NULL.
  * font_scale (point size) used by PK font.
@@ -60,15 +60,15 @@ extern void     pdf_close_fonts (void);
 extern int      pdf_font_findresource  (const char *font_name,
 					double font_scale, fontmap_rec *mrec);
 
-extern int      pdf_get_font_subtype   (int font_id);
-extern pdf_obj *pdf_get_font_reference (int font_id);
-extern char    *pdf_get_font_usedchars (int font_id);
+extern int      texpdf_get_font_subtype   (int font_id);
+extern pdf_obj *texpdf_get_font_reference (int font_id);
+extern char    *texpdf_get_font_usedchars (int font_id);
 
 #if 0
-extern char    *pdf_get_font_fontname  (int font_id); /* without unique tag */
+extern char    *texpdf_get_font_fontname  (int font_id); /* without unique tag */
 #endif /* 0 */
-extern int      pdf_get_font_encoding  (int font_id);
-extern int      pdf_get_font_wmode     (int font_id);
+extern int      texpdf_get_font_encoding  (int font_id);
+extern int      texpdf_get_font_wmode     (int font_id);
 
 /* Each font drivers use the followings. */
 extern int      pdf_font_is_in_use      (pdf_font *font);

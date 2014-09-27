@@ -27,8 +27,8 @@
 
 #define PDF_RES_FLUSH_IMMEDIATE 1
 
-extern void     pdf_init_resources  (void);
-extern void     pdf_close_resources (void);
+extern void     texpdf_init_resources  (void);
+extern void     texpdf_close_resources (void);
 
 extern long     pdf_defineresource (const char *category,
 				    const char *resname,  pdf_obj *object, int flags);
@@ -37,9 +37,9 @@ extern long     pdf_findresource   (const char *category, const char *resname);
 extern int      pdf_resource_exist (const char *category, const char *resname);
 #endif
 
-extern pdf_obj *pdf_get_resource_reference (long res_id);
+extern pdf_obj *texpdf_get_resource_reference (long res_id);
 #if 0
-extern pdf_obj *pdf_get_resource           (long res_id);
+extern pdf_obj *texpdf_get_resource           (long res_id);
 #endif
 
 #endif /* _PDF_RESOURCE_H_ */

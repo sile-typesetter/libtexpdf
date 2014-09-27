@@ -63,13 +63,13 @@ static char owner_passwd[MAX_PWD_LEN], user_passwd[MAX_PWD_LEN];
 
 static unsigned char verbose = 0;
 
-void pdf_enc_set_verbose (void)
+void texpdf_enc_set_verbose (void)
 {
   if (verbose < 255) verbose++;
 }
 
 #define PRODUCER "%s-%s, Copyright 2002-2014 by Jin-Hwan Cho, Matthias Franz, and Shunsaku Hirata"
-void pdf_enc_compute_id_string (char *dviname, char *pdfname)
+void texpdf_enc_compute_id_string (char *dviname, char *pdfname)
 {
   char *date_string, *producer;
   time_t current_time;
@@ -358,7 +358,7 @@ static char *getpass (const char *prompt)
 }
 #endif
 
-void pdf_enc_set_passwd (unsigned bits, unsigned perm, const char *owner_pw, const char *user_pw)
+void texpdf_enc_set_passwd (unsigned bits, unsigned perm, const char *owner_pw, const char *user_pw)
 {
   char *retry_passwd;
 
@@ -427,7 +427,7 @@ pdf_obj *pdf_encrypt_obj (void)
   fprintf (stderr, "(pdf_encrypt_obj)");
 #endif
 
-  doc_encrypt = pdf_new_dict ();
+  doc_encrypt = texpdf_new_dict ();
 
   /* KEY  : Filter
    * TYPE : name
@@ -435,9 +435,9 @@ pdf_obj *pdf_encrypt_obj (void)
    *        see below. Default value: Standard, for the built-in security
    *        handler.
    */
-  pdf_add_dict (doc_encrypt, 
-		pdf_new_name ("Filter"),
-		pdf_new_name ("Standard"));
+  texpdf_add_dict (doc_encrypt, 
+		texpdf_new_name ("Filter"),
+		texpdf_new_name ("Standard"));
   /* KEY  : V
    * TYPE : number
    * VALUE: (Optional but strongly recommended) A code specifying the
@@ -455,9 +455,9 @@ pdf_obj *pdf_encrypt_obj (void)
    *        The default value if this entry is omitted is 0, but a value
    *        of 1 or greater is strongly recommended.
    */
-  pdf_add_dict (doc_encrypt, 
-		pdf_new_name ("V"),
-		pdf_new_number (algorithm));
+  texpdf_add_dict (doc_encrypt, 
+		texpdf_new_name ("V"),
+		texpdf_new_number (algorithm));
   /* KEY  : Length
    * TYPE : integer
    * VALUE: (Optional; PDF 1.4; only if V is 2 or 3) The length of the
@@ -465,9 +465,9 @@ pdf_obj *pdf_encrypt_obj (void)
    *        in the range 40 to 128. Default value: 40.
    */
   if (algorithm > 1)
-    pdf_add_dict (doc_encrypt, 
-		  pdf_new_name ("Length"),
-		  pdf_new_number (key_size * 8));
+    texpdf_add_dict (doc_encrypt, 
+		  texpdf_new_name ("Length"),
+		  texpdf_new_number (key_size * 8));
   /* KEY  : R
    * TYPE : number
    * VALUE: (Required) A number specifying which revision of the standard
@@ -475,9 +475,9 @@ pdf_obj *pdf_encrypt_obj (void)
    *        The revison number should be 2 if the document is encrypted
    *        with a V value less than 2; otherwise this value should be 3.
    */
-  pdf_add_dict (doc_encrypt, 
-		pdf_new_name ("R"),
-		pdf_new_number (revision));
+  texpdf_add_dict (doc_encrypt, 
+		texpdf_new_name ("R"),
+		texpdf_new_number (revision));
   /* KEY  : O
    * TYPE : string
    * VALUE: (Required) A 32-byte string, based on both the owner and
@@ -485,9 +485,9 @@ pdf_obj *pdf_encrypt_obj (void)
    *        key and in determining whether a valid owner password was
    *        entered.
    */
-  pdf_add_dict (doc_encrypt, 
-		pdf_new_name ("O"),
-		pdf_new_string (opwd_string, 32));
+  texpdf_add_dict (doc_encrypt, 
+		texpdf_new_name ("O"),
+		texpdf_new_string (opwd_string, 32));
   /* KEY  : U
    * TYPE : string
    * VALUE: (Required) A 32-byte string, based on the user password,
@@ -495,35 +495,35 @@ pdf_obj *pdf_encrypt_obj (void)
    *        for a password and, if so, whether a valid user or owner
    *        password was entered.
    */
-  pdf_add_dict (doc_encrypt, 
-		pdf_new_name ("U"),
-		pdf_new_string (upwd_string, 32));
+  texpdf_add_dict (doc_encrypt, 
+		texpdf_new_name ("U"),
+		texpdf_new_string (upwd_string, 32));
   /* KEY  : P
    * TYPE : (signed 32 bit) integer
    * VALUE: (Required) A set of flags specifying which operations are
    *        permitted when the document is opened with user access.
    */
-  pdf_add_dict (doc_encrypt, 
-		pdf_new_name ("P"),
-		pdf_new_number (permission));
+  texpdf_add_dict (doc_encrypt, 
+		texpdf_new_name ("P"),
+		texpdf_new_number (permission));
 
   return doc_encrypt;
 }
 
-pdf_obj *pdf_enc_id_array (void)
+pdf_obj *texpdf_enc_id_array (void)
 {
-  pdf_obj *id = pdf_new_array();
-  pdf_add_array(id, pdf_new_string(id_string, MAX_KEY_LEN));
-  pdf_add_array(id, pdf_new_string(id_string, MAX_KEY_LEN));
+  pdf_obj *id = texpdf_new_array();
+  pdf_add_array(id, texpdf_new_string(id_string, MAX_KEY_LEN));
+  pdf_add_array(id, texpdf_new_string(id_string, MAX_KEY_LEN));
   return id;
 }
 
-void pdf_enc_set_label (unsigned long label)
+void texpdf_enc_set_label (unsigned long label)
 {
   current_label = label;
 }
 
-void pdf_enc_set_generation (unsigned generation)
+void texpdf_enc_set_generation (unsigned generation)
 {
   current_generation = generation;
 }

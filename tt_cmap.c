@@ -1167,7 +1167,7 @@ otf_create_ToUnicode_stream (const char *font_name,
   res_id = pdf_findresource("CMap", cmap_name);
   if (res_id >= 0) {
     RELEASE(cmap_name);
-    cmap_ref = pdf_get_resource_reference(res_id);
+    cmap_ref = texpdf_get_resource_reference(res_id);
     return cmap_ref;
   }
 
@@ -1240,7 +1240,7 @@ otf_create_ToUnicode_stream (const char *font_name,
   if (cmap_obj) {
     res_id   = pdf_defineresource("CMap", cmap_name,
 				  cmap_obj, PDF_RES_FLUSH_IMMEDIATE);
-    cmap_ref = pdf_get_resource_reference(res_id);
+    cmap_ref = texpdf_get_resource_reference(res_id);
   } else {
     cmap_ref = NULL;
   }
@@ -1380,10 +1380,10 @@ handle_subst (pdf_obj *dst_obj, pdf_obj *src_obj, int flag,
     int          rv;
     struct gent *glyph;
 
-    tmp = pdf_get_array(src_obj, i);
+    tmp = texpdf_get_array(src_obj, i);
     if (PDF_OBJ_ARRAYTYPE(tmp)) {
-      src_start = (long) pdf_number_value(pdf_get_array(tmp, 0));
-      src_end   = (long) pdf_number_value(pdf_get_array(tmp, 1));
+      src_start = (long) pdf_number_value(texpdf_get_array(tmp, 0));
+      src_end   = (long) pdf_number_value(texpdf_get_array(tmp, 1));
     } else {
       src_start = src_end = (long) pdf_number_value(tmp);
     }
@@ -1396,10 +1396,10 @@ handle_subst (pdf_obj *dst_obj, pdf_obj *src_obj, int flag,
       }
       dst++;
       if (dst > dst_end) {
-	tmp = pdf_get_array(dst_obj, j++);
+	tmp = texpdf_get_array(dst_obj, j++);
 	if (PDF_OBJ_ARRAYTYPE(tmp)) {
-	  dst_start = (long) pdf_number_value(pdf_get_array(tmp, 0));
-	  dst_end   = (long) pdf_number_value(pdf_get_array(tmp, 1));
+	  dst_start = (long) pdf_number_value(texpdf_get_array(tmp, 0));
+	  dst_end   = (long) pdf_number_value(texpdf_get_array(tmp, 1));
 	} else {
 	  dst_start = dst_end = (long) pdf_number_value(tmp);
 	}
@@ -1469,7 +1469,7 @@ handle_assign (pdf_obj *dst, pdf_obj *src, int flag,
   USHORT   gid_in[MAX_UNICODES], lig;
 
   n_unicodes = pdf_array_length(src); /* FIXME */
-  ucv = (long) pdf_number_value(pdf_get_array(dst, 0)); /* FIXME */
+  ucv = (long) pdf_number_value(texpdf_get_array(dst, 0)); /* FIXME */
   if (!UC_is_valid(ucv)) {
     if (flag == 'r' || flag == 'p') {
       if (ucv < 0x10000) {
@@ -1490,7 +1490,7 @@ handle_assign (pdf_obj *dst, pdf_obj *src, int flag,
 
   for (i = 0; i < n_unicodes; i++) {
     unicodes[i] =
-      (long) pdf_number_value(pdf_get_array(src, i));
+      (long) pdf_number_value(texpdf_get_array(src, i));
     gid_in[i] = tt_cmap_lookup(ttcmap, unicodes[i]);
 
     if (verbose > VERBOSE_LEVEL_MIN) {
@@ -1599,17 +1599,17 @@ load_gsub (pdf_obj *conf, otl_gsub *gsub_list, sfnt *sfont)
     int        flag;
     long       j, num_comms;
 
-    tmp  = pdf_get_array(rule, i);
+    tmp  = texpdf_get_array(rule, i);
     flag = (int) pdf_number_value(tmp);
 
-    commands  = pdf_get_array(rule, i+1);
+    commands  = texpdf_get_array(rule, i+1);
     num_comms = pdf_array_length(commands);
 
     /* (assign|substitute) tag dst src */
     for (j = 0 ; j < num_comms; j += 4) {
-      tmp = pdf_get_array(commands, 1);
+      tmp = texpdf_get_array(commands, 1);
       if (PDF_OBJ_STRINGTYPE(tmp)) {
-	feature = pdf_string_value(tmp);
+	feature = texpdf_string_value(tmp);
 	if (otl_gsub_add_feat(gsub_list,
 			      script, language, feature, sfont) < 0) {
 	  if (flag == 'p')
@@ -1656,10 +1656,10 @@ handle_gsub (pdf_obj *conf,
     long      j, num_comms;
     int       flag;
 
-    tmp  = pdf_get_array(rule, i);
+    tmp  = texpdf_get_array(rule, i);
     flag = (int) pdf_number_value(tmp);
 
-    commands  = pdf_get_array   (rule, i+1);
+    commands  = texpdf_get_array   (rule, i+1);
     num_comms = pdf_array_length(commands);
 
     for (j = 0; j < num_comms; j += 4) {
@@ -1668,16 +1668,16 @@ handle_gsub (pdf_obj *conf,
       int      rv;
 
       /* (assing|substitute) tag dst src */
-      operator = pdf_get_array(commands, j);
+      operator = texpdf_get_array(commands, j);
 
-      feat     = pdf_get_array(commands, j+1);
+      feat     = texpdf_get_array(commands, j+1);
       if (PDF_OBJ_STRINGTYPE(feat))
-	feature = pdf_string_value(feat);
+	feature = texpdf_string_value(feat);
       else
 	feature = NULL;
 
-      dst  = pdf_get_array(commands, j+2);
-      src  = pdf_get_array(commands, j+3);
+      dst  = texpdf_get_array(commands, j+2);
+      src  = texpdf_get_array(commands, j+3);
 
       rv = otl_gsub_select(gsub_list, script, language, feature);
       if (rv < 0) {

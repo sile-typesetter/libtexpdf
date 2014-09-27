@@ -142,10 +142,10 @@ pdf_obj *tt_get_fontdesc (sfnt *sfont, int *embed, int stemv, int type, const ch
     return NULL;
   }
 
-  descriptor = pdf_new_dict();
-  pdf_add_dict (descriptor,
-		pdf_new_name ("Type"),
-		pdf_new_name ("FontDescriptor"));
+  descriptor = texpdf_new_dict();
+  texpdf_add_dict (descriptor,
+		texpdf_new_name ("Type"),
+		texpdf_new_name ("FontDescriptor"));
 
   if (*embed && os2) {
     /*
@@ -184,50 +184,50 @@ pdf_obj *tt_get_fontdesc (sfnt *sfont, int *embed, int stemv, int type, const ch
   }
 
   if (os2) {
-    pdf_add_dict (descriptor,
-		  pdf_new_name ("Ascent"),
-		  pdf_new_number (PDFUNIT(os2->sTypoAscender)));
-    pdf_add_dict (descriptor,
-		  pdf_new_name ("Descent"),
-		  pdf_new_number (PDFUNIT(os2->sTypoDescender)));
+    texpdf_add_dict (descriptor,
+		  texpdf_new_name ("Ascent"),
+		  texpdf_new_number (PDFUNIT(os2->sTypoAscender)));
+    texpdf_add_dict (descriptor,
+		  texpdf_new_name ("Descent"),
+		  texpdf_new_number (PDFUNIT(os2->sTypoDescender)));
     if (stemv < 0) /* if not given by the option '-v' */
       stemv = (os2->usWeightClass/65.)*(os2->usWeightClass/65.)+50;
-    pdf_add_dict (descriptor,
-		  pdf_new_name ("StemV"),
-		  pdf_new_number (stemv));
+    texpdf_add_dict (descriptor,
+		  texpdf_new_name ("StemV"),
+		  texpdf_new_number (stemv));
     if (os2->version == 0x0002) {
-      pdf_add_dict (descriptor,
-		    pdf_new_name("CapHeight"),
-		    pdf_new_number(PDFUNIT(os2->sCapHeight)));
+      texpdf_add_dict (descriptor,
+		    texpdf_new_name("CapHeight"),
+		    texpdf_new_number(PDFUNIT(os2->sCapHeight)));
       /* optional */
-      pdf_add_dict (descriptor,
-		    pdf_new_name("XHeight"),
-		    pdf_new_number(PDFUNIT(os2->sxHeight)));
+      texpdf_add_dict (descriptor,
+		    texpdf_new_name("XHeight"),
+		    texpdf_new_number(PDFUNIT(os2->sxHeight)));
     } else { /* arbitrary */
-      pdf_add_dict (descriptor,
-		    pdf_new_name("CapHeight"),
-		    pdf_new_number(PDFUNIT(os2->sTypoAscender)));
+      texpdf_add_dict (descriptor,
+		    texpdf_new_name("CapHeight"),
+		    texpdf_new_number(PDFUNIT(os2->sTypoAscender)));
     }
     /* optional */
     if (os2->xAvgCharWidth != 0) {
-      pdf_add_dict (descriptor,
-		    pdf_new_name ("AvgWidth"),
-		    pdf_new_number (PDFUNIT(os2->xAvgCharWidth)));
+      texpdf_add_dict (descriptor,
+		    texpdf_new_name ("AvgWidth"),
+		    texpdf_new_number (PDFUNIT(os2->xAvgCharWidth)));
     }
   }
 
   /* BoundingBox (array) */
-  bbox = pdf_new_array ();
-  pdf_add_array (bbox, pdf_new_number (PDFUNIT(head->xMin)));
-  pdf_add_array (bbox, pdf_new_number (PDFUNIT(head->yMin)));
-  pdf_add_array (bbox, pdf_new_number (PDFUNIT(head->xMax)));
-  pdf_add_array (bbox, pdf_new_number (PDFUNIT(head->yMax)));
-  pdf_add_dict (descriptor, pdf_new_name ("FontBBox"), bbox);
+  bbox = texpdf_new_array ();
+  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->xMin)));
+  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->yMin)));
+  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->xMax)));
+  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->yMax)));
+  texpdf_add_dict (descriptor, texpdf_new_name ("FontBBox"), bbox);
 
   /* post */
-  pdf_add_dict (descriptor,
-		pdf_new_name ("ItalicAngle"),
-		pdf_new_number(fixed(post->italicAngle)));
+  texpdf_add_dict (descriptor,
+		texpdf_new_name ("ItalicAngle"),
+		texpdf_new_number(fixed(post->italicAngle)));
 
   /* Flags */
   if (os2) {
@@ -243,9 +243,9 @@ pdf_obj *tt_get_fontdesc (sfnt *sfont, int *embed, int stemv, int type, const ch
       flag |= FIXEDWIDTH;
   }
 
-  pdf_add_dict (descriptor,
-		pdf_new_name ("Flags"),
-		pdf_new_number (flag));
+  texpdf_add_dict (descriptor,
+		texpdf_new_name ("Flags"),
+		texpdf_new_number (flag));
 
   /* insert panose if you want */
   if (type == 0 && os2) { /* cid-keyed font - add panose */
@@ -256,10 +256,10 @@ pdf_obj *tt_get_fontdesc (sfnt *sfont, int *embed, int stemv, int type, const ch
     panose[1] = os2->sFamilyClass & 0xff;
     memcpy(panose+2, os2->panose, 10);
 
-    styledict = pdf_new_dict ();
-    pdf_add_dict (styledict, pdf_new_name ("Panose"),
-		  pdf_new_string (panose, 12));
-    pdf_add_dict (descriptor, pdf_new_name ("Style"), styledict);
+    styledict = texpdf_new_dict ();
+    texpdf_add_dict (styledict, texpdf_new_name ("Panose"),
+		  texpdf_new_string (panose, 12));
+    texpdf_add_dict (descriptor, texpdf_new_name ("Style"), styledict);
   }
 
   RELEASE(head);

@@ -111,7 +111,7 @@ seek_operator (unsigned char **start, unsigned char *end, const char *op)
 
 
 static int
-parse_svalue (unsigned char **start, unsigned char *end, char **value)
+texpdf_parse_svalue (unsigned char **start, unsigned char *end, char **value)
 {
   pst_obj *tok;
 
@@ -130,7 +130,7 @@ parse_svalue (unsigned char **start, unsigned char *end, char **value)
 }
 
 static int
-parse_bvalue (unsigned char **start, unsigned char *end, double *value)
+texpdf_parse_bvalue (unsigned char **start, unsigned char *end, double *value)
 {
   pst_obj *tok;
 
@@ -149,7 +149,7 @@ parse_bvalue (unsigned char **start, unsigned char *end, double *value)
 }
 
 static int
-parse_nvalue (unsigned char **start, unsigned char *end, double *value, int max)
+texpdf_parse_nvalue (unsigned char **start, unsigned char *end, double *value, int max)
 {
   int argn = 0;
   pst_obj *tok;
@@ -296,7 +296,7 @@ static const char *const ISOLatin1Encoding[256] = {
 };
 
 static int
-parse_encoding (char **enc_vec, unsigned char **start, unsigned char *end)
+texpdf_parse_encoding (char **enc_vec, unsigned char **start, unsigned char *end)
 {
   pst_obj *tok;
   int      code;
@@ -410,7 +410,7 @@ parse_encoding (char **enc_vec, unsigned char **start, unsigned char *end)
 #endif
 
 static int
-parse_subrs (cff_font *font,
+texpdf_parse_subrs (cff_font *font,
 	     unsigned char **start, unsigned char *end, int lenIV, int mode)
 {
   cff_index *subrs;
@@ -564,7 +564,7 @@ parse_subrs (cff_font *font,
 }
 
 static int
-parse_charstrings (cff_font *font,
+texpdf_parse_charstrings (cff_font *font,
 		   unsigned char **start, unsigned char *end, int lenIV, int mode)
 {
   cff_index    *charstrings;
@@ -742,7 +742,7 @@ parse_charstrings (cff_font *font,
 
 #define MAX_ARGS 127
 static int
-parse_part2 (cff_font *font, unsigned char **start, unsigned char *end, int mode)
+texpdf_parse_part2 (cff_font *font, unsigned char **start, unsigned char *end, int mode)
 {
   char  *key;
   double argv[MAX_ARGS];
@@ -752,17 +752,17 @@ parse_part2 (cff_font *font, unsigned char **start, unsigned char *end, int mode
 	 (key = get_next_key(start, end)) != NULL) {
     if (!strcmp(key, "Subrs")) {
       /* levIV must appear before Subrs */
-      if (parse_subrs(font, start, end, lenIV, mode) < 0) {
+      if (texpdf_parse_subrs(font, start, end, lenIV, mode) < 0) {
 	RELEASE(key);
 	return -1;
       }
     } else if (!strcmp(key, "CharStrings")) {
-      if (parse_charstrings(font, start, end, lenIV, mode) < 0) {
+      if (texpdf_parse_charstrings(font, start, end, lenIV, mode) < 0) {
 	RELEASE(key);
 	return -1;
       }
     } else if (!strcmp(key, "lenIV")) {
-      argn = parse_nvalue(start, end, argv, 1);
+      argn = texpdf_parse_nvalue(start, end, argv, 1);
       CHECK_ARGN_EQ(1);
       lenIV = (int) argv[0];
     } else if (!strcmp(key, "BlueValues") ||
@@ -774,7 +774,7 @@ parse_part2 (cff_font *font, unsigned char **start, unsigned char *end, int mode
       /*
        * Operand values are delta in CFF font dictionary encoding.
        */
-      argn = parse_nvalue(start, end, argv, MAX_ARGS);
+      argn = texpdf_parse_nvalue(start, end, argv, MAX_ARGS);
       CHECK_ARGN_GE(0);
       cff_dict_add(font->private[0], key, argn);
       while (argn-- > 0) {
@@ -792,12 +792,12 @@ parse_part2 (cff_font *font, unsigned char **start, unsigned char *end, int mode
        * Value of StdHW and StdVW is described as an array in the
        * Type 1 Font Specification but is a number in CFF format.
        */
-      argn = parse_nvalue(start, end, argv, 1);
+      argn = texpdf_parse_nvalue(start, end, argv, 1);
       CHECK_ARGN_EQ(1);
       cff_dict_add(font->private[0], key, 1);
       cff_dict_set(font->private[0], key, 0, argv[0]);
     } else if (!strcmp(key, "ForceBold")) {
-      argn = parse_bvalue(start, end, &(argv[0]));
+      argn = texpdf_parse_bvalue(start, end, &(argv[0]));
       CHECK_ARGN_EQ(1);
       if (argv[0] != 0) {
 	cff_dict_add(font->private[0], key, 1);
@@ -818,7 +818,7 @@ parse_part2 (cff_font *font, unsigned char **start, unsigned char *end, int mode
 #endif
 
 static long
-parse_part1 (cff_font *font, char **enc_vec,
+texpdf_parse_part1 (cff_font *font, char **enc_vec,
 	     unsigned char **start, unsigned char *end)
 {
   char  *key, *strval;
@@ -836,12 +836,12 @@ parse_part1 (cff_font *font, char **enc_vec,
   while (*start < end &&
 	 (key = get_next_key(start, end)) != NULL) {
     if (!strcmp(key, "Encoding")) {
-      if (parse_encoding(enc_vec, start, end) < 0) {
+      if (texpdf_parse_encoding(enc_vec, start, end) < 0) {
 	RELEASE(key);
 	return -1;
       }
     } else if (!strcmp(key, "FontName")) {
-      argn = parse_svalue(start, end, &strval);
+      argn = texpdf_parse_svalue(start, end, &strval);
       CHECK_ARGN_EQ(1);
       if (strlen(strval) > TYPE1_NAME_LEN_MAX) {
 	WARN("FontName too long: %s (%d bytes)", strval, strlen(strval));
@@ -850,7 +850,7 @@ parse_part1 (cff_font *font, char **enc_vec,
       cff_set_name(font, strval);
       RELEASE(strval);
     } else if (!strcmp(key, "FontType")) {
-      argn = parse_nvalue(start, end, argv, 1);
+      argn = texpdf_parse_nvalue(start, end, argv, 1);
       CHECK_ARGN_EQ(1);
       if (argv[0] != 1.0) {
 	WARN("FontType %d not supported.", (int) argv[0]);
@@ -863,7 +863,7 @@ parse_part1 (cff_font *font, char **enc_vec,
        * Subsetted font shouldn't have UniqueID.
        */
     } else if (!strcmp(key, "UniqueID")) {
-      argn = parse_nvalue(start, end, argv, 1);
+      argn = texpdf_parse_nvalue(start, end, argv, 1);
       CHECK_ARGN_EQ(1);
       cff_dict_add(font->topdict, key, 1);
       cff_dict_set(font->topdict, key, 0, argv[0]);
@@ -871,7 +871,7 @@ parse_part1 (cff_font *font, char **enc_vec,
     } else if (!strcmp(key, "ItalicAngle") ||
 	       !strcmp(key, "StrokeWidth") ||
 	       !strcmp(key, "PaintType")) {
-      argn = parse_nvalue(start, end, argv, 1);
+      argn = texpdf_parse_nvalue(start, end, argv, 1);
       CHECK_ARGN_EQ(1);
       if (argv[0] != 0.0) {
 #if 0
@@ -888,19 +888,19 @@ parse_part1 (cff_font *font, char **enc_vec,
       }
     } else if (!strcmp(key, "UnderLinePosition") ||
 	       !strcmp(key, "UnderLineThickness")) {
-      argn = parse_nvalue(start, end, argv, 1);
+      argn = texpdf_parse_nvalue(start, end, argv, 1);
       CHECK_ARGN_EQ(1);
       cff_dict_add(font->topdict, key, 1);
       cff_dict_set(font->topdict, key, 0, argv[0]);
     } else if (!strcmp(key, "FontBBox")) {
-      argn = parse_nvalue(start, end, argv, 4);
+      argn = texpdf_parse_nvalue(start, end, argv, 4);
       CHECK_ARGN_EQ(4);
       cff_dict_add(font->topdict, key, 4);
       while (argn-- > 0) {
 	cff_dict_set(font->topdict, key, argn, argv[argn]);
       }
     } else if (!strcmp(key, "FontMatrix")) {
-      argn = parse_nvalue(start, end, argv, 6);
+      argn = texpdf_parse_nvalue(start, end, argv, 6);
       CHECK_ARGN_EQ(6);
       if (argv[0] != 0.001 || argv[1] != 0.0 || argv[2] != 0.0 ||
 	  argv[3] != 0.001 || argv[4] != 0.0 || argv[5] != 0.0) {
@@ -915,7 +915,7 @@ parse_part1 (cff_font *font, char **enc_vec,
       /*
        * FontInfo
        */
-      argn = parse_svalue(start, end, &strval);
+      argn = texpdf_parse_svalue(start, end, &strval);
       CHECK_ARGN_EQ(1);
       {
 	s_SID sid;
@@ -931,7 +931,7 @@ parse_part1 (cff_font *font, char **enc_vec,
       }
       RELEASE(strval);
     } else if (!strcmp(key, "IsFixedPitch")) {
-      argn = parse_bvalue(start, end, &(argv[0]));
+      argn = texpdf_parse_bvalue(start, end, &(argv[0]));
       CHECK_ARGN_EQ(1);
       if (argv[0] != 0.0) {
 	cff_dict_add(font->private[0], key, 1);
@@ -1075,7 +1075,7 @@ t1_get_fontname (FILE *fp, char *fontname)
 	 (key = get_next_key(&start, end)) != NULL) {
     if (!strcmp(key, "FontName")) {
       char *strval;
-      if (parse_svalue(&start, end, &strval) == 1) {
+      if (texpdf_parse_svalue(&start, end, &strval) == 1) {
 	if (strlen(strval) > TYPE1_NAME_LEN_MAX) {
 	  WARN("FontName \"%s\" too long. (%d bytes)", strval, strlen(strval));
 	  strval[TYPE1_NAME_LEN_MAX] = '\0';
@@ -1145,7 +1145,7 @@ t1_load_font (char **enc_vec, int mode, FILE *fp)
   init_cff_font(cff);
 
   start = buffer; end = buffer + length;
-  if (parse_part1(cff, enc_vec, &start, end) < 0) {
+  if (texpdf_parse_part1(cff, enc_vec, &start, end) < 0) {
     cff_close(cff);
     RELEASE(buffer);
     ERROR("Reading PFB (ASCII part) file failed.");
@@ -1164,7 +1164,7 @@ t1_load_font (char **enc_vec, int mode, FILE *fp)
     t1_decrypt(T1_EEKEY, buffer, buffer, 0, length);
   }
   start = buffer + 4; end = buffer + length;
-  if (parse_part2(cff, &start, end, mode) < 0) {
+  if (texpdf_parse_part2(cff, &start, end, mode) < 0) {
     cff_close(cff);
     RELEASE(buffer);
     ERROR("Reading PFB (BINARY part) file failed.");

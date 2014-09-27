@@ -80,7 +80,7 @@ struct res_cache
 static struct res_cache resources[PDF_NUM_RESOURCE_CATEGORIES];
 
 static void
-pdf_init_resource (pdf_res *res)
+texpdf_init_resource (pdf_res *res)
 {
   ASSERT(res);
 
@@ -99,9 +99,9 @@ pdf_flush_resource (pdf_res *res)
 {
   if (res) {
     if (res->reference)
-      pdf_release_obj(res->reference);
+      texpdf_release_obj(res->reference);
     if (res->object)
-      pdf_release_obj(res->object);
+      texpdf_release_obj(res->object);
 
     res->reference = NULL;
     res->object    = NULL;
@@ -115,9 +115,9 @@ pdf_clean_resource (pdf_res *res)
     if (res->reference || res->object)
       WARN("Trying to release un-flushed object.");
     if (res->reference)
-      pdf_release_obj(res->reference);
+      texpdf_release_obj(res->reference);
     if (res->object)
-      pdf_release_obj(res->object);
+      texpdf_release_obj(res->object);
     if (res->ident)
       RELEASE(res->ident);
     res->ident    = NULL;
@@ -127,7 +127,7 @@ pdf_clean_resource (pdf_res *res)
 }
 
 void
-pdf_init_resources (void)
+texpdf_init_resources (void)
 {
   int  i;
 
@@ -140,7 +140,7 @@ pdf_init_resources (void)
 }
 
 void
-pdf_close_resources (void)
+texpdf_close_resources (void)
 {
   int  i;
 
@@ -205,7 +205,7 @@ pdf_defineresource (const char *category,
 	res->flags    = flags;
 	if (flags & PDF_RES_FLUSH_IMMEDIATE) {
 	  res->reference = pdf_ref_obj(object);
-	  pdf_release_obj(object);
+	  texpdf_release_obj(object);
 	} else {
 	  res->object = object;
 	}
@@ -223,7 +223,7 @@ pdf_defineresource (const char *category,
     }
     res = &rc->resources[res_id];
 
-    pdf_init_resource(res);
+    texpdf_init_resource(res);
     if (resname && resname[0] != '\0') {
       res->ident = NEW(strlen(resname) + 1, char);
       strcpy(res->ident, resname);
@@ -232,7 +232,7 @@ pdf_defineresource (const char *category,
     res->flags    = flags;
     if (flags & PDF_RES_FLUSH_IMMEDIATE) {
       res->reference = pdf_ref_obj(object);
-      pdf_release_obj(object);
+      texpdf_release_obj(object);
     } else {
       res->object = object;
     }
@@ -297,7 +297,7 @@ pdf_findresource (const char *category, const char *resname)
 }
 
 pdf_obj *
-pdf_get_resource_reference (long rc_id)
+texpdf_get_resource_reference (long rc_id)
 {
   int  cat_id, res_id;
   struct res_cache *rc;
@@ -332,7 +332,7 @@ pdf_get_resource_reference (long rc_id)
 
 #if 0
 pdf_obj *
-pdf_get_resource (long rc_id)
+texpdf_get_resource (long rc_id)
 {
   int  cat_id, res_id;
   struct res_cache *rc;
