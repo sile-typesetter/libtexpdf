@@ -95,6 +95,8 @@ AM_CONDITIONAL([XDVIPDFMX], [test "x$enable_xdvipdfmx" != xno])
 
 KPSE_WIN32_CALL
 
-AC_CONFIG_FILES([Makefile libtexpdf/Makefile])
+AC_CONFIG_SUBDIRS([libtexpdf])
+
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT

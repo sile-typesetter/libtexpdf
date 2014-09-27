@@ -160,7 +160,7 @@ dvipdfmx_OBJECTS = $(am_dvipdfmx_OBJECTS)
 am__DEPENDENCIES_1 =
 dvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	libtexpdf/libtexpdf.la
+	$(am__DEPENDENCIES_1) libtexpdf/.libs/libtexpdf.a
 am__objects_1 = xdvipdfmx-dpxfile.$(OBJEXT) xdvipdfmx-dvi.$(OBJEXT) \
 	xdvipdfmx-dvipdfmx.$(OBJEXT) xdvipdfmx-error.$(OBJEXT) \
 	xdvipdfmx-mem.$(OBJEXT) xdvipdfmx-mfileio.$(OBJEXT) \
@@ -174,8 +174,8 @@ nodist_xdvipdfmx_OBJECTS = $(am__objects_1)
 xdvipdfmx_OBJECTS = $(nodist_xdvipdfmx_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	libtexpdf/libtexpdf.la
-xdvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) libtexpdf/.libs/libtexpdf.a
+xdvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am__dist_bin_SCRIPTS_DIST = dvipdft
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -635,14 +635,15 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
+subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @DVIPDFMX_TRUE@@WIN32_FALSE@dist_bin_SCRIPTS = dvipdft
-AM_CPPFLAGS = $(KPATHSEA_INCLUDES) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES)
-xdvipdfmx_CPPFLAGS = -DXETEX $(FREETYPE2_INCLUDES) $(AM_CPPFLAGS)
+AM_CPPFLAGS = $(FREETYPE2_INCLUDES) $(KPATHSEA_INCLUDES) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES) -I$(srcdir)/libtexpdf
+xdvipdfmx_CPPFLAGS = -DXETEX $(AM_CPPFLAGS)
 AM_CFLAGS = $(WARNING_CFLAGS)
 SUBDIRS = libtexpdf
 dvipdfmx_SOURCES = \
@@ -685,8 +686,8 @@ dvipdfmx_SOURCES = \
 	xbb.c
 
 nodist_xdvipdfmx_SOURCES = $(dvipdfmx_SOURCES)
-dvipdfmx_LDADD = $(KPATHSEA_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS) libtexpdf/libtexpdf.la
-xdvipdfmx_LDADD = $(FREETYPE2_LIBS) $(dvipdfmx_LDADD)
+dvipdfmx_LDADD = $(FREETYPE2_LIBS) $(KPATHSEA_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS) libtexpdf/.libs/libtexpdf.a
+xdvipdfmx_LDADD = $(dvipdfmx_LDADD)
 bin_links = $(am__append_3)
 call_dvipdfmx_CPPFLAGS = -DEXEPROG=\"dvipdfmx.exe\"
 nodist_call_dvipdfmx_SOURCES = callexe.c

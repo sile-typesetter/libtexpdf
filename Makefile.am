@@ -15,8 +15,8 @@ bin_PROGRAMS += xdvipdfmx
 endif XDVIPDFMX
 EXTRA_PROGRAMS = dvipdfmx xdvipdfmx
 
-AM_CPPFLAGS = $(KPATHSEA_INCLUDES) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES)
-xdvipdfmx_CPPFLAGS = -DXETEX $(FREETYPE2_INCLUDES) $(AM_CPPFLAGS)
+AM_CPPFLAGS = $(FREETYPE2_INCLUDES) $(KPATHSEA_INCLUDES) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES) -I$(srcdir)/libtexpdf
+xdvipdfmx_CPPFLAGS = -DXETEX $(AM_CPPFLAGS)
 AM_CFLAGS = $(WARNING_CFLAGS)
 
 SUBDIRS = libtexpdf
@@ -62,8 +62,8 @@ dvipdfmx_SOURCES = \
 
 nodist_xdvipdfmx_SOURCES = $(dvipdfmx_SOURCES)
 
-dvipdfmx_LDADD = $(KPATHSEA_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS) libtexpdf/libtexpdf.la
-xdvipdfmx_LDADD = $(FREETYPE2_LIBS) $(dvipdfmx_LDADD)
+dvipdfmx_LDADD = $(FREETYPE2_LIBS) $(KPATHSEA_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS) libtexpdf/.libs/libtexpdf.a
+xdvipdfmx_LDADD = $(dvipdfmx_LDADD)
 
 $(dvipdfmx_OBJECTS) $(xdvipdfmx_OBJECTS): config.force
 
