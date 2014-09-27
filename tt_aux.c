@@ -17,22 +17,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "numbers.h"
-
-#include "pdfobj.h"
-
-#include "sfnt.h"
-#include "tt_table.h"
-#include "tt_post.h"
-#include "tt_aux.h"
+#include "libtexpdf.h"
 
 static int verbose = 0;
 

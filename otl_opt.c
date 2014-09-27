@@ -18,20 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-#include "mfileio.h"
-
-#include "otl_opt.h"
+#include "libtexpdf.h"
 
 struct bt_node {
   int    flag;

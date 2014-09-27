@@ -18,19 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <stdio.h>
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-#include "mfileio.h"
-
-#include "sfnt.h"
-#include "tt_table.h"
+#include "libtexpdf.h"
 
 /*
   tables contains information refered by other tables

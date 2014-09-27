@@ -20,27 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "numbers.h"
-
-/* Hash */
-#include "dpxutil.h"
-
-#include "pdfobj.h"
-
-#include "pdfnames.h"
-
-#include "dvipdfmx.h"
+#include "libtexpdf.h"
 
 struct obj_data
 {

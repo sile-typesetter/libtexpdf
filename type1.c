@@ -20,43 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-#include <math.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "dpxfile.h"
-
-#include "numbers.h"
-
-#include "pdfobj.h"
-#include "pdffont.h"
-
-#include "pdfencoding.h"
-#include "unicode.h"
-
-#include "dpxutil.h"
-
-#include "pst_obj.h"
-#include "pst.h"
-
-#include "cff_limits.h"
-#include "cff_types.h"
-#include "cff_dict.h"
-#include "cff.h"
-
-#include "t1_load.h"
-#include "t1_char.h"
-
-#include "type1.h"
-
-#include "tfm.h"
+#include "libtexpdf.h"
 
 #define FONT_FLAG_FIXEDPITCH (1 << 0)  /* Fixed-width font */
 #define FONT_FLAG_SERIF      (1 << 1)  /* Serif font */

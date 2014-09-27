@@ -20,28 +20,11 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <ctype.h>
-#include <string.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "mfileio.h"
-#include "dpxutil.h"
-#include "pdflimits.h"
-#include "pdfencrypt.h"
-#include "pdfparse.h"
+#include "libtexpdf.h"
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif /* HAVE_ZLIB */
-
-#include "pdfobj.h"
-#include "pdfdev.h"
 
 #define STREAM_ALLOC_SIZE      4096u
 #define ARRAY_ALLOC_SIZE       256

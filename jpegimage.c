@@ -20,9 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 /*
  * JPEG SUPPORT
@@ -51,22 +49,6 @@
  *  Adobe Technical Note #5116, Supporting the DCT Filters in PostScript
  *  Level 2.
  */
-
-#include "system.h"
-#include "error.h"
-#include "mem.h"
-
-#include "mfileio.h"
-#include "numbers.h"
-
-#include "dvipdfmx.h"
-
-#include "pdfobj.h"
-
-#include "jpegimage.h"
-#include "pdfcolor.h"
-
-#include "pdfximage.h"
 
 #define JPEG_DEBUG_STR "JPEG"
 #define JPEG_DEBUG     3

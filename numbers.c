@@ -20,14 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"	
-#include "error.h"
-#include "mfileio.h"
-#include "numbers.h"
+#include "libtexpdf.h"
 
 unsigned char get_unsigned_byte (FILE *file)
 {

@@ -22,39 +22,7 @@
  * A large part of codes are brought from ttfdump-0.5.5.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "sfnt.h"
-
-
-/* Sorry for placing this here.
- * We need to rewrite TrueType font support code...
- */
-#include "cmap.h"
-#include "cmap_write.h"
-
-#include "tt_aux.h"
-#include "tt_gsub.h"
-#include "tt_post.h"
-
-#include "unicode.h"
-#include "agl.h"
-#include "pdfparse.h"
-#include "pdfresource.h"
-#include "otl_conf.h"
-
-#include "dpxfile.h"
-
-/* Hash */
-#include "dpxutil.h"
-
-#include "tt_cmap.h"
+#include "libtexpdf.h"
 
 #define VERBOSE_LEVEL_MIN 0
 static int verbose = 0;

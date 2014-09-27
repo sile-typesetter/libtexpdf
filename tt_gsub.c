@@ -22,20 +22,7 @@
  * TrueType GSUB support: (incomplete)
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-
-#include "error.h"
-#include "mem.h"
-#include "mfileio.h"
-
-#include "sfnt.h"
-
-#include "otl_opt.h"
-#include "tt_gsub.h"
+#include "libtexpdf.h"
 
 #define VERBOSE_LEVEL_MIN 0
 static int verbose = 0;

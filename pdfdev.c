@@ -20,39 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "mfileio.h"
-#include "numbers.h"
-
-#include "pdfdoc.h"
-#include "pdfobj.h"
-
-#include "pdffont.h"
-#include "fontmap.h"
-#include "cmap.h"
-#include "pdfximage.h"
-
-#include "pdfdraw.h"
-#include "pdfcolor.h"
-
-#include "pdflimits.h"
-
-#include "dvi.h"
-
-#include "pdfdev.h"
-
-#include "cff.h"
+#include "libtexpdf.h"
 
 static int verbose = 0;
 
@@ -1831,7 +1799,8 @@ pdf_dev_put_image (pdf_doc *doc,
                    int             id,
                    transform_info *p,
                    double          ref_x,
-                   double          ref_y)
+                   double          ref_y,
+                   int             track_boxes)
 {
   char        *res_name;
   pdf_tmatrix  M, M1;
@@ -1887,7 +1856,7 @@ pdf_dev_put_image (pdf_doc *doc,
                             pdf_ximage_get_reference(id));
 
 #ifdef XETEX
-  if (dvi_is_tracking_boxes()) {
+  if (track_boxes) {
     pdf_tmatrix P;
     int i;
     pdf_rect rect;

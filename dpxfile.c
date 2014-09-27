@@ -30,7 +30,6 @@
 
 #include <time.h>
 
-#include "system.h"
 #include "error.h"
 #include "mem.h"
 

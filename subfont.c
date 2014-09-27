@@ -18,19 +18,8 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
+#include "libtexpdf.h"
 #include <errno.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "dpxfile.h"
-
-#include "subfont.h"
-
 static int verbose = 0;
 void
 subfont_set_verbose (void)

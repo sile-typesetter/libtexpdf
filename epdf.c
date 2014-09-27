@@ -29,26 +29,7 @@
  * TrimBox, BleedBox, ArtBox, Rotate ...
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "mem.h"
-#include "mfileio.h"
-#include "error.h"
-#include "dvipdfmx.h"
-
-#include "pdfobj.h"
-#include "pdfdev.h"
-#include "pdfdoc.h"
-
-#include "pdfdraw.h"
-#include "pdfparse.h"
-
-#include "pdfximage.h"
-
-#include "epdf.h"
+#include "libtexpdf.h"
 
 static int  rect_equal       (pdf_obj *rect1, pdf_obj *rect2);
 #if 0

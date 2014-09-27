@@ -25,43 +25,12 @@
  *  {begin,end}_{bead,article}, box stack, name tree (not limited to dests)...
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <time.h>
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-#include "mfileio.h"
-
-#include "numbers.h"
-
-#include "pdfobj.h"
-#include "pdfparse.h"
-#include "pdfnames.h"
-
-#include "pdfencrypt.h"
-
-#include "dvipdfmx.h"
-
-#include "pdfdev.h"
-#include "pdfdraw.h"
-#include "pdfcolor.h"
-
-#include "pdfresource.h"
-#include "pdffont.h"
-#include "pdfximage.h"
-
-#include "pdflimits.h"
-
+#include "libtexpdf.h"
 #if HAVE_LIBPNG
 #include "pngimage.h"
 #endif
-#include "jpegimage.h"
 
-#include "pdfdoc.h"
+#include <time.h>
 
 #define PDFDOC_PAGES_ALLOC_SIZE   128u
 #define PDFDOC_ARTICLE_ALLOC_SIZE 16
@@ -69,8 +38,9 @@
 
 /* XXX Need to eliminate statics if this is going to be reentrant! */
 static int verbose = 0;
-
 static char *thumb_basename = NULL;
+
+static char * my_name = "libtexpdf";
 
 void
 texpdf_doc_enable_manual_thumbnails (pdf_doc* p)
