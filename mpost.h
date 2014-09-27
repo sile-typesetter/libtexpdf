@@ -29,17 +29,17 @@
 
 extern int  texpdf_check_for_mp     (FILE *fp);
 
-extern int  mps_scan_bbox    (const char **pp, const char *endptr, pdf_rect *bbox);
+extern int  texpdf_mps_scan_bbox    (const char **pp, const char *endptr, pdf_rect *bbox);
 
 /* returns xobj_id */
 extern int  mps_include_page (pdf_doc *doc, const char *ident, FILE *fp);
 
-extern int  mps_exec_inline  (pdf_doc *doc, const char **buffer, const char *endptr,
+extern int  texpdf_mps_exec_inline  (pdf_doc *doc, const char **buffer, const char *endptr,
 			      double x_user, double y_user);
-extern int  mps_stack_depth  (void);
+extern int  texpdf_mps_stack_depth  (void);
 
-extern void mps_eop_cleanup  (void);
+extern void texpdf_mps_eop_cleanup  (void);
 
-extern int  mps_do_page      (pdf_doc *p, FILE *fp);
+extern int  texpdf_mps_do_page      (pdf_doc *p, FILE *fp);
 
 #endif /* _MPOST_H_ */

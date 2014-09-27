@@ -165,7 +165,7 @@ pdf_coord__idtransform (pdf_coord *p, const pdf_tmatrix *M)
 
 /* Modify M itself */
 void
-pdf_invertmatrix (pdf_tmatrix *M)
+texpdf_invertmatrix (pdf_tmatrix *M)
 {
   pdf_tmatrix W;  
   double      det;
@@ -739,14 +739,14 @@ texpdf_dev__rectshape (pdf_doc *doc, const pdf_rect    *r,
             !INVERTIBLE_MATRIX(M)))
     return -1;
 
-  graphics_mode(doc);
+  texpdf_graphics_mode(doc);
 
   buf[len++] = ' ';
   if (!isclip) {
     buf[len++] = 'q';
     if (M) {
       buf[len++] = ' ';
-      len += pdf_sprint_matrix(buf + len, M);
+      len += texpdf_sprint_matrix(buf + len, M);
       buf[len++] = ' ';
       buf[len++] = 'c'; buf[len++] = 'm';
     }
@@ -806,7 +806,7 @@ texpdf_dev__flushpath (pdf_doc *p, pdf_path  *pa,
     return 0;
 
   path_added = 0;
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
   isrect = pdf_path__isarect(pa, ignore_rule); 
   if (isrect) {
     pe  = &(pa->path[0]);
@@ -1258,7 +1258,7 @@ texpdf_dev_set_color (pdf_doc *p, const pdf_color *color, char mask, int force)
      */
     return;
 
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
   len = texpdf_color_to_string(color, fmt_buf);
   fmt_buf[len++] = ' ';
   switch (texpdf_color_type(color)) {
@@ -1308,7 +1308,7 @@ texpdf_dev_concat (pdf_doc *p, const pdf_tmatrix *M)
    || fabs(M->c) > 1.e-8 || fabs(M->d - 1.0) > 1.e-8
    || fabs(M->e) > 1.e-8 || fabs(M->f) > 1.e-8) {
     buf[len++] = ' ';
-    len += pdf_sprint_matrix(buf + len, M);
+    len += texpdf_sprint_matrix(buf + len, M);
     buf[len++] = ' ';
     buf[len++] = 'c';
     buf[len++] = 'm';

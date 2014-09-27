@@ -48,7 +48,7 @@ pdf_font_get_verbose (void)
 }
 
 void
-pdf_font_set_dpi (int font_dpi)
+texpdf_font_set_dpi (int font_dpi)
 {
 #ifdef TEXLIVE_INTERNAL
   PKFont_set_dpi(font_dpi);
@@ -177,7 +177,7 @@ pdf_flush_font (pdf_font *font)
       }
       if (font->descriptor) {
 	texpdf_add_dict(font->resource,
-		     texpdf_new_name("FontDescriptor"), pdf_ref_obj(font->descriptor));
+		     texpdf_new_name("FontDescriptor"), texpdf_ref_obj(font->descriptor));
       }
     }
   }
@@ -276,11 +276,11 @@ texpdf_get_font_reference (int font_id)
     return Type0Font_get_resource(t0font);
   } else {
     if (!font->reference) {
-      font->reference = pdf_ref_obj(pdf_font_get_resource(font));
+      font->reference = texpdf_ref_obj(pdf_font_get_resource(font));
     }
   }
 
-  return pdf_link_obj(font->reference);
+  return texpdf_link_obj(font->reference);
 }
 
 char *
@@ -399,12 +399,12 @@ try_load_ToUnicode_CMap (pdf_font *font)
   if (!tounicode && MREC_HAS_TOUNICODE(mrec))
     WARN("Failed to read ToUnicode mapping \"%s\"...", mrec->opt.tounicode);
   else if (tounicode) {
-    if (pdf_obj_typeof(tounicode) != PDF_STREAM)
+    if (texpdf_obj_typeof(tounicode) != PDF_STREAM)
       ERROR("Object returned by pdf_load_ToUnicode_stream() not stream object! (This must be bug)");
     else if (pdf_stream_length(tounicode) > 0) {
       texpdf_add_dict(fontdict,
                    texpdf_new_name("ToUnicode"),
-                   pdf_ref_obj (tounicode)); /* _FIXME_ */
+                   texpdf_ref_obj (tounicode)); /* _FIXME_ */
       if (__verbose)
         MESG("pdf_font>> ToUnicode CMap \"%s\" attached to font id=\"%s\".\n",
              cmap_name, font->map_name);
@@ -508,12 +508,12 @@ texpdf_close_fonts (void)
       if (enc_obj)
         texpdf_add_dict(font->resource,
 		     texpdf_new_name("Encoding"),
-		     PDF_OBJ_NAMETYPE(enc_obj) ? pdf_link_obj(enc_obj) : pdf_ref_obj(enc_obj));
+		     PDF_OBJ_NAMETYPE(enc_obj) ? texpdf_link_obj(enc_obj) : texpdf_ref_obj(enc_obj));
 
       if (!texpdf_lookup_dict(font->resource, "ToUnicode")
 	  && (tounicode = pdf_encoding_get_tounicode(font->encoding_id)))
 	texpdf_add_dict(font->resource,
-		     texpdf_new_name("ToUnicode"), pdf_ref_obj(tounicode));
+		     texpdf_new_name("ToUnicode"), texpdf_ref_obj(tounicode));
     } else if (font->subtype == PDF_FONT_FONTTYPE_TRUETYPE) {
       /* encoding_id < 0 means MacRoman here (but not really)
        * We use MacRoman as "default" encoding. */
@@ -558,12 +558,12 @@ pdf_font_findresource (const char *tex_name,
   if (mrec && mrec->enc_name) {
 #define MAYBE_CMAP(s) (!strstr((s), ".enc") || strstr((s), ".cmap"))
     if (MAYBE_CMAP(mrec->enc_name)) {
-      cmap_id = CMap_cache_find(mrec->enc_name);
+      cmap_id = texpdf_CMap_cache_find(mrec->enc_name);
       if (cmap_id >= 0) {
 	CMap  *cmap;
 	int    cmap_type, minbytes;
 
-	cmap      = CMap_cache_get(cmap_id);
+	cmap      = texpdf_CMap_cache_get(cmap_id);
 	cmap_type = CMap_get_type (cmap);
 	minbytes  = CMap_get_profile(cmap, CMAP_PROF_TYPE_INBYTES_MIN);
 	/*

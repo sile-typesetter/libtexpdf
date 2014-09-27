@@ -36,13 +36,13 @@
 #include "pdftypes.h"
 #include "pdfdoc.h"
 
-extern void   transform_info_clear (transform_info *info);
+extern void   texpdf_transform_info_clear (transform_info *info);
 
 
 extern void   texpdf_dev_set_verbose (void);
 
 /* Not in spt_t. */
-extern int    pdf_sprint_matrix (char *buf, const pdf_tmatrix *p);
+extern int    texpdf_sprint_matrix (char *buf, const pdf_tmatrix *p);
 extern int    pdf_sprint_rect   (char *buf, const pdf_rect    *p);
 extern int    pdf_sprint_coord  (char *buf, const pdf_coord   *p);
 extern int    pdf_sprint_length (char *buf, double value);
@@ -182,10 +182,10 @@ extern void   texpdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M);
 extern void   texpdf_dev_eop (pdf_doc *p);
 
 /* Text is normal and line art is not normal in dvipdfmx. So we don't have
- * begin_text (BT in PDF) and end_text (ET), but instead we have graphics_mode()
+ * begin_text (BT in PDF) and end_text (ET), but instead we have texpdf_graphics_mode()
  * to terminate text section. texpdf_dev_flushpath() and others call this.
  */
-extern void   graphics_mode (pdf_doc *p);
+extern void   texpdf_graphics_mode (pdf_doc *p);
 
 extern void   texpdf_dev_get_coord(double *xpos, double *ypos);
 extern void   texpdf_dev_push_coord(double xpos, double ypos);

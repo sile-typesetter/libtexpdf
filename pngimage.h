@@ -31,7 +31,7 @@
 
 extern int png_include_image (pdf_ximage *ximage, FILE *file);
 extern int texpdf_check_for_png     (FILE *file);
-extern int png_get_bbox (FILE *fp, long *width, long *height,
+extern int texpdf_png_get_bbox (FILE *fp, long *width, long *height,
 			 double *xdensity, double *ydensity);
 
 #endif

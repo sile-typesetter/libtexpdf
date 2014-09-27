@@ -21,7 +21,7 @@
 
 static int verbose = 0;
 
-void tt_aux_set_verbose(void)
+void texpdf_tt_aux_set_verbose(void)
 {
   ++verbose;
 }
@@ -218,10 +218,10 @@ pdf_obj *tt_get_fontdesc (sfnt *sfont, int *embed, int stemv, int type, const ch
 
   /* BoundingBox (array) */
   bbox = texpdf_new_array ();
-  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->xMin)));
-  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->yMin)));
-  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->xMax)));
-  pdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->yMax)));
+  texpdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->xMin)));
+  texpdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->yMin)));
+  texpdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->xMax)));
+  texpdf_add_array (bbox, texpdf_new_number (PDFUNIT(head->yMax)));
   texpdf_add_dict (descriptor, texpdf_new_name ("FontBBox"), bbox);
 
   /* post */

@@ -311,7 +311,7 @@ fms_need (unsigned n)
 }
 
 void
-tfm_set_verbose (void)
+texpdf_tfm_set_verbose (void)
 {
   verbose++;
 }
@@ -811,7 +811,7 @@ read_tfm (struct font_metric *fm, FILE *tfm_file, off_t tfm_file_size)
 }
 
 int
-tfm_open (const char *tfm_name, int must_exist)
+texpdf_tfm_open (const char *tfm_name, int must_exist)
 {
   FILE *tfm_file;
   int i, format = TFM_FORMAT;
@@ -936,7 +936,7 @@ tfm_open (const char *tfm_name, int must_exist)
 }
 
 void
-tfm_close_all (void)
+texpdf_tfm_close_all (void)
 {
   int  i;
 

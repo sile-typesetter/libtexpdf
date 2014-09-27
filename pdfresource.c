@@ -204,7 +204,7 @@ pdf_defineresource (const char *category,
 	pdf_flush_resource(res);
 	res->flags    = flags;
 	if (flags & PDF_RES_FLUSH_IMMEDIATE) {
-	  res->reference = pdf_ref_obj(object);
+	  res->reference = texpdf_ref_obj(object);
 	  texpdf_release_obj(object);
 	} else {
 	  res->object = object;
@@ -231,7 +231,7 @@ pdf_defineresource (const char *category,
     res->category = cat_id;
     res->flags    = flags;
     if (flags & PDF_RES_FLUSH_IMMEDIATE) {
-      res->reference = pdf_ref_obj(object);
+      res->reference = texpdf_ref_obj(object);
       texpdf_release_obj(object);
     } else {
       res->object = object;
@@ -323,11 +323,11 @@ texpdf_get_resource_reference (long rc_id)
       ERROR("Undefined object...");
       return NULL;
     } else {
-      res->reference = pdf_ref_obj(res->object);
+      res->reference = texpdf_ref_obj(res->object);
     }
   }
 
-  return pdf_link_obj(res->reference);
+  return texpdf_link_obj(res->reference);
 }
 
 #if 0

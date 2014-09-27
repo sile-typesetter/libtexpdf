@@ -80,7 +80,7 @@ typedef struct fontmap_rec {
   fontmap_opt opt;
 } fontmap_rec;
 
-extern void         pdf_fontmap_set_verbose   (void);
+extern void         texpdf_fontmap_set_verbose   (void);
 
 extern void         texpdf_init_fontmaps         (void);
 #if 0
@@ -99,7 +99,7 @@ extern int          texpdf_remove_fontmap_record (const char  *kp);
 extern int          texpdf_insert_fontmap_record (const char  *kp, const fontmap_rec *mrec);
 extern fontmap_rec *texpdf_lookup_fontmap_record (const char  *kp);
 
-extern int          is_pdfm_mapline           (const char  *mline);
+extern int          texpdf_is_pdfm_mapline           (const char  *mline);
 
 #ifdef XETEX
 extern int          pdf_load_native_font      (const char *filename, unsigned long index,

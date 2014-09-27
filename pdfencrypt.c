@@ -75,7 +75,7 @@ void texpdf_enc_compute_id_string (char *dviname, char *pdfname)
   time_t current_time;
   struct tm *bd_time;
 
-  MD5_init(&md5_ctx);
+  texpdf_MD5_init(&md5_ctx);
 
   date_string = NEW (15, char);
   time(&current_time);
@@ -83,19 +83,19 @@ void texpdf_enc_compute_id_string (char *dviname, char *pdfname)
   sprintf (date_string, "%04d%02d%02d%02d%02d%02d",
 	   bd_time -> tm_year+1900, bd_time -> tm_mon+1, bd_time -> tm_mday,
 	   bd_time -> tm_hour, bd_time -> tm_min, bd_time -> tm_sec);
-  MD5_write(&md5_ctx, (unsigned char *)date_string, strlen(date_string));
+  texpdf_MD5_write(&md5_ctx, (unsigned char *)date_string, strlen(date_string));
   RELEASE (date_string);
 
   producer = NEW (strlen(PRODUCER)+strlen(my_name)+strlen(VERSION), char);
   sprintf(producer, PRODUCER, my_name, VERSION);
-  MD5_write(&md5_ctx, (unsigned char *)producer, strlen(producer));
+  texpdf_MD5_write(&md5_ctx, (unsigned char *)producer, strlen(producer));
   RELEASE (producer);
 
   if (dviname)
-    MD5_write(&md5_ctx, (unsigned char *)dviname, strlen(dviname));
+    texpdf_MD5_write(&md5_ctx, (unsigned char *)dviname, strlen(dviname));
   if (pdfname)
-    MD5_write(&md5_ctx, (unsigned char *)pdfname, strlen(pdfname));
-  MD5_final(id_string, &md5_ctx);
+    texpdf_MD5_write(&md5_ctx, (unsigned char *)pdfname, strlen(pdfname));
+  texpdf_MD5_final(id_string, &md5_ctx);
 }
 
 static void passwd_padding (unsigned char *src, unsigned char *dst)
@@ -125,9 +125,9 @@ static void compute_owner_password (void)
    * 2. Initialize the MD5 hash function and pass the result of step 1
    *    as input to this function.
    */
-  MD5_init(&md5_ctx);
-  MD5_write(&md5_ctx, in_buf, MAX_STR_LEN);
-  MD5_final(md5_buf, &md5_ctx);
+  texpdf_MD5_init(&md5_ctx);
+  texpdf_MD5_write(&md5_ctx, in_buf, MAX_STR_LEN);
+  texpdf_MD5_final(md5_buf, &md5_ctx);
   /*
    * 3. (Revision 3 only) Do the following 50 times: Take the output
    *    from the previous MD5 hash and pass it as input into a new
@@ -139,9 +139,9 @@ static void compute_owner_password (void)
        * NOTE: We truncate each MD5 hash as in the following step.
        *       Otherwise Adobe Reader won't decrypt the PDF file.
        */
-      MD5_init(&md5_ctx);
-      MD5_write(&md5_ctx, md5_buf, key_size);
-      MD5_final(md5_buf, &md5_ctx);
+      texpdf_MD5_init(&md5_ctx);
+      texpdf_MD5_write(&md5_ctx, md5_buf, key_size);
+      texpdf_MD5_final(md5_buf, &md5_ctx);
     }
   /*
    * 4. Create an RC4 encryption key using the first n bytes of the output
@@ -210,14 +210,14 @@ static void compute_encryption_key (unsigned char *pwd)
    * 2. Initialize the MD5 hash function and pass the result of step 1
    *    as input to this fuction.
    */
-  MD5_init(&md5_ctx);
-  MD5_write(&md5_ctx, in_buf, MAX_STR_LEN);
+  texpdf_MD5_init(&md5_ctx);
+  texpdf_MD5_write(&md5_ctx, in_buf, MAX_STR_LEN);
   /*
    * 3. Pass the value of the encryption dictionary's O entry to the
    *    MD5 hash function. (Algorithm 3.3 shows how the O value is
    *    computed.)
    */
-  MD5_write(&md5_ctx, opwd_string, MAX_STR_LEN);
+  texpdf_MD5_write(&md5_ctx, opwd_string, MAX_STR_LEN);
   /*
    * 4. Treat the value of the P entry as an unsigned 4-byte integer
    *    and pass these bytes to the MD5 hash function, low-order byte
@@ -227,15 +227,15 @@ static void compute_encryption_key (unsigned char *pwd)
   in_buf[1] = (unsigned char)(permission >> 8) & 0xFF;
   in_buf[2] = (unsigned char)(permission >> 16) & 0xFF;
   in_buf[3] = (unsigned char)(permission >> 24) & 0xFF;
-  MD5_write(&md5_ctx, in_buf, 4);
+  texpdf_MD5_write(&md5_ctx, in_buf, 4);
   /*
    * 5. Pass the first element of the file's file identifier array
    *    (the value of the ID entry in the document's trailer dictionary;
    *    see Table 3.12 on page 68) to the MD5 hash function and
    *    finish the hash.
    */
-  MD5_write(&md5_ctx, id_string, MAX_KEY_LEN);
-  MD5_final(md5_buf, &md5_ctx);
+  texpdf_MD5_write(&md5_ctx, id_string, MAX_KEY_LEN);
+  texpdf_MD5_final(md5_buf, &md5_ctx);
   /*
    * 6. (Revision 3 only) Do the following 50 times; Take the output from
    *    the previous MD5 hash and pass it as input into a new MD5 hash.
@@ -246,9 +246,9 @@ static void compute_encryption_key (unsigned char *pwd)
        * NOTE: We truncate each MD5 hash as in the following step.
        *       Otherwise Adobe Reader won't decrypt the PDF file.
        */
-      MD5_init(&md5_ctx);
-      MD5_write(&md5_ctx, md5_buf, key_size);
-      MD5_final(md5_buf, &md5_ctx);
+      texpdf_MD5_init(&md5_ctx);
+      texpdf_MD5_write(&md5_ctx, md5_buf, key_size);
+      texpdf_MD5_final(md5_buf, &md5_ctx);
     }
   /*
    * 7. Set the encryption key to the first n bytes of the output from
@@ -313,11 +313,11 @@ static void compute_user_password (void)
     ARC4(&key, MAX_STR_LEN, padding_string, out_buf);
     break;
   case 3:
-    MD5_init(&md5_ctx);
-    MD5_write(&md5_ctx, padding_string, MAX_STR_LEN);
+    texpdf_MD5_init(&md5_ctx);
+    texpdf_MD5_write(&md5_ctx, padding_string, MAX_STR_LEN);
 
-    MD5_write(&md5_ctx, id_string, MAX_KEY_LEN);
-    MD5_final(md5_buf, &md5_ctx);
+    texpdf_MD5_write(&md5_ctx, id_string, MAX_KEY_LEN);
+    texpdf_MD5_final(md5_buf, &md5_ctx);
 
     ARC4_set_key(&key, key_size, key_data);
     ARC4(&key, MAX_KEY_LEN, md5_buf, out_buf);
@@ -408,9 +408,9 @@ void pdf_encrypt_data (unsigned char *data, unsigned long len)
   in_buf[key_size+3] = (unsigned char)(current_generation) & 0xFF;
   in_buf[key_size+4] = (unsigned char)(current_generation >> 8) & 0xFF;
 
-  MD5_init(&md5_ctx);
-  MD5_write(&md5_ctx, in_buf, key_size+5);
-  MD5_final(md5_buf, &md5_ctx);
+  texpdf_MD5_init(&md5_ctx);
+  texpdf_MD5_write(&md5_ctx, in_buf, key_size+5);
+  texpdf_MD5_final(md5_buf, &md5_ctx);
   
   result = NEW (len, unsigned char);
   ARC4_set_key(&key, (key_size > 10 ? MAX_KEY_LEN : key_size+5), md5_buf);
@@ -513,8 +513,8 @@ pdf_obj *pdf_encrypt_obj (void)
 pdf_obj *texpdf_enc_id_array (void)
 {
   pdf_obj *id = texpdf_new_array();
-  pdf_add_array(id, texpdf_new_string(id_string, MAX_KEY_LEN));
-  pdf_add_array(id, texpdf_new_string(id_string, MAX_KEY_LEN));
+  texpdf_add_array(id, texpdf_new_string(id_string, MAX_KEY_LEN));
+  texpdf_add_array(id, texpdf_new_string(id_string, MAX_KEY_LEN));
   return id;
 }
 

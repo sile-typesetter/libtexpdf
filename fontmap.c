@@ -44,7 +44,7 @@ static char *strip_options (const char *map_name, fontmap_opt *opt);
 
 static int verbose = 0;
 void
-pdf_fontmap_set_verbose (void)
+texpdf_fontmap_set_verbose (void)
 {
   verbose++;
 }
@@ -337,7 +337,7 @@ fontmap_parse_mapdef_dpm (fontmap_rec *mrec,
    *   Dvipdfm basically uses texpdf_parse_ident() for parsing enc_name,
    *   font_name, and other string values which assumes PostScript-like
    *   syntax.
-   *   skip_white() skips '\r' and '\n' but they should terminate
+   *   texpdf_skip_white() skips '\r' and '\n' but they should terminate
    *   fontmap line here.
    */
 
@@ -755,7 +755,7 @@ texpdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
       tfm_name = make_subfont_name(kp, sfd_name, subfont_ids[n]);
       if (!tfm_name)
         continue;
-      mrec = ht_lookup_table(fontmap, tfm_name, strlen(tfm_name));
+      mrec = texpdf_ht_lookup_table(fontmap, tfm_name, strlen(tfm_name));
       if (!mrec) {
         mrec = NEW(1, fontmap_rec);
         texpdf_init_fontmap_record(mrec);
@@ -770,7 +770,7 @@ texpdf_append_fontmap_record (const char *kp, const fontmap_rec *vp)
     RELEASE(sfd_name);
   }
 
-  mrec = ht_lookup_table(fontmap, kp, strlen(kp));
+  mrec = texpdf_ht_lookup_table(fontmap, kp, strlen(kp));
   if (!mrec) {
     mrec = NEW(1, fontmap_rec);
     texpdf_copy_fontmap_record(mrec, vp);
@@ -945,7 +945,7 @@ texpdf_read_fontmap_line (fontmap_rec *mrec, const char *mline, long mline_len, 
  * DVIPDFM fontmap line otherwise.
  */
 int
-is_pdfm_mapline (const char *mline) /* NULL terminated. */
+texpdf_is_pdfm_mapline (const char *mline) /* NULL terminated. */
 {
   int   n = 0;
   const char *p, *endptr;
@@ -1002,7 +1002,7 @@ texpdf_load_fontmap_file (const char *filename, int mode)
     if (p == endptr)
       continue;
 
-    m = is_pdfm_mapline(p);
+    m = texpdf_is_pdfm_mapline(p);
 
     if (format * m < 0) { /* mismatch */
       WARN("Found a mismatched fontmap line %d from %s.", lpos, filename);
@@ -1176,7 +1176,7 @@ texpdf_lookup_fontmap_record (const char *tfm_name)
   fontmap_rec *mrec = NULL;
 
   if (fontmap && tfm_name)
-    mrec = ht_lookup_table(fontmap, tfm_name, strlen(tfm_name));
+    mrec = texpdf_ht_lookup_table(fontmap, tfm_name, strlen(tfm_name));
 
   return  mrec;
 }
@@ -1186,14 +1186,14 @@ void
 texpdf_init_fontmaps (void)
 {
   fontmap = NEW(1, struct ht_table);
-  ht_init_table(fontmap, hval_free);
+  texpdf_ht_init_table(fontmap, hval_free);
 }
 
 void
 texpdf_close_fontmaps (void)
 {
   if (fontmap) {
-    ht_clear_table(fontmap);
+    texpdf_ht_clear_table(fontmap);
     RELEASE(fontmap);
   }
   fontmap = NULL;
@@ -1316,7 +1316,7 @@ strip_options (const char *map_name, fontmap_opt *opt)
 
 #if  DPXTEST
 static void
-dump_fontmap_rec (const char *key, const fontmap_rec *mrec)
+texpdf_dump_fontmap_rec (const char *key, const fontmap_rec *mrec)
 {
   fontmap_opt *opt = (fontmap_opt *) &mrec->opt;
 
@@ -1379,7 +1379,7 @@ dump_fontmap_rec (const char *key, const fontmap_rec *mrec)
 }
 
 void
-dump_fontmaps (void)
+texpdf_dump_fontmaps (void)
 {
   struct ht_iter iter;
   fontmap_rec   *mrec;
@@ -1399,7 +1399,7 @@ dump_fontmaps (void)
       if (kl > 127)
         continue;
       memcpy(key, kp, kl); key[kl] = 0;
-      dump_fontmap_rec(key, mrec);
+      texpdf_dump_fontmap_rec(key, mrec);
     } while (!ht_iter_next(&iter));
   }
   ht_clear_iter(&iter);
@@ -1453,12 +1453,12 @@ test_fontmap_main (int argc, char *argv[])
     texpdf_load_fontmap_file(argv[i], FONTMAP_RMODE_REPLACE);
 
   if (key == NULL)
-    dump_fontmaps();
+    texpdf_dump_fontmaps();
   else {
     fontmap_rec *mrec;
     mrec = texpdf_lookup_fontmap_record(key);
     if (mrec)
-      dump_fontmap_rec(key, mrec);
+      texpdf_dump_fontmap_rec(key, mrec);
     else {
       WARN("Fontmap entry \"%s\" not found.", key);
     }

@@ -305,8 +305,8 @@ jpeg_include_image (pdf_ximage *ximage, FILE *fp)
     WARN("Adobe CMYK JPEG: Inverted color assumed.");
     decode = texpdf_new_array();
     for (i = 0; i < j_info.num_components; i++) {
-      pdf_add_array(decode, texpdf_new_number(1.0));
-      pdf_add_array(decode, texpdf_new_number(0.0));
+      texpdf_add_array(decode, texpdf_new_number(1.0));
+      texpdf_add_array(decode, texpdf_new_number(0.0));
     }
     texpdf_add_dict(stream_dict, texpdf_new_name("Decode"), decode);
   }
@@ -459,7 +459,7 @@ JPEG_get_iccp (struct JPEG_info *j_info)
       icc_stream = NULL;
       break;
     }
-    pdf_add_stream(icc_stream, icc->chunk, icc->length);
+    texpdf_add_stream(icc_stream, icc->chunk, icc->length);
     prev_id = icc->seq_id;
     num_icc_seg = icc->num_chunks;
   }
@@ -742,7 +742,7 @@ JPEG_copy_stream (struct JPEG_info *j_info, pdf_obj *stream, FILE *fp)
 	(marker >= JM_RST0 && marker <= JM_RST7)) {
       work_buffer[0] = (char) 0xff;
       work_buffer[1] = (char) marker;
-      pdf_add_stream(stream, work_buffer, 2);
+      texpdf_add_stream(stream, work_buffer, 2);
       count++;
       continue;
     }
@@ -756,12 +756,12 @@ JPEG_copy_stream (struct JPEG_info *j_info, pdf_obj *stream, FILE *fp)
       work_buffer[1] = (char) marker;
       work_buffer[2] = ((length + 2) >> 8) & 0xff;
       work_buffer[3] =  (length + 2) & 0xff;
-      pdf_add_stream(stream, work_buffer, 4);
+      texpdf_add_stream(stream, work_buffer, 4);
       while (length > 0) {
 	nb_read = fread(work_buffer, sizeof(char),
 			MIN(length, WORK_BUFFER_SIZE), fp);
 	if (nb_read > 0)
-	  pdf_add_stream(stream, work_buffer, nb_read);
+	  texpdf_add_stream(stream, work_buffer, nb_read);
 	length -= nb_read;
       }
       found_SOFn = 1;
@@ -779,12 +779,12 @@ JPEG_copy_stream (struct JPEG_info *j_info, pdf_obj *stream, FILE *fp)
 	work_buffer[1] = (char) marker;
 	work_buffer[2] = ((length + 2) >> 8) & 0xff;
 	work_buffer[3] =  (length + 2) & 0xff;
-	pdf_add_stream(stream, work_buffer, 4);
+	texpdf_add_stream(stream, work_buffer, 4);
 	while (length > 0) {
 	  nb_read = fread(work_buffer, sizeof(char),
 			  MIN(length, WORK_BUFFER_SIZE), fp);
 	  if (nb_read > 0)
-	    pdf_add_stream(stream, work_buffer, nb_read);
+	    texpdf_add_stream(stream, work_buffer, nb_read);
 	  length -= nb_read;
 	}
       }
@@ -794,7 +794,7 @@ JPEG_copy_stream (struct JPEG_info *j_info, pdf_obj *stream, FILE *fp)
 
   while ((length = fread(work_buffer,
 			 sizeof(char), WORK_BUFFER_SIZE, fp)) > 0) {
-    pdf_add_stream(stream, work_buffer, length);
+    texpdf_add_stream(stream, work_buffer, length);
   }
 
   return (found_SOFn ? 0 : -1);
@@ -904,7 +904,7 @@ JPEG_scan_file (struct JPEG_info *j_info, FILE *fp)
 }
 
 int
-jpeg_get_bbox (FILE *fp, long *width, long *height,
+texpdf_jpeg_get_bbox (FILE *fp, long *width, long *height,
 	       double *xdensity, double *ydensity)
 {
   struct JPEG_info j_info;

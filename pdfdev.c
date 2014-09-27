@@ -183,7 +183,7 @@ dev_sprint_bp (char *buf, spt_t value, spt_t *error)
 
 /* They are affected by precision (set at device initialization). */
 int
-pdf_sprint_matrix (char *buf, const pdf_tmatrix *M)
+texpdf_sprint_matrix (char *buf, const pdf_tmatrix *M)
 {
   int  len;
   int  prec2 = MIN(dev_unit.precision + 2, DEV_PRECISION_MAX);
@@ -520,7 +520,7 @@ dev_set_text_matrix (pdf_doc *p, spt_t xpos, spt_t ypos, double slant, double ex
   tm.f = ypos * dev_unit.dvi2pts;
 
   format_buffer[len++] = ' ';
-  len += pdf_sprint_matrix(format_buffer+len, &tm);
+  len += texpdf_sprint_matrix(format_buffer+len, &tm);
   format_buffer[len++] = ' ';
   format_buffer[len++] = 'T';
   format_buffer[len++] = 'm';
@@ -584,7 +584,7 @@ text_mode (pdf_doc *p)
 }
 
 void
-graphics_mode (pdf_doc *p)
+texpdf_graphics_mode (pdf_doc *p)
 {
   switch (motion_state) {
   case GRAPHICS_MODE:
@@ -849,7 +849,7 @@ dev_set_font (pdf_doc *doc, int font_id)
   if (!real_font->used_on_this_page) { 
     texpdf_doc_add_page_resource(doc, "Font",
                               real_font->short_name,
-                              pdf_link_obj(real_font->resource));
+                              texpdf_link_obj(real_font->resource));
     real_font->used_on_this_page = 1;
   }
 
@@ -1018,13 +1018,13 @@ handle_multibyte_string (struct dev_font *font,
     long           inbytesleft, outbytesleft;
     CMap          *cmap;
 
-    cmap         = CMap_cache_get(font->enc_id);
+    cmap         = texpdf_CMap_cache_get(font->enc_id);
     inbuf        = p;
     outbuf       = sbuf0;
     inbytesleft  = length;
     outbytesleft = FORMAT_BUF_SIZE;
 
-    CMap_decode(cmap,
+    texpdf_CMap_decode(cmap,
                 &inbuf, &inbytesleft, &outbuf, &outbytesleft);
     if (inbytesleft != 0) {
       WARN("CMap conversion failed. (%d bytes remains)", inbytesleft);
@@ -1261,7 +1261,7 @@ texpdf_init_device (pdf_doc *p, double dvi2pts, int precision, int black_and_whi
 
   dev_param.colormode = (black_and_white ? 0 : 1);
 
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
   texpdf_color_clear_stack();
   texpdf_dev_init_gstates();
 
@@ -1336,7 +1336,7 @@ texpdf_dev_set_origin (double phys_x, double phys_y)
 
   texpdf_dev_currentmatrix(&M0);
   texpdf_dev_currentmatrix(&M1);
-  pdf_invertmatrix(&M1);
+  texpdf_invertmatrix(&M1);
   M0.e = phys_x; M0.f = phys_y;
   pdf_concatmatrix(&M1, &M0);
 
@@ -1347,7 +1347,7 @@ texpdf_dev_set_origin (double phys_x, double phys_y)
 void
 texpdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M)
 {
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
 
   text_state.force_reset  = 0;
 
@@ -1363,7 +1363,7 @@ texpdf_dev_eop (pdf_doc *p)
 {
   int  depth;
 
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
 
   depth = texpdf_dev_current_depth();
   if (depth != 1) {
@@ -1585,7 +1585,7 @@ texpdf_dev_set_rule (pdf_doc *p, spt_t xpos, spt_t ypos, spt_t width, spt_t heig
     ypos -= bpt2spt(dev_coords[num_dev_coords-1].y);
   }
 
-  graphics_mode(p);
+  texpdf_graphics_mode(p);
 
   format_buffer[len++] = ' ';
   format_buffer[len++] = 'q';
@@ -1822,7 +1822,7 @@ texpdf_dev_put_image (pdf_doc *doc,
     tmp = -M.c; M.c = M.d; M.d = tmp;
   }
 
-  graphics_mode(doc);
+  texpdf_graphics_mode(doc);
   texpdf_dev_gsave(doc);
 
   texpdf_ximage_scale_image(id, &M1, &r, p);
@@ -1903,7 +1903,7 @@ texpdf_dev_put_image (pdf_doc *doc,
 
 
 void
-transform_info_clear (transform_info *info)
+texpdf_transform_info_clear (transform_info *info)
 {
   /* Physical dimensions */
   info->width    = 0.0;

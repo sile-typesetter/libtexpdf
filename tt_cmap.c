@@ -19,7 +19,7 @@
 */
 
 /*
- * A large part of codes are brought from ttfdump-0.5.5.
+ * A large part of codes are brought from ttftexpdf_dump-0.5.5.
  */
 
 #include "libtexpdf.h"
@@ -895,7 +895,7 @@ handle_subst_glyphs (CMap *cmap,
         inbytesleft  = 2;
         outbuf       = wbuf + 2;
         outbytesleft = WBUF_SIZE - 2;
-        CMap_decode(cmap_add, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        texpdf_CMap_decode(cmap_add, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
 
         if (inbytesleft != 0) {
           WARN("CMap conversion failed...");
@@ -1208,16 +1208,16 @@ otf_create_ToUnicode_stream (const char *font_name,
     ERROR("Could not read OpenType/TrueType table directory.");
   }
 
-  code_to_cid_cmap = CMap_cache_get(cmap_id);
+  code_to_cid_cmap = texpdf_CMap_cache_get(cmap_id);
   cmap_type = CMap_get_type(code_to_cid_cmap);
   if (cmap_type != CMAP_TYPE_CODE_TO_CID)
     code_to_cid_cmap = NULL;
 
-  cmap_add_id = CMap_cache_find(cmap_name);
+  cmap_add_id = texpdf_CMap_cache_find(cmap_name);
   if (cmap_add_id < 0) {
     cmap_add = NULL;
   } else {
-    cmap_add = CMap_cache_get(cmap_add_id);
+    cmap_add = texpdf_CMap_cache_get(cmap_add_id);
   }
 
   CMap_set_silent(1); /* many warnings without this... */
@@ -1342,7 +1342,7 @@ add_glyph (struct ht_table *unencoded,
     glyph->unicodes[i] = unicodes[i];
   }
 
-  ht_append_table(unencoded, wbuf, 4, glyph);
+  texpdf_ht_append_table(unencoded, wbuf, 4, glyph);
 }
 
 /* This seriously affects speed... */
@@ -1356,7 +1356,7 @@ find_glyph (struct ht_table *unencoded, long ucv)
   wbuf[2] = (ucv >>  8) & 0xff;
   wbuf[3] =  ucv & 0xff;
 
-  return (struct gent *) ht_lookup_table(unencoded, wbuf, 4);
+  return (struct gent *) texpdf_ht_lookup_table(unencoded, wbuf, 4);
 }
 
 static void
@@ -1369,8 +1369,8 @@ handle_subst (pdf_obj *dst_obj, pdf_obj *src_obj, int flag,
   long     src, dst;
   long     src_start, src_end, dst_start, dst_end;
 
-  src_size = pdf_array_length(src_obj);
-  dst_size = pdf_array_length(dst_obj);
+  src_size = texpdf_array_length(src_obj);
+  dst_size = texpdf_array_length(dst_obj);
 
   dst_start = dst_end = -1; dst = 0;
   src_start = src_end = -1; src = 0;
@@ -1382,10 +1382,10 @@ handle_subst (pdf_obj *dst_obj, pdf_obj *src_obj, int flag,
 
     tmp = texpdf_get_array(src_obj, i);
     if (PDF_OBJ_ARRAYTYPE(tmp)) {
-      src_start = (long) pdf_number_value(texpdf_get_array(tmp, 0));
-      src_end   = (long) pdf_number_value(texpdf_get_array(tmp, 1));
+      src_start = (long) texpdf_number_value(texpdf_get_array(tmp, 0));
+      src_end   = (long) texpdf_number_value(texpdf_get_array(tmp, 1));
     } else {
-      src_start = src_end = (long) pdf_number_value(tmp);
+      src_start = src_end = (long) texpdf_number_value(tmp);
     }
     for (src = src_start; src <= src_end; src++) {
       glyph = find_glyph(unencoded, src);
@@ -1398,10 +1398,10 @@ handle_subst (pdf_obj *dst_obj, pdf_obj *src_obj, int flag,
       if (dst > dst_end) {
 	tmp = texpdf_get_array(dst_obj, j++);
 	if (PDF_OBJ_ARRAYTYPE(tmp)) {
-	  dst_start = (long) pdf_number_value(texpdf_get_array(tmp, 0));
-	  dst_end   = (long) pdf_number_value(texpdf_get_array(tmp, 1));
+	  dst_start = (long) texpdf_number_value(texpdf_get_array(tmp, 0));
+	  dst_end   = (long) texpdf_number_value(texpdf_get_array(tmp, 1));
 	} else {
-	  dst_start = dst_end = (long) pdf_number_value(tmp);
+	  dst_start = dst_end = (long) texpdf_number_value(tmp);
 	}
 	dst = dst_start;
       }
@@ -1468,8 +1468,8 @@ handle_assign (pdf_obj *dst, pdf_obj *src, int flag,
   int      i, n_unicodes, rv;
   USHORT   gid_in[MAX_UNICODES], lig;
 
-  n_unicodes = pdf_array_length(src); /* FIXME */
-  ucv = (long) pdf_number_value(texpdf_get_array(dst, 0)); /* FIXME */
+  n_unicodes = texpdf_array_length(src); /* FIXME */
+  ucv = (long) texpdf_number_value(texpdf_get_array(dst, 0)); /* FIXME */
   if (!UC_is_valid(ucv)) {
     if (flag == 'r' || flag == 'p') {
       if (ucv < 0x10000) {
@@ -1490,7 +1490,7 @@ handle_assign (pdf_obj *dst, pdf_obj *src, int flag,
 
   for (i = 0; i < n_unicodes; i++) {
     unicodes[i] =
-      (long) pdf_number_value(texpdf_get_array(src, i));
+      (long) texpdf_number_value(texpdf_get_array(src, i));
     gid_in[i] = tt_cmap_lookup(ttcmap, unicodes[i]);
 
     if (verbose > VERBOSE_LEVEL_MIN) {
@@ -1551,7 +1551,7 @@ load_base_CMap (const char *cmap_name, int wmode,
 {
   int cmap_id;
 
-  cmap_id = CMap_cache_find(cmap_name);
+  cmap_id = texpdf_CMap_cache_find(cmap_name);
   if (cmap_id < 0) {
     CMap  *cmap;
 
@@ -1593,17 +1593,17 @@ load_gsub (pdf_obj *conf, otl_gsub *gsub_list, sfnt *sfont)
   script   = otl_conf_get_script  (conf);
   language = otl_conf_get_language(conf);
 
-  size     = pdf_array_length(rule);
+  size     = texpdf_array_length(rule);
   for (i = 0; i < size; i += 2) {
     pdf_obj   *tmp, *commands;
     int        flag;
     long       j, num_comms;
 
     tmp  = texpdf_get_array(rule, i);
-    flag = (int) pdf_number_value(tmp);
+    flag = (int) texpdf_number_value(tmp);
 
     commands  = texpdf_get_array(rule, i+1);
-    num_comms = pdf_array_length(commands);
+    num_comms = texpdf_array_length(commands);
 
     /* (assign|substitute) tag dst src */
     for (j = 0 ; j < num_comms; j += 4) {
@@ -1650,17 +1650,17 @@ handle_gsub (pdf_obj *conf,
   script   = otl_conf_get_script  (conf);
   language = otl_conf_get_language(conf);
 
-  size = pdf_array_length(rule);
+  size = texpdf_array_length(rule);
   for (i = 0; i < size; i += 2) {
     pdf_obj  *tmp, *commands;
     long      j, num_comms;
     int       flag;
 
     tmp  = texpdf_get_array(rule, i);
-    flag = (int) pdf_number_value(tmp);
+    flag = (int) texpdf_number_value(tmp);
 
     commands  = texpdf_get_array   (rule, i+1);
-    num_comms = pdf_array_length(commands);
+    num_comms = texpdf_array_length(commands);
 
     for (j = 0; j < num_comms; j += 4) {
       pdf_obj *operator;
@@ -1691,13 +1691,13 @@ handle_gsub (pdf_obj *conf,
       } else {
 
 	if (verbose > VERBOSE_LEVEL_MIN) {
-	  MESG("otf_cmap>> %s:\n", pdf_name_value(operator));
+	  MESG("otf_cmap>> %s:\n", texpdf_name_value(operator));
 	}
 
-	if (!strcmp(pdf_name_value(operator), "assign")) {
+	if (!strcmp(texpdf_name_value(operator), "assign")) {
 	  handle_assign(dst, src, flag,
 			gsub_list, ttcmap, unencoded);
-	} else if (!strcmp(pdf_name_value(operator), "substitute")) {
+	} else if (!strcmp(texpdf_name_value(operator), "substitute")) {
 	  handle_subst(dst, src, flag,
 		       gsub_list, ttcmap, unencoded);
 	}
@@ -1813,7 +1813,7 @@ otf_load_Unicode_CMap (const char *map_name, int ttc_index, /* 0 for non-TTC fon
 	 map_name, (otl_tags ? otl_tags : "none"));
   }
 
-  cmap_id = CMap_cache_find(cmap_name);
+  cmap_id = texpdf_CMap_cache_find(cmap_name);
   if (cmap_id >= 0) {
     RELEASE(cmap_name);
     RELEASE(base_name);
@@ -1867,7 +1867,7 @@ otf_load_Unicode_CMap (const char *map_name, int ttc_index, /* 0 for non-TTC fon
     return cmap_id;
   }
 
-  base = CMap_cache_get(cmap_id);
+  base = texpdf_CMap_cache_get(cmap_id);
 
   cmap = CMap_new();
   CMap_set_name (cmap, cmap_name);
@@ -1925,7 +1925,7 @@ otf_load_Unicode_CMap (const char *map_name, int ttc_index, /* 0 for non-TTC fon
       load_gsub(opt_conf, gsub_list, sfont);
     }
 
-    ht_init_table(&unencoded, hval_free);
+    texpdf_ht_init_table(&unencoded, hval_free);
 
     handle_gsub(conf, ttcmap, gsub_list, &unencoded);
     if (opt_tag) {
@@ -1939,9 +1939,9 @@ otf_load_Unicode_CMap (const char *map_name, int ttc_index, /* 0 for non-TTC fon
       tounicode_id = -1;
       tounicode    = NULL;
     } else {
-      tounicode_id = CMap_cache_find(tounicode_name);
+      tounicode_id = texpdf_CMap_cache_find(tounicode_name);
       if (tounicode_id >= 0)
-	tounicode  = CMap_cache_get(tounicode_id);
+	tounicode  = texpdf_CMap_cache_get(tounicode_id);
       else {
 	tounicode = CMap_new();
 	CMap_set_name (tounicode, tounicode_name);
@@ -1955,7 +1955,7 @@ otf_load_Unicode_CMap (const char *map_name, int ttc_index, /* 0 for non-TTC fon
     }
     create_cmaps(cmap, tounicode, &unencoded, GIDToCIDMap);
 
-    ht_clear_table(&unencoded);
+    texpdf_ht_clear_table(&unencoded);
     RELEASE(conf_name);
   }
 

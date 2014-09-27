@@ -813,7 +813,7 @@ pst_string_parse_hex (unsigned char **inbuf, unsigned char *inbufend)
   /* PDF Reference does not specify how to treat invalid char */  
   while (cur < inbufend && len < PST_STRING_LEN_MAX) {
     int    hi, lo;
-    skip_white_spaces(&cur, inbufend);
+    texpdf_skip_white_spaces(&cur, inbufend);
     if (*cur == '>')
       break;
     hi = xtoi(*(cur++));
@@ -821,7 +821,7 @@ pst_string_parse_hex (unsigned char **inbuf, unsigned char *inbufend)
       WARN("Invalid char for hex string <%x> treated as <0>.", *(cur-1));
       hi = 0;
     }
-    skip_white_spaces(&cur, inbufend);
+    texpdf_skip_white_spaces(&cur, inbufend);
     if (*cur == '>')
       break;
     /* 0 is appended if final hex digit is missing */

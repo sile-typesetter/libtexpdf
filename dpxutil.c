@@ -152,7 +152,7 @@ esctouc (unsigned char **inbuf, unsigned char *inbufend, unsigned char *valid)
 }
 
 void
-skip_white_spaces (unsigned char **s, unsigned char *endptr)
+texpdf_skip_white_spaces (unsigned char **s, unsigned char *endptr)
 {
   while (*s < endptr)
     if (!is_space(**s))
@@ -162,7 +162,7 @@ skip_white_spaces (unsigned char **s, unsigned char *endptr)
 }
 
 void
-ht_init_table (struct ht_table *ht, hval_free_func hval_free_fn)
+texpdf_ht_init_table (struct ht_table *ht, hval_free_func hval_free_fn)
 {
   int  i;
 
@@ -176,7 +176,7 @@ ht_init_table (struct ht_table *ht, hval_free_func hval_free_fn)
 }
 
 void
-ht_clear_table (struct ht_table *ht)
+texpdf_ht_clear_table (struct ht_table *ht)
 {
   int   i;
 
@@ -226,7 +226,7 @@ get_hash (const void *key, int keylen)
 }
 
 void *
-ht_lookup_table (struct ht_table *ht, const void *key, int keylen)
+texpdf_ht_lookup_table (struct ht_table *ht, const void *key, int keylen)
 {
   struct ht_entry *hent;
   unsigned int     hkey;
@@ -330,7 +330,7 @@ ht_insert_table (struct ht_table *ht,
 }
 
 void
-ht_append_table (struct ht_table *ht,
+texpdf_ht_append_table (struct ht_table *ht,
 		 const void *key, int keylen, void *value) 
 {
   struct ht_entry *hent, *last;

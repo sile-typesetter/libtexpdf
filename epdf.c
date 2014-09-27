@@ -99,8 +99,8 @@ rect_equal (pdf_obj *rect1, pdf_obj *rect2)
   if (!rect1 || !rect2)
     return 0;
   for (i = 0; i < 4; i++) {
-    if (pdf_number_value(texpdf_get_array(rect1, i)) !=
-	pdf_number_value(texpdf_get_array(rect2, i)))
+    if (texpdf_number_value(texpdf_get_array(rect1, i)) !=
+	texpdf_number_value(texpdf_get_array(rect2, i)))
       return 0;
   }
 
@@ -161,7 +161,7 @@ texpdf_get_page_obj (pdf_file *pf, long page_no,
    * Negative page numbers are counted from the back.
    */
   {
-    long count = pdf_number_value(texpdf_lookup_dict(page_tree, "Count"));
+    long count = texpdf_number_value(texpdf_lookup_dict(page_tree, "Count"));
     page_idx = page_no + (page_no >= 0 ? -1 : count);
     if (page_idx < 0 || page_idx >= count) {
 	WARN("Page %ld does not exist.", page_no);
@@ -238,7 +238,7 @@ texpdf_get_page_obj (pdf_file *pf, long page_no,
       if (!kids_ref)
 	break;
       kids = pdf_deref_obj(kids_ref);
-      kids_length = pdf_array_length(kids);
+      kids_length = texpdf_array_length(kids);
 
       for (i = 0; i < kids_length; i++) {
 	long count;
@@ -249,7 +249,7 @@ texpdf_get_page_obj (pdf_file *pf, long page_no,
 	tmp = pdf_deref_obj(texpdf_lookup_dict(page_tree, "Count"));
 	if (tmp) {
 	  /* Pages object */
-	  count = pdf_number_value(tmp);
+	  count = texpdf_number_value(tmp);
 	  texpdf_release_obj(tmp);
 	} else
 	  /* Page object */
@@ -292,8 +292,8 @@ texpdf_get_page_obj (pdf_file *pf, long page_no,
   }
 
   if (rotate) {
-    if (pdf_number_value(rotate) != 0.0)
-      WARN("<< /Rotate %d >> found. (Not supported yet)",  (int)pdf_number_value(rotate));
+    if (texpdf_number_value(rotate) != 0.0)
+      WARN("<< /Rotate %d >> found. (Not supported yet)",  (int)texpdf_number_value(rotate));
     texpdf_release_obj(rotate);
     rotate = NULL;
   }
@@ -315,7 +315,7 @@ texpdf_get_page_content (pdf_obj* page)
   if (!contents)
     return NULL;
 
-  if (pdf_obj_typeof(contents) == PDF_NULL) {
+  if (texpdf_obj_typeof(contents) == PDF_NULL) {
     /* empty page */
     texpdf_release_obj(contents);
     /* TODO: better don't include anything if the page is empty */
@@ -381,11 +381,11 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
   pdf_obj *page = NULL, *resources = NULL, *markinfo = NULL;
   long page_no;
 
-  pf = pdf_open(filename, image_file);
+  pf = texpdf_open(filename, image_file);
   if (!pf)
     return -1;
 
-  if (pdf_file_get_version(pf) > texpdf_get_version())
+  if (texpdf_file_get_version(pf) > texpdf_get_version())
     goto too_recent;
 
   texpdf_ximage_init_form_info(&info);
@@ -441,7 +441,7 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
       /*
        * Concatenate all content streams.
        */
-      int idx, len = pdf_array_length(contents);
+      int idx, len = texpdf_array_length(contents);
       content_new = texpdf_new_stream(STREAM_COMPRESS);
       for (idx = 0; idx < len; idx++) {
 	pdf_obj *content_seg = pdf_deref_obj(texpdf_get_array(contents, idx));
@@ -479,20 +479,20 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
 		 texpdf_new_number(1.0));
 
     bbox = texpdf_new_array();
-    pdf_add_array(bbox, texpdf_new_number(info.bbox.llx));
-    pdf_add_array(bbox, texpdf_new_number(info.bbox.lly));
-    pdf_add_array(bbox, texpdf_new_number(info.bbox.urx));
-    pdf_add_array(bbox, texpdf_new_number(info.bbox.ury));
+    texpdf_add_array(bbox, texpdf_new_number(info.bbox.llx));
+    texpdf_add_array(bbox, texpdf_new_number(info.bbox.lly));
+    texpdf_add_array(bbox, texpdf_new_number(info.bbox.urx));
+    texpdf_add_array(bbox, texpdf_new_number(info.bbox.ury));
 
     texpdf_add_dict(contents_dict, texpdf_new_name("BBox"), bbox);
 
     matrix = texpdf_new_array();
-    pdf_add_array(matrix, texpdf_new_number(1.0));
-    pdf_add_array(matrix, texpdf_new_number(0.0));
-    pdf_add_array(matrix, texpdf_new_number(0.0));
-    pdf_add_array(matrix, texpdf_new_number(1.0));
-    pdf_add_array(matrix, texpdf_new_number(0.0));
-    pdf_add_array(matrix, texpdf_new_number(0.0));
+    texpdf_add_array(matrix, texpdf_new_number(1.0));
+    texpdf_add_array(matrix, texpdf_new_number(0.0));
+    texpdf_add_array(matrix, texpdf_new_number(0.0));
+    texpdf_add_array(matrix, texpdf_new_number(1.0));
+    texpdf_add_array(matrix, texpdf_new_number(0.0));
+    texpdf_add_array(matrix, texpdf_new_number(0.0));
 
     texpdf_add_dict(contents_dict, texpdf_new_name("Matrix"), matrix);
 
@@ -501,7 +501,7 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
     texpdf_release_obj(resources);
   }
 
-  pdf_close(pf);
+  texpdf_close(pf);
 
   texpdf_ximage_set_form(ximage, &info, contents);
 
@@ -519,12 +519,12 @@ pdf_include_page (pdf_ximage *ximage, FILE *image_file, const char *filename)
   if (contents)
     texpdf_release_obj(contents);
 
-  pdf_close(pf);
+  texpdf_close(pf);
 
   return -1;
 
  too_recent:
-  pdf_close(pf);
+  texpdf_close(pf);
   WARN("PDF version of input file more recent than in output file.");
   if (compat_mode) {
     WARN("Converting. Use \"-V\" switch to change output PDF version.");
@@ -602,7 +602,7 @@ static struct operator
 
 
 int
-pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y_user)
+texpdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y_user)
 {
   pdf_obj *page_tree, *contents;
   int depth = 0, top = -1;
@@ -612,23 +612,23 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
   double stack[6];
   pdf_file *pf;
   
-  pf = pdf_open(NULL, image_file);
+  pf = texpdf_open(NULL, image_file);
   if (!pf)
     return -1;
 
   texpdf_dev_currentmatrix(&M);
-  pdf_invertmatrix(&M);
+  texpdf_invertmatrix(&M);
   M.e += x_user; M.f += y_user;
   page_tree = texpdf_get_page_obj (pf, pageNo, NULL, NULL);
   if (!page_tree) {
-    pdf_close(pf);
+    texpdf_close(pf);
     return -1;
   }
 
   contents = texpdf_get_page_content(page_tree);
   texpdf_release_obj(page_tree);
   if (!contents) {
-    pdf_close(pf);
+    texpdf_close(pf);
     return -1;
   }
 
@@ -643,7 +643,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
   for (; clip_path < end_path; clip_path++) {
     int color_dimen = 0;	/* silence uninitialized warning */
     char *token;
-    skip_white(&clip_path, end_path);
+    texpdf_skip_white(&clip_path, end_path);
     if (clip_path == end_path)
       break;
     if (depth > 1) {
@@ -683,7 +683,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
       else {
         clip_path++;
         texpdf_parse_ident(&clip_path, end_path);
-	skip_white(&clip_path, end_path);
+	texpdf_skip_white(&clip_path, end_path);
 	token = texpdf_parse_ident(&clip_path, end_path);
         if (strcmp(token, "gs") == 0) {
 	  continue;
@@ -842,7 +842,7 @@ pdf_copy_clip (pdf_doc *p, FILE *image_file, int pageNo, double x_user, double y
   free(save_path);
 
   texpdf_release_obj(contents);
-  pdf_close(pf);
+  texpdf_close(pf);
 
   return 0;
 }
@@ -878,14 +878,14 @@ add_stream_flate (pdf_obj *dst, const void *data, long len)
     }
 
     if (z.avail_out == 0) {
-      pdf_add_stream(dst, wbuf, WBUF_SIZE);
+      texpdf_add_stream(dst, wbuf, WBUF_SIZE);
       z.next_out  = wbuf;
       z.avail_out = WBUF_SIZE;
     }
   }
 
   if (WBUF_SIZE - z.avail_out > 0)
-    pdf_add_stream(dst, wbuf, WBUF_SIZE - z.avail_out);
+    texpdf_add_stream(dst, wbuf, WBUF_SIZE - z.avail_out);
 
   return (inflateEnd(&z) == Z_OK ? 0 : -1);
 }
@@ -913,13 +913,13 @@ concat_stream (pdf_obj *dst, pdf_obj *src)
 
   filter = texpdf_lookup_dict(stream_dict, "Filter");
   if (!filter) {
-    pdf_add_stream(dst, stream_data, stream_length);
+    texpdf_add_stream(dst, stream_data, stream_length);
     return 0;
 #if HAVE_ZLIB
   } else {
     char *filter_name;
     if (PDF_OBJ_NAMETYPE(filter)) {
-      filter_name = pdf_name_value(filter);
+      filter_name = texpdf_name_value(filter);
       if (filter_name && !strcmp(filter_name, "FlateDecode"))
 	return add_stream_flate(dst, stream_data, stream_length);
       else {
@@ -927,11 +927,11 @@ concat_stream (pdf_obj *dst, pdf_obj *src)
 	return -1;
       }
     } else if (PDF_OBJ_ARRAYTYPE(filter)) {
-      if (pdf_array_length(filter) > 1) {
+      if (texpdf_array_length(filter) > 1) {
 	WARN("Multiple DecodeFilter not supported.");
 	return -1;
       } else {
-	filter_name = pdf_name_value(texpdf_get_array(filter, 0));
+	filter_name = texpdf_name_value(texpdf_get_array(filter, 0));
 	if (filter_name && !strcmp(filter_name, "FlateDecode"))
 	  return add_stream_flate(dst, stream_data, stream_length);
 	else {

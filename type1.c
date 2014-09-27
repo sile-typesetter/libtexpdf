@@ -271,14 +271,14 @@ add_metrics (pdf_font *font, cff_font *cffont, char **enc_vec, double *widths, l
   tmp_array = texpdf_new_array();
   for (i = 0; i < 4; i++) {
     val = cff_dict_get(cffont->topdict, "FontBBox", i);
-    pdf_add_array(tmp_array, texpdf_new_number(ROUND(val, 1.0)));
+    texpdf_add_array(tmp_array, texpdf_new_number(ROUND(val, 1.0)));
   }
   texpdf_add_dict(descriptor, texpdf_new_name("FontBBox"), tmp_array);
 
   tmp_array = texpdf_new_array();
   if (num_glyphs <= 1) { /* This must be an error. */
     firstchar = lastchar = 0;
-    pdf_add_array(tmp_array, texpdf_new_number(0.0));
+    texpdf_add_array(tmp_array, texpdf_new_number(0.0));
   } else {
     for (firstchar = 255, lastchar = 0, code = 0; code < 256; code++) {
       if (usedchars[code]) {
@@ -292,7 +292,7 @@ add_metrics (pdf_font *font, cff_font *cffont, char **enc_vec, double *widths, l
       return;
     }
 #ifdef TEXLIVE_INTERNAL    
-    tfm_id = tfm_open(pdf_font_get_mapname(font), 0);
+    tfm_id = texpdf_tfm_open(pdf_font_get_mapname(font), 0);
 #endif    
     for (code = firstchar; code <= lastchar; code++) {
       if (usedchars[code]) {
@@ -305,17 +305,17 @@ add_metrics (pdf_font *font, cff_font *cffont, char **enc_vec, double *widths, l
 #else
         width = scaling * widths[cff_glyph_lookup(cffont, enc_vec[code])];
 #endif        
-	pdf_add_array(tmp_array,
+	texpdf_add_array(tmp_array,
 		      texpdf_new_number(ROUND(width, 0.1)));
       } else {
-	pdf_add_array(tmp_array, texpdf_new_number(0.0));
+	texpdf_add_array(tmp_array, texpdf_new_number(0.0));
       }
     }
   }
 
-  if (pdf_array_length(tmp_array) > 0) {
+  if (texpdf_array_length(tmp_array) > 0) {
     texpdf_add_dict(fontdict,
-		 texpdf_new_name("Widths"),  pdf_ref_obj(tmp_array));
+		 texpdf_new_name("Widths"),  texpdf_ref_obj(tmp_array));
   }
   texpdf_release_obj(tmp_array);
 
@@ -435,10 +435,10 @@ write_fontfile (pdf_font *font, cff_font *cffont)
   fontfile    = texpdf_new_stream(STREAM_COMPRESS);
   stream_dict = texpdf_stream_dict(fontfile);
   texpdf_add_dict(descriptor,
-	       texpdf_new_name("FontFile3"), pdf_ref_obj (fontfile));
+	       texpdf_new_name("FontFile3"), texpdf_ref_obj (fontfile));
   texpdf_add_dict(stream_dict,
 	       texpdf_new_name("Subtype"),   texpdf_new_name("Type1C"));
-  pdf_add_stream (fontfile, (void *) stream_data_ptr,  offset);
+  texpdf_add_stream (fontfile, (void *) stream_data_ptr,  offset);
   texpdf_release_obj(fontfile);
 
   RELEASE(stream_data_ptr);
@@ -528,7 +528,7 @@ pdf_font_load_type1 (pdf_font *font)
     if (tounicode) {
       texpdf_add_dict(fontdict,
                      texpdf_new_name("ToUnicode"),
-                     pdf_ref_obj (tounicode));
+                     texpdf_ref_obj (tounicode));
       texpdf_release_obj(tounicode);
       }
     }
