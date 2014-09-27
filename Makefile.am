@@ -1,8 +1,8 @@
-AM_CPPFLAGS = $(KPATHSEA_INCLUDES) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES)
+AM_CPPFLAGS = $(FREETYPE_CFLAGS) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES)
 
 lib_LTLIBRARIES = libtexpdf.la
 
-libtexpdf_la_CPPFLAGS = -DXETEX $(FREETYPE2_INCLUDES) $(AM_CPPFLAGS)
+libtexpdf_la_CPPFLAGS = -DXETEX $(AM_CPPFLAGS)
 AM_CFLAGS = $(WARNING_CFLAGS)
 
 libtexpdf_la_SOURCES = \
@@ -36,8 +36,6 @@ libtexpdf_la_SOURCES = \
 	cs_type2.h \
 	dpxcrypt.c \
 	dpxcrypt.h \
-	dpxfile.c \
-	dpxfile.h \
 	dpxutil.c \
 	dpxutil.h \
 	epdf.c \
@@ -129,4 +127,4 @@ libtexpdf_la_SOURCES = \
 	unicode.c \
 	unicode.h
 
-libtexpdf_la_LIBADD = $(FREETYPE2_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
+libtexpdf_la_LIBADD = $(FREETYPE_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
