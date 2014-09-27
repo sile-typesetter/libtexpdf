@@ -20,25 +20,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include "system.h"
-#include "mem.h"
-#include "error.h"
-
-#include "dpxfile.h"
-
-#include "numbers.h"
-#include "pdfobj.h"
-#include "pdfdev.h" /* pdf_rect */
-
-#include "pdfencoding.h"
-#include "pdffont.h"
-
-#include "pkfont.h"
-
+#include "libtexpdf.h"
+#ifdef TEXLIVE_INTERNAL
+#include <kpathsea/kpathsea.h>
 #define ENABLE_GLYPHENC  1
 
 #ifndef PKFONT_DPI_DEFAULT
@@ -788,3 +772,4 @@ pdf_font_load_pkfont (pdf_font *font)
 
   return  0;
 }
+#endif

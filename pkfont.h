@@ -19,6 +19,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
+#ifdef TEXLIVE_INTERNAL
 
 #ifndef _PK_FONT_H_
 #define _PK_FONT_H_
@@ -31,3 +32,5 @@ extern int  pdf_font_load_pkfont (pdf_font *font);
 extern void PKFont_set_dpi(int dpi);
 
 #endif /* _PK_FONT_H_ */
+
+#endif

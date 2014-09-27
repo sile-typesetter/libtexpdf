@@ -20,10 +20,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
+#ifdef TEXLIVE_INTERNAL
 #ifndef _TFM_H_
 #define _TFM_H_
 
 #include "numbers.h"
+#include <kpathsea/kpathsea.h>
 
 extern void tfm_set_verbose (void);
 
@@ -56,3 +58,4 @@ extern int tfm_is_vert (int font_id);
 extern int tfm_exists  (const char *tfm_name);
 
 #endif /* _TFM_H_ */
+#endif
