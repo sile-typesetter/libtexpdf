@@ -25,7 +25,7 @@
 #endif
 
 #include <ctype.h>
-
+#include "dvi.h"
 #include "system.h"
 #include "mem.h"
 #include "error.h"
@@ -1034,7 +1034,7 @@ spc_handler_pdfm_image (struct spc_env *spe, struct spc_arg *args)
   }
 
   if (!(ti.flags & INFO_DO_HIDE))
-    pdf_dev_put_image(pdf, xobj_id, &ti, spe->x_user, spe->y_user);
+    pdf_dev_put_image(pdf, xobj_id, &ti, spe->x_user, spe->y_user, dvi_is_tracking_boxes());
 
   if (ident) {
     if (compat_mode &&
@@ -1673,7 +1673,7 @@ spc_handler_pdfm_uxobj (struct spc_env *spe, struct spc_arg *args)
     }
   }
 
-  pdf_dev_put_image(pdf, xobj_id, &ti, spe->x_user, spe->y_user);
+  pdf_dev_put_image(pdf, xobj_id, &ti, spe->x_user, spe->y_user,dvi_is_tracking_boxes());
   RELEASE(ident);
 
   return 0;
