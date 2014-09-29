@@ -88,7 +88,7 @@ subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(srcdir)/config.h.in $(top_srcdir)/build-aux/depcomp COPYING \
-	INSTALL compile build-aux/compile build-aux/config.guess \
+	INSTALL TODO compile build-aux/compile build-aux/config.guess \
 	build-aux/config.sub depcomp build-aux/depcomp install-sh \
 	build-aux/install-sh missing build-aux/missing \
 	build-aux/texinfo.tex build-aux/ylwrap build-aux/ltmain.sh \
@@ -200,6 +200,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libtexpdf_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libtexpdf_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -407,6 +410,7 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = $(FREETYPE_CFLAGS) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_INCLUDES)
 lib_LTLIBRARIES = libtexpdf.la
 libtexpdf_la_CPPFLAGS = -DXETEX $(AM_CPPFLAGS)
+libtexpdf_la_LDFLAGS = -export-symbols-regex '^texpdf_'
 AM_CFLAGS = $(WARNING_CFLAGS) -I..
 libtexpdf_la_SOURCES = agl.c agl.h bmpimage.c bmpimage.h cff.c cff.h \
 	cff_dict.c cff_dict.h cff_limits.h cff_stdstr.h cff_types.h \
@@ -521,7 +525,7 @@ clean-libLTLIBRARIES:
 	}
 
 libtexpdf.la: $(libtexpdf_la_OBJECTS) $(libtexpdf_la_DEPENDENCIES) $(EXTRA_libtexpdf_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) -rpath $(libdir) $(libtexpdf_la_OBJECTS) $(libtexpdf_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libtexpdf_la_LINK) -rpath $(libdir) $(libtexpdf_la_OBJECTS) $(libtexpdf_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

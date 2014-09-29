@@ -3,6 +3,8 @@ AM_CPPFLAGS = $(FREETYPE_CFLAGS) $(LIBPNG_INCLUDES) $(ZLIB_INCLUDES) $(LIBPAPER_
 lib_LTLIBRARIES = libtexpdf.la
 
 libtexpdf_la_CPPFLAGS = -DXETEX $(AM_CPPFLAGS)
+libtexpdf_la_LDFLAGS = -export-symbols-regex '^texpdf_'
+
 AM_CFLAGS = $(WARNING_CFLAGS) -I..
 
 libtexpdf_la_SOURCES = \
