@@ -101,8 +101,6 @@ static double x_offset = 72.0;
 static double y_offset = 72.0;
 char   landscape_mode    = 0;
 
-int always_embed = 0; /* always embed fonts, regardless of licensing flags */
-
 char *dvi_filename = NULL, *pdf_filename = NULL;
 
 pdf_doc *pdf;
@@ -619,7 +617,7 @@ do_args (int argc, char *argv[])
         POP_ARG();
         break;
       case 'E':
-        always_embed = 1;
+        texpdf_tt_aux_set_always_embed();
         break;
       case 'h':
         show_usage();

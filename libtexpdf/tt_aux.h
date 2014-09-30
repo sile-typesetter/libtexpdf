@@ -24,9 +24,8 @@
 #include "pdfobj.h"
 #include "sfnt.h"
 
-extern int always_embed; /* flag declared in dvipdfmx.c */
-
 extern void texpdf_tt_aux_set_verbose(void);
+extern void texpdf_tt_aux_set_always_embed(void);
 
 /* TTC (TrueType Collection) */
 extern ULONG    ttc_read_offset (sfnt *sfont, int ttc_idx);
