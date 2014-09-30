@@ -20,10 +20,16 @@
 #include "libtexpdf.h"
 
 static int verbose = 0;
+static int always_embed = 0;
 
 void texpdf_tt_aux_set_verbose(void)
 {
   ++verbose;
+}
+
+void texpdf_tt_aux_set_always_embed(void)
+{
+  ++always_embed;
 }
 
 ULONG ttc_read_offset (sfnt *sfont, int ttc_idx)
