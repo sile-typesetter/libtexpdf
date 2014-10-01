@@ -21,7 +21,6 @@
 */
 
 #include "libtexpdf.h"
-#ifdef TEXLIVE_INTERNAL
 #define TFM_FORMAT 1
 #define OFM_FORMAT 2
 
@@ -1124,7 +1123,4 @@ tfm_is_vert (int font_id)
   return 0;
 }
 #endif /* !WITHOUT_ASCII_PTEX */
-#endif
-
-
 #endif

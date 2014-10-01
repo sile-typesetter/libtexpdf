@@ -195,9 +195,7 @@ do_widths (pdf_font *font, double *widths)
   pdf_obj  *fontdict;
   pdf_obj  *tmparray;
   int       code, firstchar, lastchar;
-#ifdef TEXLIVE_INTERNAL
   int tfm_id;
-#endif  
   char     *usedchars;
 
   fontdict   = pdf_font_get_resource  (font);
@@ -215,20 +213,14 @@ do_widths (pdf_font *font, double *widths)
     texpdf_release_obj(tmparray);
     return;
   }
-#ifdef TEXLIVE_INTERNAL
   tfm_id = texpdf_tfm_open(pdf_font_get_mapname(font), 0);
-#endif
   for (code = firstchar; code <= lastchar; code++) {
     if (usedchars[code]) {
       double width;
-#ifdef TEXLIVE_INTERNAL     
       if (tfm_id < 0) /* tfm is not found */      
         width = widths[code];
       else
         width = 1000. * texpdf_tfm_get_width(tfm_id, code);
-#else
-      width = widths[code];
-#endif
       texpdf_add_array(tmparray,
                     texpdf_new_number(ROUND(width, 0.1)));
     } else {

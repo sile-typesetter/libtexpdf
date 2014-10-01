@@ -239,9 +239,7 @@ add_metrics (pdf_font *font, cff_font *cffont, char **enc_vec, double *widths, l
   int      code, firstchar, lastchar;
   double   val;
   int      i;
-#ifdef TEXLIVE_INTERNAL
   int tfm_id;
-#endif   
   char    *usedchars;
   double   scaling;
 
@@ -291,20 +289,14 @@ add_metrics (pdf_font *font, cff_font *cffont, char **enc_vec, double *widths, l
       texpdf_release_obj(tmp_array);
       return;
     }
-#ifdef TEXLIVE_INTERNAL    
     tfm_id = texpdf_tfm_open(pdf_font_get_mapname(font), 0);
-#endif    
     for (code = firstchar; code <= lastchar; code++) {
       if (usedchars[code]) {
         double width;
-#ifdef TEXLIVE_INTERNAL
         if (tfm_id < 0) /* tfm is not found */
 	  width = scaling * widths[cff_glyph_lookup(cffont, enc_vec[code])];
         else
           width = 1000. * texpdf_tfm_get_width(tfm_id, code);
-#else
-        width = scaling * widths[cff_glyph_lookup(cffont, enc_vec[code])];
-#endif        
 	texpdf_add_array(tmp_array,
 		      texpdf_new_number(ROUND(width, 0.1)));
       } else {
