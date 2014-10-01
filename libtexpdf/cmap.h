@@ -17,6 +17,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
+/**
+@file
+@brief Convert characters between Unicode values and CIDs.
+*/
+/* XXX I don't know how these work so someone else will have to fill this in. - SC */
 
 #ifndef _CMAP_H_
 #define _CMAP_H_
