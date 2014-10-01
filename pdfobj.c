@@ -149,7 +149,7 @@ struct pdf_file
   int         version;
 };
 
-static pdf_obj *output_stream;
+static pdf_obj *output_stream; /* XXX needs to be re-entrant */
 
 #define OBJSTM_MAX_OBJS  200
 /* the limit is only 100 for linearized PDF */
@@ -157,8 +157,8 @@ static pdf_obj *output_stream;
 static int enc_mode;
 static int doc_enc_mode;
 
-static pdf_obj *trailer_dict;
-static pdf_obj *xref_stream;
+static pdf_obj *trailer_dict; /* XXX needs to be re-entrant */
+static pdf_obj *xref_stream; /* XXX needs to be re-entrant */
 
 /* Internal static routines */
 
