@@ -102,7 +102,7 @@ extern fontmap_rec *texpdf_lookup_fontmap_record (const char  *kp);
 extern int          texpdf_is_pdfm_mapline           (const char  *mline);
 
 #ifdef XETEX
-extern int          pdf_load_native_font      (const char *filename, unsigned long index,
+extern int          texpdf_load_native_font      (const char *filename, unsigned long index,
                                                int layout_dir, int extend, int slant, int embolden);
 #endif
 
