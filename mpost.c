@@ -107,9 +107,7 @@ mp_setfont (const char *font_name, double pt_size)
   strcpy(font->font_name, font_name);
   font->subfont_id = subfont_id;
   font->pt_size    = pt_size;
-#ifdef TEXLIVE_INTERNAL  
   font->tfm_id     = texpdf_tfm_open(font_name, 0); /* Need not exist in MP mode */
-#endif  
   font->font_id    = texpdf_dev_locate_font(name,
                                          (spt_t) (pt_size * dev_unit_dviunit()));
 
@@ -180,11 +178,7 @@ is_fontname (const char *token)
   mrec = texpdf_lookup_fontmap_record(token);
   if (mrec)
     return  1;
-#ifdef TEXLIVE_INTERNAL
   return  tfm_exists(token);
-#else
-  return 0;
-#endif  
 }
 
 int
@@ -761,12 +755,10 @@ do_show (pdf_doc *p)
   strptr = texpdf_string_value (text_str);
   length = texpdf_string_length(text_str);
 
-#ifdef TEXLIVE_INTERNAL
   if (font->tfm_id < 0) {
     WARN("mpost: TFM not found for \"%s\".", font->font_name);
     WARN("mpost: Text width not calculated...");
   }
-#endif
 
   text_width = 0.0;
   if (font->subfont_id >= 0) {
@@ -779,11 +771,9 @@ do_show (pdf_doc *p)
       uch = texpdf_lookup_sfd_record(font->subfont_id, strptr[i]);
       ustr[2*i  ] = uch >> 8;
       ustr[2*i+1] = uch & 0xff;
-#ifdef TEXLIVE_INTERNAL      
       if (font->tfm_id >= 0) {
 	text_width += texpdf_tfm_get_width(font->tfm_id, strptr[i]);
       }
-#endif      
     }
     text_width *= font->pt_size;
 
@@ -795,12 +785,10 @@ do_show (pdf_doc *p)
     RELEASE(ustr);
   } else {
 #define FWBASE ((double) (1<<20))
-#ifdef TEXLIVE_INTERNAL
     if (font->tfm_id >= 0) {
       text_width = (double) tfm_string_width(font->tfm_id, strptr, length)/FWBASE;
       text_width *= font->pt_size;
     }
-#endif    
     texpdf_dev_set_string(p, (spt_t)(cp.x * dev_unit_dviunit()),
 		       (spt_t)(cp.y * dev_unit_dviunit()),
 		       strptr, length,
