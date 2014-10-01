@@ -1092,7 +1092,7 @@ texpdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
 static FT_Library ftLib;
 
 int
-pdf_load_native_font (const char *filename, unsigned long index,
+texpdf_load_native_font (const char *filename, unsigned long index,
                       int layout_dir, int extend, int slant, int embolden)
 {
   FT_Face face = NULL;
