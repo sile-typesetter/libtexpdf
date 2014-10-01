@@ -38,6 +38,8 @@ libtexpdf_la_SOURCES = \
 	cs_type2.h \
 	dpxcrypt.c \
 	dpxcrypt.h \
+	dpxfile.c \
+	dpxfile.h \
 	dpxutil.c \
 	dpxutil.h \
 	epdf.c \

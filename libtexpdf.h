@@ -1,5 +1,8 @@
 #ifndef _LIBTEXPDF_H
 #define _LIBTEXPDF_H
+
+#define XETEX 1 /* We are all xetex now */
+
 #include <libtexpdf/config.h>
 
 #ifdef HAVE_STRING_H

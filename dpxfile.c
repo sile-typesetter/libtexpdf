@@ -20,15 +20,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef _MSC_VER
-#include <kpathsea/dirent.h>
-#endif
+#include "libtexpdf/libtexpdf.h"
 
 #include <time.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 #include "error.h"
 #include "mem.h"
@@ -57,6 +54,10 @@
 #define WIFEXITED(val) (((val) & 255) == 0)
 #endif
 #endif
+
+#define xcalloc calloc
+#define xgetcwd getcwd
+#define xstrdup strdup
 
 static int verbose = 0;
 int keep_cache = 0;
@@ -292,372 +293,6 @@ ensuresuffix (const char *basename, const char *sfx)
   return  p;
 }
 
-#ifdef  MIKTEX
-static char *
-dpx_find__app__xyz (const char *filename,
-                    const char *suffix, int is_text)
-{
-  char  *fqpn = NULL;
-  int    r;
-  char  *q;
-
-  q = ensuresuffix(filename, suffix);
-  r = miktex_find_app_input_file("dvipdfmx", q, _tmpbuf);
-  if (!r && strcmp(q, filename))
-    r = miktex_find_app_input_file("dvipdfmx", filename, _tmpbuf);
-  if (r) {
-    fqpn = NEW(strlen(_tmpbuf) + 1, char);
-    strcpy(fqpn, _tmpbuf);
-  }
-  RELEASE(q);
-
-  return  fqpn;
-}
-
-static char *
-dpx_foolsearch (const char  *foolname,
-                const char  *filename,
-                int          is_text)
-{
-  char  *fqpn = NULL;
-  int    r;
-
-  r = miktex_find_app_input_file(foolname, filename, _tmpbuf);
-  if (r) {
-    fqpn = NEW(strlen(_tmpbuf) + 1, char);
-    strcpy(fqpn, _tmpbuf);
-  }
-
-  return  fqpn;
-}
-#else /* !MIKTEX */
-#  define TDS11DOC "http://www.tug.org/ftp/tex/tds-1.1/tds.html#Fonts"
-static void
-insistupdate (const char      *filename,
-              const char      *fqpn,
-              const char      *foolname,
-              kpse_file_format_type foolformat,
-              kpse_file_format_type realformat)
-{
-  kpse_format_info_type *fif;
-  kpse_format_info_type *fir;
-  if (verbose < 1)
-    return;
-  fif = &kpse_format_info[foolformat];
-  fir = &kpse_format_info[realformat];
-  WARN("File name=\"%s\" format=\"%s\" might be found in different location than I expected:",
-       filename, fir->type);
-  WARN(">>   %s", fqpn);
-  WARN(">> Please adjust your TEXMF as conformant with:");
-  WARN(">>   " TDS11DOC);
-  WARN(">> I searched it with fooling kpathsea as progname=\"%s\" format=\"%s\".",
-       foolname, fif->type);
-  WARN(">> Default search path for this format file is:");
-  WARN(">>   %s", fir->default_path);
-  WARN(">> Please read \"README\" file.");
-}
-
-static char *
-dpx_find__app__xyz (const char *filename,
-                    const char *suffix, int is_text)
-{
-  char  *fqpn = NULL;
-  char  *q;
-
-  q    = ensuresuffix(filename, suffix);
-  fqpn = kpse_find_file(q,
-                         (is_text ?
-                            kpse_program_text_format : kpse_program_binary_format), 0);
-  if (!fqpn && strcmp(q, filename))
-    fqpn = kpse_find_file(filename,
-                           (is_text ?
-                              kpse_program_text_format : kpse_program_binary_format), 0);   
-  RELEASE(q);
-
-  return  fqpn;
-}
-
-static char *
-dpx_foolsearch (const char  *foolname,
-                const char  *filename,
-                int          is_text)
-{
-  char  *fqpn = NULL;
-
-  kpse_reset_program_name(foolname);
-  fqpn = kpse_find_file  (filename,
-                          (is_text ?
-                              kpse_program_text_format :
-                              kpse_program_binary_format),
-                          false);
-  kpse_reset_program_name("dvipdfmx");
-
-  return  fqpn;
-}
-#endif /* MIKTEX */
-
-static char *dpx_find_fontmap_file  (const char *filename);
-static char *dpx_find_agl_file      (const char *filename);
-static char *dpx_find_sfd_file      (const char *filename);
-static char *dpx_find_cmap_file     (const char *filename);
-static char *dpx_find_enc_file      (const char *filename);
-static char *dpx_find_iccp_file     (const char *filename);
-
-FILE *
-dpx_open_file (const char *filename, dpx_res_type type)
-{
-  FILE  *fp   = NULL;
-  char  *fqpn = NULL;
-
-  switch (type) {
-  case DPX_RES_TYPE_FONTMAP:
-    fqpn = dpx_find_fontmap_file(filename);
-    if (verbose) 
-      MESG(fqpn);
-    break;
-  case DPX_RES_TYPE_T1FONT:
-    fqpn = dpx_find_type1_file(filename);
-    break;
-  case DPX_RES_TYPE_TTFONT:
-    fqpn = dpx_find_truetype_file(filename);
-    break;
-  case DPX_RES_TYPE_OTFONT:
-    fqpn = dpx_find_opentype_file(filename);
-    break;
-  case DPX_RES_TYPE_PKFONT:
-    break;
-  case DPX_RES_TYPE_CMAP:
-    fqpn = dpx_find_cmap_file(filename);
-    break;
-  case DPX_RES_TYPE_ENC:
-    fqpn = dpx_find_enc_file(filename);
-    break;
-  case DPX_RES_TYPE_SFD:
-    fqpn = dpx_find_sfd_file(filename);
-    break;
-  case DPX_RES_TYPE_AGL:
-    fqpn = dpx_find_agl_file(filename);
-    break;
-  case DPX_RES_TYPE_ICCPROFILE:
-    fqpn = dpx_find_iccp_file(filename);
-    break;
-  case DPX_RES_TYPE_DFONT:
-    fqpn = dpx_find_dfont_file(filename);
-    break;
-  case DPX_RES_TYPE_BINARY:
-    fqpn = dpx_find__app__xyz(filename, "", 0);
-    break;
-  case DPX_RES_TYPE_TEXT:
-    fqpn = dpx_find__app__xyz(filename, "", 1);
-    break;
-  }
-  if (fqpn) {
-    fp = MFOPEN(fqpn, FOPEN_RBIN_MODE);
-    RELEASE(fqpn);
-  }
-
-  return  fp;
-}
-
-
-static char *
-dpx_find_iccp_file (const char *filename)
-{
-  char  *fqpn = NULL;
-
-  fqpn = dpx_find__app__xyz(filename, "", 0);
-  if (fqpn || strrchr(filename, '.'))
-    return  fqpn;
-
-  fqpn = dpx_find__app__xyz(filename, ".icc", 0);
-  if (fqpn)
-    return  fqpn;
-
-  fqpn = dpx_find__app__xyz(filename, ".icm", 0);
-
-  return  fqpn;
-}
-
-
-static char *
-dpx_find_fontmap_file (const char *filename)
-{
-  char  *fqpn = NULL;
-  char  *q;
-
-  q = ensuresuffix(filename, ".map");
-#ifdef  MIKTEX
-  fqpn = dpx_find__app__xyz(q, ".map", 1);
-#else /* !MIKTEX */
-  fqpn = kpse_find_file(q, kpse_fontmap_format, 0);
-  if (!fqpn) {
-    fqpn = dpx_find__app__xyz(q, ".map", 1);
-    if (fqpn)
-      insistupdate(q, fqpn, "dvipdfmx",
-                   kpse_program_text_format, kpse_fontmap_format); 
-  }
-#endif /* MIKETEX */
-  RELEASE(q);
-
-  return  fqpn;
-}
-
-
-static char *
-dpx_find_agl_file (const char *filename)
-{
-  char  *fqpn = NULL;
-  char  *q;
-
-  q = ensuresuffix(filename, ".txt");
-#ifdef  MIKTEX
-  fqpn = dpx_find__app__xyz(q, ".txt", 1);
-#else /* !MIKTEX */
-  fqpn = kpse_find_file(q, kpse_fontmap_format, 0);
-  if (!fqpn) {
-    fqpn = dpx_find__app__xyz(q, ".txt", 1);
-    if (fqpn)
-      insistupdate(q, fqpn, "dvipdfmx",
-                   kpse_program_text_format, kpse_fontmap_format); 
-  }
-#endif /* MIKETEX */
-  RELEASE(q);
-
-  return  fqpn;
-}
-
-
-/* cmap.sty put files into tex/latex/cmap */
-static char *
-dpx_find_cmap_file (const char *filename)
-{
-  char  *fqpn = NULL;
-  static const char *fools[] = {
-    "cmap", "tex", NULL
-  };
-  int    i;
-
-#if  defined(MIKTEX)
-  /* Find in Acrobat's Resource/CMap dir */
-  {
-    char  _acrodir[_MAX_PATH+1];
-    char  *q;
-    int    r;
-
-    memset(_acrodir, 0, _MAX_PATH+1);
-    r = miktex_get_acrobat_font_dir(_acrodir);
-    if (r &&
-        strlen(_acrodir) > strlen("Font")) {
-      /* ....\Font\ */
-      q = strrchr(_acrodir, PATH_SEP_CHR);
-      if (q && q[1] == '\0')
-        q[0] = '\0';
-      q = strrchr(_acrodir, PATH_SEP_CHR);
-      if (q && !strcmp(q + 1, "Font")) {
-        sprintf(q, "%cCMap%c", PATH_SEP_CHR, PATH_SEP_CHR);
-        r = miktex_find_file(filename, _acrodir, _tmpbuf);
-        if (r) {
-          fqpn = NEW(strlen(_tmpbuf) + 1, char);
-          strcpy(fqpn, _tmpbuf);
-        }
-      }
-    }
-    memset(_tmpbuf, 0, _MAX_PATH+1);
-  }
-#else
-  fqpn = kpse_find_file(filename, kpse_cmap_format, 0); 
-#endif
-
-  /* Files found above are assumed to be CMap,
-   * if it's not really CMap it will cause an error.
-   */
-  for (i = 0; !fqpn && fools[i]; i++) { 
-    fqpn = dpx_foolsearch(fools[i], filename, 1);
-    if (fqpn) {
-#ifndef  MIKTEX
-      insistupdate(filename, fqpn, fools[i],
-                   kpse_program_text_format, kpse_cmap_format); 
-#endif
-      if (!qcheck_filetype(fqpn, DPX_RES_TYPE_CMAP)) {
-        WARN("Found file \"%s\" for PostScript CMap but it doesn't look like a CMap...", fqpn);
-        RELEASE(fqpn);
-        fqpn = NULL;
-      }
-    }
-  }
-
-  return  fqpn;
-}
-
-
-/* Search order:
- *   SFDFONTS (TDS 1.1)
- *   ttf2pk   (text file)
- *   ttf2tfm  (text file)
- *   dvipdfm  (text file)   
- */
-static char *
-dpx_find_sfd_file (const char *filename)
-{
-  char  *fqpn = NULL;
-  char  *q;
-  static const char *fools[] = {
-    "ttf2pk", "ttf2tfm", NULL
-  };
-  int    i;
-
-  q    = ensuresuffix(filename, ".sfd");
-#ifndef  MIKTEX
-  fqpn = kpse_find_file(q, kpse_sfd_format, 0);
-#endif /* !MIKTEX */
-
-  for (i = 0; !fqpn && fools[i]; i++) { 
-    fqpn = dpx_foolsearch(fools[i], q, 1);
-#ifndef  MIKTEX
-    if (fqpn)
-      insistupdate(filename, fqpn, fools[i],
-                   kpse_program_text_format, kpse_sfd_format); 
-#endif
-  }
-  RELEASE(q);
-
-  return  fqpn;
-}
-
-
-static char *
-dpx_find_enc_file (const char *filename)
-{
-  char  *fqpn = NULL;
-  char  *q;
-  static const char *fools[] = {
-    "dvips", NULL
-  };
-  int    i;
-
-  q = ensuresuffix(filename, ".enc");
-#ifdef  MIKTEX
-  if (miktex_find_psheader_file(q, _tmpbuf)) {
-    fqpn = NEW(strlen(_tmpbuf) + 1, char);
-    strcpy(fqpn, _tmpbuf);
-  }
-#else
-  fqpn = kpse_find_file(q, kpse_enc_format, 0);
-#endif /* MIKTEX */
-
-  for (i = 0; !fqpn && fools[i]; i++) { 
-    fqpn = dpx_foolsearch(fools[i], q, 1);
-#ifndef  MIKTEX
-    if (fqpn)
-      insistupdate(filename, fqpn, fools[i],
-                   kpse_program_text_format, kpse_enc_format); 
-#endif
-  }
-  RELEASE(q);
-
-  return  fqpn;
-}
-
 static int
 is_absolute_path(const char *filename)
 {
@@ -673,95 +308,6 @@ is_absolute_path(const char *filename)
     return 1;
 #endif
   return 0;
-}
-
-char *
-dpx_find_type1_file (const char *filename)
-{
-  char  *fqpn = NULL;
-
-  if (is_absolute_path(filename))
-    fqpn = xstrdup(filename);
-  else
-    fqpn = kpse_find_file(filename, kpse_type1_format, 0);
-  if (fqpn && !qcheck_filetype(fqpn, DPX_RES_TYPE_T1FONT)) {
-    RELEASE(fqpn);
-    fqpn = NULL;
-  }
-
-  return  fqpn;
-}
-
-
-char *
-dpx_find_truetype_file (const char *filename)
-{
-  char  *fqpn = NULL;
-
-  if (is_absolute_path(filename))
-    fqpn = xstrdup(filename);
-  else
-    fqpn = kpse_find_file(filename, kpse_truetype_format, 0);
-  if (fqpn && !qcheck_filetype(fqpn, DPX_RES_TYPE_TTFONT)) {
-    RELEASE(fqpn);
-    fqpn = NULL;
-  }
-
-  return  fqpn;
-}
-
-
-char *
-dpx_find_opentype_file (const char *filename)
-{
-  char  *fqpn = NULL;
-  char  *q;
-
-  q = ensuresuffix(filename, ".otf");
-#ifndef MIKTEX
-  if (is_absolute_path(q))
-    fqpn = xstrdup(q);
-  else
-    fqpn = kpse_find_file(q, kpse_opentype_format, 0);
-  if (!fqpn) {
-#endif
-    fqpn = dpx_foolsearch("dvipdfmx", q, 0);
-#ifndef  MIKTEX
-    if (fqpn)
-      insistupdate(filename, fqpn, "dvipdfmx",
-                   kpse_program_binary_format, kpse_opentype_format); 
-  }
-#endif
-  RELEASE(q);
-
-  /* *We* use "opentype" for ".otf" (CFF). */
-  if (fqpn && !qcheck_filetype(fqpn, DPX_RES_TYPE_OTFONT)) {
-    RELEASE(fqpn);
-    fqpn = NULL;
-  }
-
-  return  fqpn;
-}
-
-
-char *
-dpx_find_dfont_file (const char *filename)
-{
-  char *fqpn = NULL;
-
-  fqpn = kpse_find_file(filename, kpse_truetype_format, 0);
-  if (fqpn) {
-    int len = strlen(fqpn);
-    if (len > 6 && strncmp(fqpn+len-6, ".dfont", 6)) {
-      fqpn = RENEW(fqpn, len+6, char);
-      strcat(fqpn, "/rsrc");
-    }
-  }
-  if (!qcheck_filetype(fqpn, DPX_RES_TYPE_DFONT)) {
-    RELEASE(fqpn);
-    fqpn = NULL;
-  }
-  return fqpn;
 }
  
 static const char *
@@ -865,8 +411,10 @@ dpx_create_fix_temp_file (const char *filename)
 #endif
 
   if (!dir) {
+      char wd[PATH_MAX];
       dir = dpx_get_tmpdir();
-      cwd = xgetcwd();
+      getcwd(wd, PATH_MAX);
+      cwd = strdup(wd);
   }
 
   texpdf_MD5_init(&state);
@@ -902,6 +450,21 @@ dpx_clear_cache_filter (const struct dirent *ent) {
 #else
     return strncmp(ent->d_name, PREFIX, plen) == 0;
 #endif
+}
+
+/* WARNING: If you're used to dpx_open_file in dvipdfkmx, this has
+quite a different meaning within libtexpdf. Here the job is ensuring
+that the filename is a fully-qualified name of the type that we are
+expecting. */
+FILE *
+dpx_open_file (const char *filename, dpx_res_type type)
+{
+  FILE  *fp   = NULL;
+  char  *fqpn = NULL;
+  if (qcheck_filetype(filename, type)) {
+    fp = MFOPEN(filename, FOPEN_RBIN_MODE);
+  }
+  return  fp;
 }
 
 void
