@@ -63,7 +63,6 @@ extern int compat_mode;
 #include "jpegimage.h"
 #include "mem.h"
 #include "mfileio.h"
-#include "mpost.h"
 #include "numbers.h"
 #include "otl_conf.h"
 #include "otl_opt.h"
