@@ -22,7 +22,6 @@
 
 #include "libtexpdf.h"
 #ifdef TEXLIVE_INTERNAL
-#include <kpathsea/kpathsea.h>
 #define ENABLE_GLYPHENC  1
 
 #ifndef PKFONT_DPI_DEFAULT
@@ -30,6 +29,11 @@
 #endif
 
 static unsigned base_dpi = PKFONT_DPI_DEFAULT;
+static pk_open_handler_t pk_open_handler = NULL;
+
+void texpdf_set_pk_open_handler(pk_open_handler_t handler) {
+  pk_open_handler = handler;
+}
 
 void
 PKFont_set_dpi (int dpi)
@@ -64,23 +68,6 @@ truedpi (const char *ident, double point_size, unsigned bdpi)
   return  dpi;
 }
 
-static FILE *
-dpx_open_pk_font_at (const char *ident, unsigned dpi)
-{
-  FILE  *fp;
-  char  *fqpn;
-  kpse_glyph_file_type kpse_file_info;
-
-  fqpn = kpse_find_glyph(ident, dpi, kpse_pk_format, &kpse_file_info);
-  if (!fqpn)
-    return  NULL;
-  fp   = MFOPEN(fqpn, FOPEN_RBIN_MODE);
-  RELEASE(fqpn);
-
-  return  fp;
-}
-
-
 int
 pdf_font_open_pkfont (pdf_font *font)
 {
@@ -98,7 +85,11 @@ pdf_font_open_pkfont (pdf_font *font)
     return  -1;
 
   dpi = truedpi(ident, point_size, base_dpi);
-  fp  = dpx_open_pk_font_at(ident, dpi);
+  if (!pk_open_handler) {
+    WARN("PK font used but no handler declared!");
+    return -1;
+  }
+  fp  = (pk_open_handler)(ident, dpi);
   if (!fp)
     return  -1;
   MFCLOSE(fp);
@@ -557,7 +548,11 @@ pdf_font_load_pkfont (pdf_font *font)
   ASSERT(ident && usedchars && point_size > 0.0);
 
   dpi  = truedpi(ident, point_size, base_dpi);
-  fp   = dpx_open_pk_font_at(ident, dpi);
+  if (!pk_open_handler) {
+    ERROR("PK font used but no handler declared!");
+    return -1;
+  }
+  fp  = (pk_open_handler)(ident, dpi);
   if (!fp) {
     ERROR("Could not find/open PK font file: %s (at %udpi)", ident, dpi);
   }

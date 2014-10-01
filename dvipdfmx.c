@@ -35,9 +35,9 @@
 
 #include "system.h"
 #include "mem.h"
+#include "dpxfile.h"
 
 #include "libtexpdf/libtexpdf.h"
-#include "dpxfile.h"
 
 #include "dvi.h"
 #include "mpost.h"
@@ -1021,6 +1021,7 @@ main (int argc, char *argv[])
 
   texpdf_files_init();
   texpdf_set_metapost_handler(&mps_include_page);
+  texpdf_set_pk_open_handler(&dpx_open_pk_font_at);
 
   /* Set default paper size here so that all page's can inherite it.
    * annot_grow:    Margin of annotation.

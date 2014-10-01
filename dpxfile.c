@@ -763,7 +763,23 @@ dpx_find_dfont_file (const char *filename)
   }
   return fqpn;
 }
- 
+
+FILE *
+dpx_open_pk_font_at (const char *ident, unsigned dpi)
+{
+  FILE  *fp;
+  char  *fqpn;
+  kpse_glyph_file_type kpse_file_info;
+
+  fqpn = kpse_find_glyph(ident, dpi, kpse_pk_format, &kpse_file_info);
+  if (!fqpn)
+    return  NULL;
+  fp   = MFOPEN(fqpn, FOPEN_RBIN_MODE);
+  RELEASE(fqpn);
+
+  return  fp;
+}
+
 static const char *
 dpx_get_tmpdir (void)
 {
