@@ -810,6 +810,10 @@ read_tfm (struct font_metric *fm, FILE *tfm_file, off_t tfm_file_size)
   return;
 }
 
+/*
+ * It's now the callees responsibility to call kpathsea and resolve the path.
+ */
+
 int
 texpdf_tfm_open (const char *tfm_name, int must_exist)
 {
@@ -823,73 +827,7 @@ texpdf_tfm_open (const char *tfm_name, int must_exist)
       return i;
   }
 
-  /*
-   * The procedure to search tfm or ofm files:
-   * 1. Search tfm file with the given name with the must_exist flag unset.
-   * 2. Search ofm file with the given name with the must_exist flag unset.
-   * 3. If not found and must_exist flag is set, try again to search
-   *    tfm file with the must_exist flag set.
-   * 4. If not found and must_exist flag is not set, return -1.
-   */
-
-
-  /*
-   * We first look for OFM and then TFM.
-   * The reason for this change is incompatibility introduced when dvipdfmx
-   * started to write correct glyph metrics to output PDF for CID fonts.
-   * I'll not explain this in detail... This change is mostly specific to
-   * Japanese support.
-   */
-#if 0
-  if ((file_name = kpse_find_file(tfm_name, kpse_tfm_format, 0))) {
-    format = TFM_FORMAT;
-  } else if ((file_name = kpse_find_file(tfm_name, kpse_ofm_format, 0))) {
-    format = OFM_FORMAT;
-  }
-#endif
- {
-   char *ofm_name, *suffix;
-
-   suffix = strrchr(tfm_name, '.');
-   if (!suffix || (strcmp(suffix, ".tfm") != 0 &&
-		   strcmp(suffix, ".ofm") != 0)) {
-     ofm_name = NEW(strlen(tfm_name) + strlen(".ofm") + 1, char);
-     strcpy(ofm_name, tfm_name);
-     strcat(ofm_name, ".ofm");
-   } else {
-     ofm_name = NULL;
-   }
-   if (ofm_name &&
-       (file_name = kpse_find_file(ofm_name, kpse_ofm_format, 0)) != NULL) {
-     format = OFM_FORMAT;
-   } else if ((file_name =
-	       kpse_find_file(tfm_name, kpse_tfm_format, 0)) != NULL) {
-     format = TFM_FORMAT;
-   } else if ((file_name =
-	       kpse_find_file(tfm_name, kpse_ofm_format, 0)) != NULL) {
-     format = OFM_FORMAT;
-   }
-   if (ofm_name)
-     RELEASE(ofm_name);
- }
-
-  /*
-   * In case that must_exist is set, MiKTeX returns always non-NULL value
-   * even if the tfm file is not found.
-   */
-  if (file_name == NULL) {
-    if (must_exist) {
-      if ((file_name = kpse_find_file(tfm_name, kpse_tfm_format, 1)) != NULL)
-	format = TFM_FORMAT;
-      else {
-	ERROR("Unable to find TFM file \"%s\".", tfm_name);
-      }
-    } else {
-      return -1;
-    }
-  }
-
-  tfm_file = MFOPEN(file_name, FOPEN_RBIN_MODE);
+  tfm_file = MFOPEN(tfm_name, FOPEN_RBIN_MODE);
   if (!tfm_file) {
     ERROR("Could not open specified TFM/OFM file \"%s\".", tfm_name);
   }
