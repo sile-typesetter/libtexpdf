@@ -831,7 +831,7 @@ do_mps_pages (void)
   /* _FIXME_ */
   fp = MFOPEN(dvi_filename, FOPEN_RBIN_MODE);
   if (fp) {
-    texpdf_mps_do_page(pdf, fp);
+    mps_do_page(pdf, fp);
     MFCLOSE(fp);
   } else {
     long  i, page_no, step, page_count = 0;
@@ -849,7 +849,7 @@ do_mps_pages (void)
         fp = MFOPEN(filename, FOPEN_RBIN_MODE);
         if (fp) {
           MESG("[%ld<%s>", page_no + 1, filename);
-          texpdf_mps_do_page(pdf, fp);
+          mps_do_page(pdf, fp);
           page_count++;
           MESG("]");
           MFCLOSE(fp);

@@ -251,16 +251,16 @@ spc_handler_ps_literal (struct spc_env *spe, struct spc_arg *args)
   texpdf_skip_white(&args->curptr, args->endptr);
   if (args->curptr < args->endptr) {
 
-    st_depth = texpdf_mps_stack_depth();
+    st_depth = mps_stack_depth();
     gs_depth = texpdf_dev_current_depth();
 
-    error = texpdf_mps_exec_inline(pdf, &args->curptr,
+    error = mps_exec_inline(pdf, &args->curptr,
 			    args->endptr,
 			    x_user, y_user);
     if (error) {
       spc_warn(spe, "Interpreting PS code failed!!! Output might be broken!!!");
       texpdf_dev_grestore_to(pdf, gs_depth);
-    } else if (st_depth != texpdf_mps_stack_depth()) {
+    } else if (st_depth != mps_stack_depth()) {
       spc_warn(spe, "Stack not empty after execution of inline PostScript code.");
       spc_warn(spe, ">> Your macro package makes some assumption on internal behaviour of DVI drivers.");
       spc_warn(spe, ">> It may not compatible with dvipdfmx.");
@@ -812,14 +812,14 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
 
   texpdf_dev_gsave(pdf);
 
-  st_depth = texpdf_mps_stack_depth();
+  st_depth = mps_stack_depth();
   gs_depth = texpdf_dev_current_depth();
 
   {
     pdf_tmatrix M;
     M.a = M.d = 1.0; M.b = M.c = 0.0; M.e = spe->x_user; M.f = spe->y_user;
     texpdf_dev_concat(pdf, &M);
-  error = texpdf_mps_exec_inline(pdf, &args->curptr,
+  error = mps_exec_inline(pdf, &args->curptr,
 			  args->endptr,
 			  spe->x_user, spe->y_user);
     M.e = -spe->x_user; M.f = -spe->y_user;
@@ -828,7 +828,7 @@ spc_handler_ps_default (struct spc_env *spe, struct spc_arg *args)
   if (error)
     spc_warn(spe, "Interpreting PS code failed!!! Output might be broken!!!");
   else {
-    if (st_depth != texpdf_mps_stack_depth()) {
+    if (st_depth != mps_stack_depth()) {
       spc_warn(spe, "Stack not empty after execution of inline PostScript code.");
       spc_warn(spe, ">> Your macro package makes some assumption on internal behaviour of DVI drivers.");
       spc_warn(spe, ">> It may not compatible with dvipdfmx.");
@@ -904,7 +904,7 @@ spc_dvips_at_begin_page (void)
 int
 spc_dvips_at_end_page (void)
 {
-  texpdf_mps_eop_cleanup();
+  mps_eop_cleanup();
   if (!temporary_defs) {
     dpx_delete_temp_file(temporary_defs, true);
     temporary_defs = 0;

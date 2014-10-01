@@ -95,7 +95,7 @@ spc_handler_postscriptbox (struct spc_env *spe, struct spc_arg *ap)
     const char *p = mfgets(buf, 512, fp);
     if (!p)
       break;
-    if (texpdf_mps_scan_bbox(&p, p + strlen(p), &ti.bbox) >= 0) {
+    if (mps_scan_bbox(&p, p + strlen(p), &ti.bbox) >= 0) {
       ti.flags |= INFO_HAS_USER_BBOX;
       break;
     }

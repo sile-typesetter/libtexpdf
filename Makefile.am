@@ -35,6 +35,8 @@ dvipdfmx_SOURCES = \
 	mem.h \
 	mfileio.c \
 	mfileio.h \
+	mpost.c \
+	mpost.h \
 	numbers.c \
 	numbers.h \
 	spc_color.c \

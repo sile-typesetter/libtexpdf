@@ -151,11 +151,11 @@ am__v_lt_0 = --silent
 am__v_lt_1 = 
 am_dvipdfmx_OBJECTS = dpxfile.$(OBJEXT) dvi.$(OBJEXT) \
 	dvipdfmx.$(OBJEXT) error.$(OBJEXT) mem.$(OBJEXT) \
-	mfileio.$(OBJEXT) numbers.$(OBJEXT) spc_color.$(OBJEXT) \
-	spc_dvips.$(OBJEXT) spc_html.$(OBJEXT) spc_misc.$(OBJEXT) \
-	spc_pdfm.$(OBJEXT) spc_tpic.$(OBJEXT) spc_util.$(OBJEXT) \
-	spc_xtx.$(OBJEXT) specials.$(OBJEXT) vf.$(OBJEXT) \
-	xbb.$(OBJEXT)
+	mfileio.$(OBJEXT) mpost.$(OBJEXT) numbers.$(OBJEXT) \
+	spc_color.$(OBJEXT) spc_dvips.$(OBJEXT) spc_html.$(OBJEXT) \
+	spc_misc.$(OBJEXT) spc_pdfm.$(OBJEXT) spc_tpic.$(OBJEXT) \
+	spc_util.$(OBJEXT) spc_xtx.$(OBJEXT) specials.$(OBJEXT) \
+	vf.$(OBJEXT) xbb.$(OBJEXT)
 dvipdfmx_OBJECTS = $(am_dvipdfmx_OBJECTS)
 am__DEPENDENCIES_1 =
 dvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -164,12 +164,13 @@ dvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 am__objects_1 = xdvipdfmx-dpxfile.$(OBJEXT) xdvipdfmx-dvi.$(OBJEXT) \
 	xdvipdfmx-dvipdfmx.$(OBJEXT) xdvipdfmx-error.$(OBJEXT) \
 	xdvipdfmx-mem.$(OBJEXT) xdvipdfmx-mfileio.$(OBJEXT) \
-	xdvipdfmx-numbers.$(OBJEXT) xdvipdfmx-spc_color.$(OBJEXT) \
-	xdvipdfmx-spc_dvips.$(OBJEXT) xdvipdfmx-spc_html.$(OBJEXT) \
-	xdvipdfmx-spc_misc.$(OBJEXT) xdvipdfmx-spc_pdfm.$(OBJEXT) \
-	xdvipdfmx-spc_tpic.$(OBJEXT) xdvipdfmx-spc_util.$(OBJEXT) \
-	xdvipdfmx-spc_xtx.$(OBJEXT) xdvipdfmx-specials.$(OBJEXT) \
-	xdvipdfmx-vf.$(OBJEXT) xdvipdfmx-xbb.$(OBJEXT)
+	xdvipdfmx-mpost.$(OBJEXT) xdvipdfmx-numbers.$(OBJEXT) \
+	xdvipdfmx-spc_color.$(OBJEXT) xdvipdfmx-spc_dvips.$(OBJEXT) \
+	xdvipdfmx-spc_html.$(OBJEXT) xdvipdfmx-spc_misc.$(OBJEXT) \
+	xdvipdfmx-spc_pdfm.$(OBJEXT) xdvipdfmx-spc_tpic.$(OBJEXT) \
+	xdvipdfmx-spc_util.$(OBJEXT) xdvipdfmx-spc_xtx.$(OBJEXT) \
+	xdvipdfmx-specials.$(OBJEXT) xdvipdfmx-vf.$(OBJEXT) \
+	xdvipdfmx-xbb.$(OBJEXT)
 nodist_xdvipdfmx_OBJECTS = $(am__objects_1)
 xdvipdfmx_OBJECTS = $(nodist_xdvipdfmx_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -660,6 +661,8 @@ dvipdfmx_SOURCES = \
 	mem.h \
 	mfileio.c \
 	mfileio.h \
+	mpost.c \
+	mpost.h \
 	numbers.c \
 	numbers.h \
 	spc_color.c \
@@ -898,6 +901,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfileio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpost.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numbers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spc_color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spc_dvips.Po@am__quote@
@@ -916,6 +920,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-mfileio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-mpost.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-numbers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-spc_color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-spc_dvips.Po@am__quote@
@@ -1050,6 +1055,20 @@ xdvipdfmx-mfileio.obj: mfileio.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mfileio.c' object='xdvipdfmx-mfileio.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xdvipdfmx-mfileio.obj `if test -f 'mfileio.c'; then $(CYGPATH_W) 'mfileio.c'; else $(CYGPATH_W) '$(srcdir)/mfileio.c'; fi`
+
+xdvipdfmx-mpost.o: mpost.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xdvipdfmx-mpost.o -MD -MP -MF $(DEPDIR)/xdvipdfmx-mpost.Tpo -c -o xdvipdfmx-mpost.o `test -f 'mpost.c' || echo '$(srcdir)/'`mpost.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xdvipdfmx-mpost.Tpo $(DEPDIR)/xdvipdfmx-mpost.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mpost.c' object='xdvipdfmx-mpost.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xdvipdfmx-mpost.o `test -f 'mpost.c' || echo '$(srcdir)/'`mpost.c
+
+xdvipdfmx-mpost.obj: mpost.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xdvipdfmx-mpost.obj -MD -MP -MF $(DEPDIR)/xdvipdfmx-mpost.Tpo -c -o xdvipdfmx-mpost.obj `if test -f 'mpost.c'; then $(CYGPATH_W) 'mpost.c'; else $(CYGPATH_W) '$(srcdir)/mpost.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xdvipdfmx-mpost.Tpo $(DEPDIR)/xdvipdfmx-mpost.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mpost.c' object='xdvipdfmx-mpost.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xdvipdfmx-mpost.obj `if test -f 'mpost.c'; then $(CYGPATH_W) 'mpost.c'; else $(CYGPATH_W) '$(srcdir)/mpost.c'; fi`
 
 xdvipdfmx-numbers.o: numbers.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xdvipdfmx-numbers.o -MD -MP -MF $(DEPDIR)/xdvipdfmx-numbers.Tpo -c -o xdvipdfmx-numbers.o `test -f 'numbers.c' || echo '$(srcdir)/'`numbers.c

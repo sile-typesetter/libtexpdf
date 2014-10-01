@@ -188,7 +188,7 @@ is_fontname (const char *token)
 }
 
 int
-texpdf_mps_scan_bbox (const char **pp, const char *endptr, pdf_rect *bbox)
+mps_scan_bbox (const char **pp, const char *endptr, pdf_rect *bbox)
 {
   char  *number;
   double values[4];
@@ -1445,20 +1445,20 @@ mp_parse_body (pdf_doc *p, const char **start, const char *end, double x_user, d
 }
 
 void
-texpdf_mps_eop_cleanup (void)
+mps_eop_cleanup (void)
 {
   clear_fonts();
   do_clear();
 }
 
 int
-texpdf_mps_stack_depth (void)
+mps_stack_depth (void)
 {
   return top_stack;
 }
 
 int
-texpdf_mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
+mps_exec_inline (pdf_doc *doc, const char **p, const char *endptr,
 		 double x_user, double y_user)
 {
   int  error;
@@ -1537,7 +1537,7 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
     length -= nb_read;
   }
 
-  error = texpdf_mps_scan_bbox(&p, endptr, &(info.bbox));
+  error = mps_scan_bbox(&p, endptr, &(info.bbox));
   if (error) {
     WARN("Error occured while scanning MetaPost file headers: Could not find BoundingBox.");
     RELEASE(buffer);
@@ -1554,7 +1554,7 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
 
   mp_cmode = MP_CMODE_MPOST;
   gs_depth = texpdf_dev_current_depth();
-  st_depth = texpdf_mps_stack_depth();
+  st_depth = mps_stack_depth();
   /* At this point the gstate must be initialized, since it starts a new
    * XObject. Note that it increase gs_depth by 1. */
   texpdf_dev_push_gstate();
@@ -1583,7 +1583,7 @@ mps_include_page (pdf_doc *doc, const char *ident, FILE *fp)
 }
 
 int
-texpdf_mps_do_page (pdf_doc *p, FILE *image_file)
+mps_do_page (pdf_doc *p, FILE *image_file)
 {
   int       error = 0;
   pdf_rect  bbox;
@@ -1604,7 +1604,7 @@ texpdf_mps_do_page (pdf_doc *p, FILE *image_file)
   start = buffer;
   end   = buffer + size;
 
-  error = texpdf_mps_scan_bbox(&start, end, &bbox);
+  error = mps_scan_bbox(&start, end, &bbox);
   if (error) {
     WARN("Error occured while scanning MetaPost file headers: Could not find BoundingBox.");
     RELEASE(buffer);
