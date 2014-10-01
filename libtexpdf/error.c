@@ -94,6 +94,6 @@ ERROR (const char *fmt, ...)
     va_end(argp);
     fprintf(stderr, "\n");
   }
-  error_cleanup();
+  texpdf_error_cleanup();
   exit( 1 );
 }
