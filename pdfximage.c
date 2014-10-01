@@ -37,6 +37,8 @@
 static int  texpdf_check_for_ps    (FILE *fp);
 static int  ps_include_page (pdf_ximage *ximage, const char *file_name);
 
+/* Moved (back) from mpost.c */
+static int  texpdf_check_for_mp    (FILE *fp);
 
 #define IMAGE_TYPE_UNKNOWN -1
 #define IMAGE_TYPE_PDF      0
@@ -87,6 +89,7 @@ static struct opt_ _opts = {
 
 void texpdf_ximage_set_verbose (void) { _opts.verbose++; }
 
+static metapost_handler_t metapost_handler = NULL;
 
 struct ic_
 {
@@ -97,6 +100,11 @@ struct ic_
 static struct ic_  _ic = {
   0, 0, NULL
 };
+
+void
+texpdf_set_metapost_handler(metapost_handler_t handler) {
+  metapost_handler = handler;
+}
 
 static void
 texpdf_init_ximage_struct (pdf_ximage *I,
@@ -391,7 +399,9 @@ texpdf_ximage_findresource (pdf_doc *p, const char *ident, long page_no, pdf_obj
   case IMAGE_TYPE_MPS:
     if (_opts.verbose)
       MESG("[MPS]");
-    id = mps_include_page(p,  ident, fp);
+    id = -1;
+    if (metapost_handler)
+      id = (metapost_handler)(p,  ident, fp);
     if (id < 0) {
       WARN("Try again with the distiller.");
       format = IMAGE_TYPE_EPS;
@@ -957,4 +967,27 @@ static int texpdf_check_for_ps (FILE *image_file)
   if (!strncmp (work_buffer, "%!", 2))
     return 1;
   return 0;
+}
+
+static int
+texpdf_check_for_mp (FILE *image_file) 
+{
+  int try_count = 10;
+
+  rewind (image_file);
+  mfgets(work_buffer, WORK_BUFFER_SIZE, image_file);
+  if (strncmp(work_buffer, "%!PS", 4))
+    return 0;
+
+  while (try_count > 0) {
+    mfgets(work_buffer, WORK_BUFFER_SIZE, image_file);
+    if (!strncmp(work_buffer, "%%Creator:", 10)) {
+      if (strlen(work_buffer+10) >= 8 &&
+    strstr(work_buffer+10, "MetaPost"))
+  break;
+    }
+    try_count--;
+  }
+
+  return ((try_count > 0) ? 1 : 0);
 }

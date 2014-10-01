@@ -50,7 +50,8 @@ typedef struct {
 } xform_info;
 
 typedef struct texpdf_ximage_ pdf_ximage;
-
+typedef int (*metapost_handler_t)(pdf_doc *, const char *i, FILE *);
+extern void     texpdf_set_metapost_handler(metapost_handler_t handler);
 extern void     texpdf_ximage_set_verbose    (void);
 
 extern void     texpdf_init_images           (void);
@@ -92,5 +93,4 @@ extern void
 texpdf_ximage_set_attr (int xobj_id,
                      long width, long height, double xdensity, double ydensity,
                      double llx, double lly, double urx, double ury);
-
 #endif /* _PDFXIMAGE_H_ */
