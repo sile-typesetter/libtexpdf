@@ -152,19 +152,18 @@ am__libtexpdf_la_SOURCES_DIST = agl.c agl.h bmpimage.c bmpimage.h \
 	cs_type2.h dpxcrypt.c dpxcrypt.h dpxfile.c dpxfile.h dpxutil.c \
 	dpxutil.h epdf.c epdf.h error.c error.h fontmap.c fontmap.h \
 	jp2image.c jp2image.h jpegimage.c jpegimage.h mem.c mem.h \
-	mfileio.c mfileio.h mpost.c mpost.h numbers.c numbers.h \
-	otl_conf.c otl_conf.h otl_opt.c otl_opt.h pdfcolor.c \
-	pdfcolor.h pdfdev.c pdfdev.h pdfdoc.c pdfdoc.h pdfdraw.c \
-	pdfdraw.h pdfencrypt.c pdfencrypt.h pdfencoding.c \
-	pdfencoding.h pdffont.c pdffont.h pdflimits.h pdfnames.c \
-	pdfnames.h pdfobj.c pdfobj.h pdfparse.c pdfparse.h \
-	pdfresource.c pdfresource.h pdfximage.c pdfximage.h pngimage.c \
-	pngimage.h pst.c pst.h pst_obj.c pst_obj.h sfnt.c sfnt.h \
-	subfont.c subfont.h system.h t1_char.c t1_char.h t1_load.c \
-	t1_load.h truetype.c truetype.h tt_aux.c tt_aux.h tt_cmap.c \
-	tt_cmap.h tt_glyf.c tt_glyf.h tt_gsub.c tt_gsub.h tt_post.c \
-	tt_post.h tt_table.c tt_table.h type0.c type0.h type1.c \
-	type1.h type1c.c type1c.h unicode.c unicode.h pkfont.c \
+	mfileio.c mfileio.h numbers.c numbers.h otl_conf.c otl_conf.h \
+	otl_opt.c otl_opt.h pdfcolor.c pdfcolor.h pdfdev.c pdfdev.h \
+	pdfdoc.c pdfdoc.h pdfdraw.c pdfdraw.h pdfencrypt.c \
+	pdfencrypt.h pdfencoding.c pdfencoding.h pdffont.c pdffont.h \
+	pdflimits.h pdfnames.c pdfnames.h pdfobj.c pdfobj.h pdfparse.c \
+	pdfparse.h pdfresource.c pdfresource.h pdfximage.c pdfximage.h \
+	pngimage.c pngimage.h pst.c pst.h pst_obj.c pst_obj.h sfnt.c \
+	sfnt.h subfont.c subfont.h system.h t1_char.c t1_char.h \
+	t1_load.c t1_load.h truetype.c truetype.h tt_aux.c tt_aux.h \
+	tt_cmap.c tt_cmap.h tt_glyf.c tt_glyf.h tt_gsub.c tt_gsub.h \
+	tt_post.c tt_post.h tt_table.c tt_table.h type0.c type0.h \
+	type1.c type1.h type1c.c type1c.h unicode.c unicode.h pkfont.c \
 	pkfont.h tfm.c tfm.h
 @TEXLIVE_INTERNAL_TRUE@am__objects_1 = libtexpdf_la-pkfont.lo \
 @TEXLIVE_INTERNAL_TRUE@	libtexpdf_la-tfm.lo
@@ -178,24 +177,24 @@ am_libtexpdf_la_OBJECTS = libtexpdf_la-agl.lo libtexpdf_la-bmpimage.lo \
 	libtexpdf_la-epdf.lo libtexpdf_la-error.lo \
 	libtexpdf_la-fontmap.lo libtexpdf_la-jp2image.lo \
 	libtexpdf_la-jpegimage.lo libtexpdf_la-mem.lo \
-	libtexpdf_la-mfileio.lo libtexpdf_la-mpost.lo \
-	libtexpdf_la-numbers.lo libtexpdf_la-otl_conf.lo \
-	libtexpdf_la-otl_opt.lo libtexpdf_la-pdfcolor.lo \
-	libtexpdf_la-pdfdev.lo libtexpdf_la-pdfdoc.lo \
-	libtexpdf_la-pdfdraw.lo libtexpdf_la-pdfencrypt.lo \
-	libtexpdf_la-pdfencoding.lo libtexpdf_la-pdffont.lo \
-	libtexpdf_la-pdfnames.lo libtexpdf_la-pdfobj.lo \
-	libtexpdf_la-pdfparse.lo libtexpdf_la-pdfresource.lo \
-	libtexpdf_la-pdfximage.lo libtexpdf_la-pngimage.lo \
-	libtexpdf_la-pst.lo libtexpdf_la-pst_obj.lo \
-	libtexpdf_la-sfnt.lo libtexpdf_la-subfont.lo \
-	libtexpdf_la-t1_char.lo libtexpdf_la-t1_load.lo \
-	libtexpdf_la-truetype.lo libtexpdf_la-tt_aux.lo \
-	libtexpdf_la-tt_cmap.lo libtexpdf_la-tt_glyf.lo \
-	libtexpdf_la-tt_gsub.lo libtexpdf_la-tt_post.lo \
-	libtexpdf_la-tt_table.lo libtexpdf_la-type0.lo \
-	libtexpdf_la-type1.lo libtexpdf_la-type1c.lo \
-	libtexpdf_la-unicode.lo $(am__objects_1)
+	libtexpdf_la-mfileio.lo libtexpdf_la-numbers.lo \
+	libtexpdf_la-otl_conf.lo libtexpdf_la-otl_opt.lo \
+	libtexpdf_la-pdfcolor.lo libtexpdf_la-pdfdev.lo \
+	libtexpdf_la-pdfdoc.lo libtexpdf_la-pdfdraw.lo \
+	libtexpdf_la-pdfencrypt.lo libtexpdf_la-pdfencoding.lo \
+	libtexpdf_la-pdffont.lo libtexpdf_la-pdfnames.lo \
+	libtexpdf_la-pdfobj.lo libtexpdf_la-pdfparse.lo \
+	libtexpdf_la-pdfresource.lo libtexpdf_la-pdfximage.lo \
+	libtexpdf_la-pngimage.lo libtexpdf_la-pst.lo \
+	libtexpdf_la-pst_obj.lo libtexpdf_la-sfnt.lo \
+	libtexpdf_la-subfont.lo libtexpdf_la-t1_char.lo \
+	libtexpdf_la-t1_load.lo libtexpdf_la-truetype.lo \
+	libtexpdf_la-tt_aux.lo libtexpdf_la-tt_cmap.lo \
+	libtexpdf_la-tt_glyf.lo libtexpdf_la-tt_gsub.lo \
+	libtexpdf_la-tt_post.lo libtexpdf_la-tt_table.lo \
+	libtexpdf_la-type0.lo libtexpdf_la-type1.lo \
+	libtexpdf_la-type1c.lo libtexpdf_la-unicode.lo \
+	$(am__objects_1)
 libtexpdf_la_OBJECTS = $(am_libtexpdf_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -421,19 +420,18 @@ libtexpdf_la_SOURCES = agl.c agl.h bmpimage.c bmpimage.h cff.c cff.h \
 	dpxcrypt.c dpxcrypt.h dpxfile.c dpxfile.h dpxutil.c dpxutil.h \
 	epdf.c epdf.h error.c error.h fontmap.c fontmap.h jp2image.c \
 	jp2image.h jpegimage.c jpegimage.h mem.c mem.h mfileio.c \
-	mfileio.h mpost.c mpost.h numbers.c numbers.h otl_conf.c \
-	otl_conf.h otl_opt.c otl_opt.h pdfcolor.c pdfcolor.h pdfdev.c \
-	pdfdev.h pdfdoc.c pdfdoc.h pdfdraw.c pdfdraw.h pdfencrypt.c \
-	pdfencrypt.h pdfencoding.c pdfencoding.h pdffont.c pdffont.h \
-	pdflimits.h pdfnames.c pdfnames.h pdfobj.c pdfobj.h pdfparse.c \
-	pdfparse.h pdfresource.c pdfresource.h pdfximage.c pdfximage.h \
-	pngimage.c pngimage.h pst.c pst.h pst_obj.c pst_obj.h sfnt.c \
-	sfnt.h subfont.c subfont.h system.h t1_char.c t1_char.h \
-	t1_load.c t1_load.h truetype.c truetype.h tt_aux.c tt_aux.h \
-	tt_cmap.c tt_cmap.h tt_glyf.c tt_glyf.h tt_gsub.c tt_gsub.h \
-	tt_post.c tt_post.h tt_table.c tt_table.h type0.c type0.h \
-	type1.c type1.h type1c.c type1c.h unicode.c unicode.h \
-	$(am__append_1)
+	mfileio.h numbers.c numbers.h otl_conf.c otl_conf.h otl_opt.c \
+	otl_opt.h pdfcolor.c pdfcolor.h pdfdev.c pdfdev.h pdfdoc.c \
+	pdfdoc.h pdfdraw.c pdfdraw.h pdfencrypt.c pdfencrypt.h \
+	pdfencoding.c pdfencoding.h pdffont.c pdffont.h pdflimits.h \
+	pdfnames.c pdfnames.h pdfobj.c pdfobj.h pdfparse.c pdfparse.h \
+	pdfresource.c pdfresource.h pdfximage.c pdfximage.h pngimage.c \
+	pngimage.h pst.c pst.h pst_obj.c pst_obj.h sfnt.c sfnt.h \
+	subfont.c subfont.h system.h t1_char.c t1_char.h t1_load.c \
+	t1_load.h truetype.c truetype.h tt_aux.c tt_aux.h tt_cmap.c \
+	tt_cmap.h tt_glyf.c tt_glyf.h tt_gsub.c tt_gsub.h tt_post.c \
+	tt_post.h tt_table.c tt_table.h type0.c type0.h type1.c \
+	type1.h type1c.c type1c.h unicode.c unicode.h $(am__append_1)
 libtexpdf_la_LIBADD = $(FREETYPE_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -555,7 +553,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-jpegimage.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-mem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-mfileio.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-mpost.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-numbers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-otl_conf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtexpdf_la-otl_opt.Plo@am__quote@
@@ -762,13 +759,6 @@ libtexpdf_la-mfileio.lo: mfileio.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mfileio.c' object='libtexpdf_la-mfileio.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtexpdf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtexpdf_la-mfileio.lo `test -f 'mfileio.c' || echo '$(srcdir)/'`mfileio.c
-
-libtexpdf_la-mpost.lo: mpost.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtexpdf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtexpdf_la-mpost.lo -MD -MP -MF $(DEPDIR)/libtexpdf_la-mpost.Tpo -c -o libtexpdf_la-mpost.lo `test -f 'mpost.c' || echo '$(srcdir)/'`mpost.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libtexpdf_la-mpost.Tpo $(DEPDIR)/libtexpdf_la-mpost.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mpost.c' object='libtexpdf_la-mpost.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtexpdf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtexpdf_la-mpost.lo `test -f 'mpost.c' || echo '$(srcdir)/'`mpost.c
 
 libtexpdf_la-numbers.lo: numbers.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtexpdf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtexpdf_la-numbers.lo -MD -MP -MF $(DEPDIR)/libtexpdf_la-numbers.Tpo -c -o libtexpdf_la-numbers.lo `test -f 'numbers.c' || echo '$(srcdir)/'`numbers.c

@@ -56,8 +56,6 @@ libtexpdf_la_SOURCES = \
 	mem.h \
 	mfileio.c \
 	mfileio.h \
-	mpost.c \
-	mpost.h \
 	numbers.c \
 	numbers.h \
 	otl_conf.c \
