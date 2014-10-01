@@ -40,7 +40,7 @@
 #include "dpxfile.h"
 
 #include "dvi.h"
-
+#include "mpost.h"
 #include "spc_tpic.h"
 #include "specials.h"
 
@@ -1020,6 +1020,7 @@ main (int argc, char *argv[])
   }
 
   texpdf_files_init();
+  texpdf_set_metapost_handler(&mps_include_page);
 
   /* Set default paper size here so that all page's can inherite it.
    * annot_grow:    Margin of annotation.
