@@ -1188,22 +1188,5 @@ tfm_is_vert (int font_id)
 #endif /* !WITHOUT_ASCII_PTEX */
 #endif
 
-int
-tfm_exists (const char *tfm_name)
-{
-  char *fullname;
 
-  fullname = kpse_find_file(tfm_name, kpse_ofm_format, 0);
-  if (fullname) {
-    RELEASE(fullname);
-    return 1;
-  }
-  fullname = kpse_find_file(tfm_name, kpse_tfm_format, 0);
-  if (fullname) {
-    RELEASE(fullname);
-    return 1;
-  }
-
-  return 0;
-}
 #endif

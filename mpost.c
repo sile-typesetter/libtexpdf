@@ -1630,24 +1630,20 @@ mps_do_page (pdf_doc *p, FILE *image_file)
 }
 
 int
-texpdf_check_for_mp (FILE *image_file) 
+tfm_exists (const char *tfm_name)
 {
-  int try_count = 10;
+  char *fullname;
 
-  rewind (image_file);
-  mfgets(work_buffer, WORK_BUFFER_SIZE, image_file);
-  if (strncmp(work_buffer, "%!PS", 4))
-    return 0;
-
-  while (try_count > 0) {
-    mfgets(work_buffer, WORK_BUFFER_SIZE, image_file);
-    if (!strncmp(work_buffer, "%%Creator:", 10)) {
-      if (strlen(work_buffer+10) >= 8 &&
-	  strstr(work_buffer+10, "MetaPost"))
-	break;
-    }
-    try_count--;
+  fullname = kpse_find_file(tfm_name, kpse_ofm_format, 0);
+  if (fullname) {
+    RELEASE(fullname);
+    return 1;
+  }
+  fullname = kpse_find_file(tfm_name, kpse_tfm_format, 0);
+  if (fullname) {
+    RELEASE(fullname);
+    return 1;
   }
 
-  return ((try_count > 0) ? 1 : 0);
+  return 0;
 }

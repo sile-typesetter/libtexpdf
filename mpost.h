@@ -27,8 +27,6 @@
 #include  "pdfximage.h"
 #include  "pdfdev.h"
 
-extern int  texpdf_check_for_mp     (FILE *fp);
-
 extern int  mps_scan_bbox    (const char **pp, const char *endptr, pdf_rect *bbox);
 
 /* returns xobj_id */
