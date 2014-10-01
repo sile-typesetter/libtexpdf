@@ -21,7 +21,6 @@
 */
 
 #include "libtexpdf.h"
-#ifdef TEXLIVE_INTERNAL
 #define ENABLE_GLYPHENC  1
 
 #ifndef PKFONT_DPI_DEFAULT
@@ -767,4 +766,3 @@ pdf_font_load_pkfont (pdf_font *font)
 
   return  0;
 }
-#endif

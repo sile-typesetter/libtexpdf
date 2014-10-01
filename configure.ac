@@ -75,19 +75,6 @@ AC_DEFINE([HAVE_ZLIB], 1, [Define if you have zlib and its headers.])
 AC_DEFINE([HAVE_ZLIB_COMPRESS2], 1, [Define if your zlib has the compress2 function.])
 AC_DEFINE([HAVE_LIBPNG], 1, [Define if you have libpng and its headers.])
 
-dnl Having said we're not using kpathsea, PK font support is needed by
-dnl actual-TeX but not really by anything else, so if we're really building
-dnl this as part of TL, we need to know so we can add in those features.
-AC_ARG_ENABLE([texlive],
-    AS_HELP_STRING([--enable-texlive], [Building this library as part of TeX Live]))
-
-AS_IF([test "x$enable_texlive" = "xyes"], [
-  KPSE_ADD_FLAGS([kpathsea])
-  AC_CHECK_HEADER([kpathsea/version.h], [AC_DEFINE([HAVE_KPATHSEA],1,[Define if you have kpathsea])])
-  AC_DEFINE([TEXLIVE_INTERNAL], 1, [I am building TeX Live])
-])
-AM_CONDITIONAL([TEXLIVE_INTERNAL], [test x$enable_texlive = xyes])
-
 AC_CONFIG_FILES([Makefile ])
 
 AC_OUTPUT

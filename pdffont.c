@@ -50,9 +50,7 @@ pdf_font_get_verbose (void)
 void
 texpdf_font_set_dpi (int font_dpi)
 {
-#ifdef TEXLIVE_INTERNAL
   PKFont_set_dpi(font_dpi);
-#endif
 }
 
 void
@@ -471,13 +469,11 @@ texpdf_close_fonts (void)
 	MESG("[TrueType]");
       pdf_font_load_truetype(font);
       break;
-#ifdef TEXLIVE_INTERNAL
     case PDF_FONT_FONTTYPE_TYPE3:
       if (__verbose)
 	MESG("[Type3/PK]");
       pdf_font_load_pkfont (font);
       break;
-#endif      
     case PDF_FONT_FONTTYPE_TYPE0:
       break;
     default:
@@ -731,10 +727,8 @@ pdf_font_findresource (const char *tex_name,
 	font->subtype = PDF_FONT_FONTTYPE_TYPE1C;
       } else if (pdf_font_open_truetype(font) >= 0) {
 	font->subtype = PDF_FONT_FONTTYPE_TRUETYPE;
-#ifdef TEXLIVE_INTERNAL
       } else if (pdf_font_open_pkfont(font) >= 0) {
 	font->subtype = PDF_FONT_FONTTYPE_TYPE3;
-#endif
       } else {
 	pdf_clean_font_struct(font);
 	return -1;
