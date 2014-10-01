@@ -34,6 +34,7 @@
 
 #include "dvi.h"
 #include "dvicodes.h"
+#include "mpost.h"
 
 #include "dvipdfmx.h"
 #include "libtexpdf/libtexpdf.h"

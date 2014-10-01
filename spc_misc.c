@@ -34,7 +34,8 @@
 
 #include "libtexpdf/libtexpdf.h"
 #include "dvipdfmx.h"
-
+#include "mpost.h"
+#include "dvi.h"
 #include "specials.h"
 
 #include "spc_util.h"

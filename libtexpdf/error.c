@@ -32,7 +32,7 @@
 #endif
 
 #include "error.h"
-
+#include "pdfobj.h"
 #define DPX_MESG        0
 #define DPX_MESG_WARN   1
 #define DPX_MESG_ERROR  2

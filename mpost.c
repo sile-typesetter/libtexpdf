@@ -20,7 +20,17 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
+#include "config.h"
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
 #include "libtexpdf.h"
+#include <kpathsea/kpathsea.h>
 
 /*
  * Define the origin as (llx, lly) in order to
