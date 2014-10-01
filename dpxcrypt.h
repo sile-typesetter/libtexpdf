@@ -17,6 +17,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
+/**
+@file
+@brief MD5 functions borrowed from libgcrypt.
+*/
 
 #ifndef _DPXCRYPT_H_
 #define _DPXCRYPT_H_
@@ -37,8 +41,20 @@ typedef struct {
   int count;
 } MD5_CONTEXT;
 
+/** Initialize MD5 state. 
+Caller provides memory-allocated struct.
+*/
 void texpdf_MD5_init (MD5_CONTEXT *ctx);
+/** Add characters to MD5 digest.
+The routine updates the message-digest context to
+account for the presence of each of the characters `inBuf[0..inlen-1]`
+in the message whose digest is being computed.*/
 void texpdf_MD5_write (MD5_CONTEXT *ctx, const unsigned char *inbuf, unsigned long inlen);
+/** Terminate message digest computation.
+  The routine final terminates the message-digest computation and
+  ends with the desired message digest in `ctx->digest[0...15]`.
+  The handle is prepared for a new MD5 cycle.
+  Returns 16 bytes representing the digest. */
 void texpdf_MD5_final (unsigned char *outbuf, MD5_CONTEXT *ctx);
 
 /* libgcrypt arcfour */

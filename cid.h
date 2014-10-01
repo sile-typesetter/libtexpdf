@@ -18,6 +18,11 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
+/**
+@file
+@brief Support for CID-encoded fonts
+*/
+
 #ifndef _CID_H_
 #define _CID_H_
 
@@ -40,18 +45,25 @@ extern void CIDFont_set_verbose     (void);
 #if 0
 extern int  CIDFont_require_version (void);
 #endif
-extern void texpdf_CIDFont_set_flags       (long flags);
-
-#define CIDFONT_FORCE_FIXEDPITCH (1 << 1)
 
 #include "pdfobj.h"
 #include "type0.h"
 
+/** Treat all CIDFont as fixed-pitch font. */
+#define CIDFONT_FORCE_FIXEDPITCH (1 << 1)
 /* FIXME */
 /* Converted from Type 1 */
+
+/** Treat all CIDFont as Type1 fonts. */
 #define CIDFONT_FLAG_TYPE1      (1 << 8)
+/** Treat all CIDFont as Type1C fonts. */
 #define CIDFONT_FLAG_TYPE1C     (1 << 9)
+/** Treat all CIDFont as Truetype fonts. */
 #define CIDFONT_FLAG_TRUETYPE   (1 << 10)
+
+/** Settings which affect the treatment of CID fonts, using the flags definitions above. */
+extern void texpdf_CIDFont_set_flags       (long flags);
+
 
 extern CIDFont *CIDFont_new     (void);
 extern void     CIDFont_release (CIDFont *font);
