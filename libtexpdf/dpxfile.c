@@ -278,6 +278,7 @@ done:
   return ret;
 }
 
+#if 0
 /* ensuresuffix() returns a copy of basename if sfx is "". */
 static char *
 ensuresuffix (const char *basename, const char *sfx)
@@ -309,7 +310,8 @@ is_absolute_path(const char *filename)
 #endif
   return 0;
 }
- 
+#endif
+
 static const char *
 dpx_get_tmpdir (void)
 {
@@ -460,7 +462,6 @@ FILE *
 dpx_open_file (const char *filename, dpx_res_type type)
 {
   FILE  *fp   = NULL;
-  char  *fqpn = NULL;
   if (qcheck_filetype(filename, type)) {
     fp = MFOPEN(filename, FOPEN_RBIN_MODE);
   }
