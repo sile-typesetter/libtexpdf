@@ -123,14 +123,10 @@ libtexpdf_la_SOURCES = \
 	type1c.c \
 	type1c.h \
 	unicode.c \
-	unicode.h
-
-if TEXLIVE_INTERNAL
-libtexpdf_la_SOURCES += \
+	unicode.h \
 	pkfont.c \
 	pkfont.h \
 	tfm.c \
 	tfm.h
-endif
 
 libtexpdf_la_LIBADD = $(FREETYPE_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
