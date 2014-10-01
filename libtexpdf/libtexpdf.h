@@ -1,9 +1,10 @@
 #ifndef _LIBTEXPDF_H
 #define _LIBTEXPDF_H
-
 #define XETEX 1 /* We are all xetex now */
 
+#ifdef BUILDING_LIBTEXPDF
 #include <libtexpdf/config.h>
+#endif
 
 #ifdef HAVE_STRING_H
 #include <string.h>
