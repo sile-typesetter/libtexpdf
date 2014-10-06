@@ -913,17 +913,7 @@ dvi_locate_native_font (const char *filename, uint32_t index,
 
   cur_id = num_loaded_fonts++;
 
-  sprintf(fontmap_key, "%s/%u/%c/%d/%d/%d", filename, index, layout_dir == 0 ? 'H' : 'V', extend, slant, embolden);
-  mrec = texpdf_lookup_fontmap_record(fontmap_key);
-  if (mrec == NULL) {
-    if (texpdf_load_native_font(filename, index, layout_dir, extend, slant, embolden) == -1) {
-      ERROR("Cannot proceed without the \"native\" font: %s", filename);
-    }
-    mrec = texpdf_lookup_fontmap_record(fontmap_key);
-    /* FIXME: would be more efficient if pdf_load_native_font returned the mrec ptr (or NULL for error)
-              so we could avoid doing a second lookup for the item we just inserted */
-  }
-  loaded_fonts[cur_id].font_id = texpdf_dev_locate_font(fontmap_key, ptsize);
+  loaded_fonts[cur_id].font_id = texpdf_dev_load_native_font(filename, index, ptsize, layout_dir, extend, slant, embolden);
   loaded_fonts[cur_id].size    = ptsize;
   loaded_fonts[cur_id].type    = NATIVE;
   free(fontmap_key);
