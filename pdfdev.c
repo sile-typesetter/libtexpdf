@@ -1415,6 +1415,24 @@ print_fontmap (const char *font_name, fontmap_rec *mrec)
 
 }
 
+int texpdf_dev_load_native_font(const char *filename, uint32_t index,
+                        spt_t ptsize, int layout_dir, int extend, int slant, int embolden) {
+  fontmap_rec  *mrec;
+  char         *fontmap_key = malloc(strlen(filename) + 40); // CHECK this is enough
+
+  sprintf(fontmap_key, "%s/%u/%c/%d/%d/%d", filename, index, layout_dir == 0 ? 'H' : 'V', extend, slant, embolden);
+  mrec = texpdf_lookup_fontmap_record(fontmap_key);
+  if (mrec == NULL) {
+    if (texpdf_load_native_font(filename, index, layout_dir, extend, slant, embolden) == -1) {
+      ERROR("Cannot proceed without the \"native\" font: %s", filename);
+    }
+    mrec = texpdf_lookup_fontmap_record(fontmap_key);
+    /* FIXME: would be more efficient if pdf_load_native_font returned the mrec ptr (or NULL for error)
+              so we could avoid doing a second lookup for the item we just inserted */
+  }
+  return texpdf_dev_locate_font(fontmap_key, ptsize);
+}
+
 /* _FIXME_
  * Font is identified with font_name and point_size as in DVI here.
  * However, except for PDF_FONTTYPE_BITMAP, we can share the 

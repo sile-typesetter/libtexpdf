@@ -116,6 +116,9 @@ extern int    texpdf_dev_put_image  (pdf_doc *doc, int xobj_id,
 
 /* The design_size and ptsize required by PK font support...
  */
+extern int    texpdf_dev_load_native_font(const char *filename, uint32_t index,
+                        spt_t ptsize, int layout_dir, int extend, int slant, int embolden);
+
 extern int    texpdf_dev_locate_font (const char *font_name, spt_t ptsize);
 
 extern int    texpdf_dev_setfont     (const char *font_name, spt_t ptsize);
