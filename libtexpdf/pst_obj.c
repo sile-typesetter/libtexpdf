@@ -21,6 +21,7 @@
 */
 
 #include "libtexpdf.h"
+#include <errno.h>
 
 struct pst_obj
 {
