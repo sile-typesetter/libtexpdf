@@ -819,7 +819,6 @@ texpdf_tfm_open (const char *tfm_name, int must_exist)
   FILE *tfm_file;
   int i, format = TFM_FORMAT;
   off_t tfm_file_size;
-  char *file_name = NULL;
 
   for (i = 0; i < numfms; i++) {
     if (!strcmp(tfm_name, fms[i].tex_name))
@@ -836,11 +835,7 @@ texpdf_tfm_open (const char *tfm_name, int must_exist)
       MESG("(TFM:%s", tfm_name);
     else if (format == OFM_FORMAT)
       MESG("(OFM:%s", tfm_name);
-    if (verbose > 1)
-      MESG("[%s]", file_name);
   }
-
-  RELEASE(file_name);
 
   tfm_file_size = xfile_size (tfm_file, "TFM/OFM");
   if (tfm_file_size > 0x1ffffffff)
