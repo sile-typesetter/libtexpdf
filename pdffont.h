@@ -57,7 +57,7 @@ extern void     texpdf_close_fonts (void);
  * It might be necessary if dvipdfmx supports font format with
  * various optical sizes supported in the future.
  */
-extern int      pdf_font_findresource  (const char *font_name,
+extern int      pdf_font_findresource  (fontmap_t* map, const char *font_name,
 					double font_scale, fontmap_rec *mrec);
 
 extern int      texpdf_get_font_subtype   (int font_id);

@@ -80,7 +80,10 @@ typedef struct fontmap_rec {
   fontmap_opt opt;
 } fontmap_rec;
 
+typedef struct ht_table fontmap_t;
+
 extern void         texpdf_fontmap_set_verbose   (void);
+extern int          texpdf_fontmap_get_verbose (void);
 
 extern void         texpdf_init_fontmaps         (void);
 #if 0
@@ -90,18 +93,17 @@ extern void         texpdf_close_fontmaps        (void);
 
 extern void         texpdf_init_fontmap_record   (fontmap_rec *mrec);
 extern void         texpdf_clear_fontmap_record  (fontmap_rec *mrec);
+extern void         texpdf_copy_fontmap_record (fontmap_rec *dst, const fontmap_rec *src);
 
-extern int          texpdf_load_fontmap_file     (const char  *filename, int mode);
-extern int          texpdf_read_fontmap_line     (fontmap_rec *mrec, const char *mline, long mline_strlen, int format);
+extern void         pdftex_fill_in_defaults (fontmap_rec *mrec, const char *tex_name);
 
-extern int          texpdf_append_fontmap_record (const char  *kp, const fontmap_rec *mrec);
-extern int          texpdf_remove_fontmap_record (const char  *kp);
-extern int          texpdf_insert_fontmap_record (const char  *kp, const fontmap_rec *mrec);
-extern fontmap_rec *texpdf_lookup_fontmap_record (const char  *kp);
-
-extern int          texpdf_is_pdfm_mapline           (const char  *mline);
+extern int          texpdf_insert_fontmap_record (fontmap_t* map, const char  *kp, const fontmap_rec *mrec);
+extern fontmap_rec *texpdf_lookup_fontmap_record (fontmap_t* map, const char  *kp);
+extern char *       texpdf_make_subfont_name (const char *map_name, const char *sfd_name, const char *sub_id);
+extern char *       texpdf_chop_sfd_name (const char *tex_name, char **sfd_name);
 
 #ifdef XETEX
+extern fontmap_t *native_fontmap;
 extern int          texpdf_load_native_font      (const char *filename, unsigned long index,
                                                int layout_dir, int extend, int slant, int embolden);
 #endif

@@ -35,7 +35,7 @@
 
 #include "pdftypes.h"
 #include "pdfdoc.h"
-
+#include "fontmap.h"
 extern void   texpdf_transform_info_clear (transform_info *info);
 
 
@@ -119,7 +119,7 @@ extern int    texpdf_dev_put_image  (pdf_doc *doc, int xobj_id,
 extern int    texpdf_dev_load_native_font(const char *filename, uint32_t index,
                         spt_t ptsize, int layout_dir, int extend, int slant, int embolden);
 
-extern int    texpdf_dev_locate_font (const char *font_name, spt_t ptsize);
+extern int    texpdf_dev_locate_font (fontmap_t* map, const char *font_name, spt_t ptsize);
 
 extern int    texpdf_dev_setfont     (const char *font_name, spt_t ptsize);
 
