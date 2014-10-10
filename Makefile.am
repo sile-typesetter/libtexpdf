@@ -31,6 +31,8 @@ dvipdfmx_SOURCES = \
 	dvipdfmx.h \
 	error.c \
 	error.h \
+	fontmap.c \
+	fontmap.h \
 	mem.c \
 	mem.h \
 	mfileio.c \

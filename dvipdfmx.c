@@ -38,7 +38,7 @@
 #include "dpxfile.h"
 
 #include "libtexpdf/libtexpdf.h"
-
+#include "fontmap.h"
 #include "dvi.h"
 #include "mpost.h"
 #include "spc_tpic.h"
@@ -944,7 +944,8 @@ main (int argc, char *argv[])
   if (really_quiet)
     shut_up(really_quiet);
 
-  texpdf_init_fontmaps(); /* This must come before parsing options... */
+  texpdf_init_fontmaps(); /* The native fontmap */
+  dvipdf_init_fontmaps(); /* Our fontmap */
 
   read_config_file(DPX_CONFIG_FILE);
 

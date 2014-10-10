@@ -45,6 +45,7 @@
 
 #include "libtexpdf/libtexpdf.h"
 #include "dvicodes.h"
+#include "fontmap.h"
 #include "vf.h"
 
 #include "spc_util.h"
@@ -780,7 +781,7 @@ dvi_locate_font (const char *tfm_name, spt_t ptsize)
    */
   cur_id = num_loaded_fonts++;
 
-  mrec = texpdf_lookup_fontmap_record(tfm_name);
+  mrec = texpdf_lookup_fontmap_record(dvi_fontmap, tfm_name);
   /* Load subfont mapping table */
   if (mrec && mrec->charmap.sfd_name && mrec->charmap.subfont_id) {
     subfont_id = texpdf_sfd_load_record(mrec->charmap.sfd_name, mrec->charmap.subfont_id);
@@ -835,7 +836,7 @@ dvi_locate_font (const char *tfm_name, spt_t ptsize)
    */
   else if (subfont_id >= 0 && mrec->map_name)
   {
-    fontmap_rec  *mrec1 = texpdf_lookup_fontmap_record(mrec->map_name);
+    fontmap_rec  *mrec1 = texpdf_lookup_fontmap_record(dvi_fontmap, mrec->map_name);
     /* enc_name=NULL should be used only for 'built-in' encoding.
      * Please fix this!
      */
@@ -871,11 +872,11 @@ dvi_locate_font (const char *tfm_name, spt_t ptsize)
   }
 
   /* We need ptsize for PK font creation. */
-  font_id = texpdf_dev_locate_font(name, ptsize);
+  font_id = texpdf_dev_locate_font(dvi_fontmap, name, ptsize);
   if (font_id < 0) {
     WARN("Could not locate a virtual/physical font for TFM \"%s\".", tfm_name);
     if (mrec && mrec->map_name) { /* has map_name */
-      fontmap_rec  *mrec1 = texpdf_lookup_fontmap_record(mrec->map_name);
+      fontmap_rec  *mrec1 = texpdf_lookup_fontmap_record(dvi_fontmap, mrec->map_name);
       WARN(">> This font is mapped to an intermediate 16-bit font \"%s\" with SFD charmap=<%s,%s>,",
            mrec->map_name, mrec->charmap.sfd_name, mrec->charmap.subfont_id);
       if (!mrec1)
@@ -919,16 +920,16 @@ dvi_locate_native_font (const char *filename, uint32_t index,
   cur_id = num_loaded_fonts++;
 
   sprintf(fontmap_key, "%s/%u/%c/%d/%d/%d", filename, index, layout_dir == 0 ? 'H' : 'V', extend, slant, embolden);
-  mrec = texpdf_lookup_fontmap_record(fontmap_key);
+  mrec = texpdf_lookup_fontmap_record(native_fontmap, fontmap_key);
   if (mrec == NULL) {
     if (texpdf_load_native_font(filename, index, layout_dir, extend, slant, embolden) == -1) {
       ERROR("Cannot proceed without the \"native\" font: %s", filename);
     }
-    mrec = texpdf_lookup_fontmap_record(fontmap_key);
+    mrec = texpdf_lookup_fontmap_record(native_fontmap, fontmap_key);
     /* FIXME: would be more efficient if pdf_load_native_font returned the mrec ptr (or NULL for error)
               so we could avoid doing a second lookup for the item we just inserted */
   }
-  loaded_fonts[cur_id].font_id = texpdf_dev_locate_font(fontmap_key, ptsize);
+  loaded_fonts[cur_id].font_id = texpdf_dev_locate_font(native_fontmap, fontmap_key, ptsize);
   loaded_fonts[cur_id].size    = ptsize;
   loaded_fonts[cur_id].type    = NATIVE;
   free(fontmap_key);

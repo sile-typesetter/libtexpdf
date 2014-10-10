@@ -31,6 +31,7 @@
 
 #include "libtexpdf.h"
 #include <kpathsea/kpathsea.h>
+#include "fontmap.h"
 
 /*
  * Define the origin as (llx, lly) in order to
@@ -99,7 +100,7 @@ mp_setfont (const char *font_name, double pt_size)
     currentfont = 0;
   }
 
-  mrec = texpdf_lookup_fontmap_record(font_name);
+  mrec = texpdf_lookup_fontmap_record(dvi_fontmap, font_name);
   if (mrec && mrec->charmap.sfd_name && mrec->charmap.subfont_id) {
     subfont_id = texpdf_sfd_load_record(mrec->charmap.sfd_name, mrec->charmap.subfont_id);
   }
@@ -118,7 +119,7 @@ mp_setfont (const char *font_name, double pt_size)
   font->subfont_id = subfont_id;
   font->pt_size    = pt_size;
   font->tfm_id     = texpdf_tfm_open(font_name, 0); /* Need not exist in MP mode */
-  font->font_id    = texpdf_dev_locate_font(name,
+  font->font_id    = texpdf_dev_locate_font(dvi_fontmap, name,
                                          (spt_t) (pt_size * dev_unit_dviunit()));
 
   if (font->font_id < 0) {
@@ -185,7 +186,7 @@ is_fontname (const char *token)
 {
   fontmap_rec *mrec;
 
-  mrec = texpdf_lookup_fontmap_record(token);
+  mrec = texpdf_lookup_fontmap_record(dvi_fontmap, token);
   if (mrec)
     return  1;
   return  tfm_exists(token);

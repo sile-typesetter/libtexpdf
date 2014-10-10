@@ -1421,16 +1421,16 @@ int texpdf_dev_load_native_font(const char *filename, uint32_t index,
   char         *fontmap_key = malloc(strlen(filename) + 40); // CHECK this is enough
 
   sprintf(fontmap_key, "%s/%u/%c/%d/%d/%d", filename, index, layout_dir == 0 ? 'H' : 'V', extend, slant, embolden);
-  mrec = texpdf_lookup_fontmap_record(fontmap_key);
+  mrec = texpdf_lookup_fontmap_record(native_fontmap, fontmap_key);
   if (mrec == NULL) {
     if (texpdf_load_native_font(filename, index, layout_dir, extend, slant, embolden) == -1) {
       ERROR("Cannot proceed without the \"native\" font: %s", filename);
     }
-    mrec = texpdf_lookup_fontmap_record(fontmap_key);
+    mrec = texpdf_lookup_fontmap_record(native_fontmap, fontmap_key);
     /* FIXME: would be more efficient if pdf_load_native_font returned the mrec ptr (or NULL for error)
               so we could avoid doing a second lookup for the item we just inserted */
   }
-  return texpdf_dev_locate_font(fontmap_key, ptsize);
+  return texpdf_dev_locate_font(native_fontmap, fontmap_key, ptsize);
 }
 
 /* _FIXME_
@@ -1440,7 +1440,7 @@ int texpdf_dev_load_native_font(const char *filename, uint32_t index,
  * of the same font at different sizes.
  */
 int
-texpdf_dev_locate_font (const char *font_name, spt_t ptsize)
+texpdf_dev_locate_font (fontmap_t* map, const char *font_name, spt_t ptsize)
 {
   int              i;
   fontmap_rec     *mrec;
@@ -1475,12 +1475,12 @@ texpdf_dev_locate_font (const char *font_name, spt_t ptsize)
   font = &dev_fonts[num_dev_fonts];
 
   /* New font */
-  mrec = texpdf_lookup_fontmap_record(font_name);
+  mrec = texpdf_lookup_fontmap_record(map, font_name);
 
   if (verbose > 1)
     print_fontmap(font_name, mrec);
 
-  font->font_id = pdf_font_findresource(font_name, ptsize * dev_unit.dvi2pts, mrec);
+  font->font_id = pdf_font_findresource(map, font_name, ptsize * dev_unit.dvi2pts, mrec);
   if (font->font_id < 0)
     return  -1;
 

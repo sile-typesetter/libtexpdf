@@ -150,12 +150,12 @@ am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
 am_dvipdfmx_OBJECTS = dpxfile.$(OBJEXT) dvi.$(OBJEXT) \
-	dvipdfmx.$(OBJEXT) error.$(OBJEXT) mem.$(OBJEXT) \
-	mfileio.$(OBJEXT) mpost.$(OBJEXT) numbers.$(OBJEXT) \
-	spc_color.$(OBJEXT) spc_dvips.$(OBJEXT) spc_html.$(OBJEXT) \
-	spc_misc.$(OBJEXT) spc_pdfm.$(OBJEXT) spc_tpic.$(OBJEXT) \
-	spc_util.$(OBJEXT) spc_xtx.$(OBJEXT) specials.$(OBJEXT) \
-	vf.$(OBJEXT) xbb.$(OBJEXT)
+	dvipdfmx.$(OBJEXT) error.$(OBJEXT) fontmap.$(OBJEXT) \
+	mem.$(OBJEXT) mfileio.$(OBJEXT) mpost.$(OBJEXT) \
+	numbers.$(OBJEXT) spc_color.$(OBJEXT) spc_dvips.$(OBJEXT) \
+	spc_html.$(OBJEXT) spc_misc.$(OBJEXT) spc_pdfm.$(OBJEXT) \
+	spc_tpic.$(OBJEXT) spc_util.$(OBJEXT) spc_xtx.$(OBJEXT) \
+	specials.$(OBJEXT) vf.$(OBJEXT) xbb.$(OBJEXT)
 dvipdfmx_OBJECTS = $(am_dvipdfmx_OBJECTS)
 am__DEPENDENCIES_1 =
 dvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -163,14 +163,14 @@ dvipdfmx_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) libtexpdf/.libs/libtexpdf.a
 am__objects_1 = xdvipdfmx-dpxfile.$(OBJEXT) xdvipdfmx-dvi.$(OBJEXT) \
 	xdvipdfmx-dvipdfmx.$(OBJEXT) xdvipdfmx-error.$(OBJEXT) \
-	xdvipdfmx-mem.$(OBJEXT) xdvipdfmx-mfileio.$(OBJEXT) \
-	xdvipdfmx-mpost.$(OBJEXT) xdvipdfmx-numbers.$(OBJEXT) \
-	xdvipdfmx-spc_color.$(OBJEXT) xdvipdfmx-spc_dvips.$(OBJEXT) \
-	xdvipdfmx-spc_html.$(OBJEXT) xdvipdfmx-spc_misc.$(OBJEXT) \
-	xdvipdfmx-spc_pdfm.$(OBJEXT) xdvipdfmx-spc_tpic.$(OBJEXT) \
-	xdvipdfmx-spc_util.$(OBJEXT) xdvipdfmx-spc_xtx.$(OBJEXT) \
-	xdvipdfmx-specials.$(OBJEXT) xdvipdfmx-vf.$(OBJEXT) \
-	xdvipdfmx-xbb.$(OBJEXT)
+	xdvipdfmx-fontmap.$(OBJEXT) xdvipdfmx-mem.$(OBJEXT) \
+	xdvipdfmx-mfileio.$(OBJEXT) xdvipdfmx-mpost.$(OBJEXT) \
+	xdvipdfmx-numbers.$(OBJEXT) xdvipdfmx-spc_color.$(OBJEXT) \
+	xdvipdfmx-spc_dvips.$(OBJEXT) xdvipdfmx-spc_html.$(OBJEXT) \
+	xdvipdfmx-spc_misc.$(OBJEXT) xdvipdfmx-spc_pdfm.$(OBJEXT) \
+	xdvipdfmx-spc_tpic.$(OBJEXT) xdvipdfmx-spc_util.$(OBJEXT) \
+	xdvipdfmx-spc_xtx.$(OBJEXT) xdvipdfmx-specials.$(OBJEXT) \
+	xdvipdfmx-vf.$(OBJEXT) xdvipdfmx-xbb.$(OBJEXT)
 nodist_xdvipdfmx_OBJECTS = $(am__objects_1)
 xdvipdfmx_OBJECTS = $(nodist_xdvipdfmx_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -657,6 +657,8 @@ dvipdfmx_SOURCES = \
 	dvipdfmx.h \
 	error.c \
 	error.h \
+	fontmap.c \
+	fontmap.h \
 	mem.c \
 	mem.h \
 	mfileio.c \
@@ -899,6 +901,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dvipdfmx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fontmap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfileio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpost.Po@am__quote@
@@ -918,6 +921,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-dvi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-dvipdfmx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-fontmap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-mfileio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdvipdfmx-mpost.Po@am__quote@
@@ -1027,6 +1031,20 @@ xdvipdfmx-error.obj: error.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='error.c' object='xdvipdfmx-error.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xdvipdfmx-error.obj `if test -f 'error.c'; then $(CYGPATH_W) 'error.c'; else $(CYGPATH_W) '$(srcdir)/error.c'; fi`
+
+xdvipdfmx-fontmap.o: fontmap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xdvipdfmx-fontmap.o -MD -MP -MF $(DEPDIR)/xdvipdfmx-fontmap.Tpo -c -o xdvipdfmx-fontmap.o `test -f 'fontmap.c' || echo '$(srcdir)/'`fontmap.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xdvipdfmx-fontmap.Tpo $(DEPDIR)/xdvipdfmx-fontmap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fontmap.c' object='xdvipdfmx-fontmap.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xdvipdfmx-fontmap.o `test -f 'fontmap.c' || echo '$(srcdir)/'`fontmap.c
+
+xdvipdfmx-fontmap.obj: fontmap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xdvipdfmx-fontmap.obj -MD -MP -MF $(DEPDIR)/xdvipdfmx-fontmap.Tpo -c -o xdvipdfmx-fontmap.obj `if test -f 'fontmap.c'; then $(CYGPATH_W) 'fontmap.c'; else $(CYGPATH_W) '$(srcdir)/fontmap.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xdvipdfmx-fontmap.Tpo $(DEPDIR)/xdvipdfmx-fontmap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fontmap.c' object='xdvipdfmx-fontmap.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xdvipdfmx-fontmap.obj `if test -f 'fontmap.c'; then $(CYGPATH_W) 'fontmap.c'; else $(CYGPATH_W) '$(srcdir)/fontmap.c'; fi`
 
 xdvipdfmx-mem.o: mem.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xdvipdfmx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xdvipdfmx-mem.o -MD -MP -MF $(DEPDIR)/xdvipdfmx-mem.Tpo -c -o xdvipdfmx-mem.o `test -f 'mem.c' || echo '$(srcdir)/'`mem.c

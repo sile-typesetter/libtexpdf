@@ -110,6 +110,8 @@ struct pdf_font
   /* PK font */
   double   point_size;
   double   design_size;
+
+  fontmap_t* fontmap;
 };
 
 static void
@@ -136,6 +138,8 @@ texpdf_init_font_struct (pdf_font *font)
 
   font->usedchars   = NULL;
   font->flags       = 0;
+
+  font->fontmap     = NULL;
 
   return;
 }
@@ -385,7 +389,7 @@ try_load_ToUnicode_CMap (pdf_font *font)
 
   ASSERT(font->map_name);
 
-  mrec = texpdf_lookup_fontmap_record(font->map_name);
+  mrec = texpdf_lookup_fontmap_record(font->fontmap, font->map_name);
   if (MREC_HAS_TOUNICODE(mrec))
     cmap_name = mrec->opt.tounicode;
   else {
@@ -538,7 +542,7 @@ texpdf_close_fonts (void)
 }
 
 int
-pdf_font_findresource (const char *tex_name,
+pdf_font_findresource (fontmap_t* map, const char *tex_name,
 		       double font_scale, fontmap_rec *mrec)
 {
   int          font_id = -1;
@@ -639,6 +643,7 @@ pdf_font_findresource (const char *tex_name,
       font->font_id     = type0_id;
       font->subtype     = PDF_FONT_FONTTYPE_TYPE0;
       font->encoding_id = cmap_id;
+      font->fontmap     = map;
 
       font_cache.count++;
 
@@ -719,6 +724,7 @@ pdf_font_findresource (const char *tex_name,
       strcpy(font->ident, fontname);
       font->map_name    = NEW(strlen(tex_name) + 1, char);
       strcpy(font->map_name, tex_name);
+      font->fontmap     = map;
       font->index       = (mrec && mrec->opt.index) ? mrec->opt.index : 0;
 
       if (pdf_font_open_type1(font) >= 0) {

@@ -43,6 +43,7 @@
     
 #include "libtexpdf/libtexpdf.h"
 #include "dvipdfmx.h"
+#include "fontmap.h"
 
 #include "specials.h"
 
@@ -233,7 +234,7 @@ spc_handler_xtx_fontmapline (struct spc_env *spe, struct spc_arg *ap)
     else if (opchr == '+')
       texpdf_append_fontmap_record(mrec->map_name, mrec);
     else
-      texpdf_insert_fontmap_record(mrec->map_name, mrec);
+      texpdf_insert_fontmap_record(dvi_fontmap, mrec->map_name, mrec);
     texpdf_clear_fontmap_record(mrec);
     RELEASE(mrec);
     break;
