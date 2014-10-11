@@ -129,4 +129,71 @@ libtexpdf_la_SOURCES = \
 	tfm.c \
 	tfm.h
 
+pkginclude_HEADERS = \
+	agl.h \
+	bmpimage.h \
+	cff.h \
+	cff_dict.h \
+	cff_limits.h \
+	cff_stdstr.h \
+	cff_types.h \
+	cid_basefont.h \
+	cid.h \
+	cid_p.h \
+	cidtype0.h \
+	cidtype2.h \
+	cmap.h \
+	cmap_p.h \
+	cmap_read.h \
+	cmap_write.h \
+	cs_type2.h \
+	dpxcrypt.h \
+	dpxfile.h \
+	dpxutil.h \
+	epdf.h \
+	error.h \
+	fontmap.h \
+	jp2image.h \
+	jpegimage.h \
+	libtexpdf.h \
+	mem.h \
+	mfileio.h \
+	numbers.h \
+	otl_conf.h \
+	otl_opt.h \
+	pdfcolor.h \
+	pdfdev.h \
+	pdfdoc.h \
+	pdfdraw.h \
+	pdfencrypt.h \
+	pdfencoding.h \
+	pdffont.h \
+	pdflimits.h \
+	pdfnames.h \
+	pdfobj.h \
+	pdfparse.h \
+	pdfresource.h \
+	pdftypes.h \
+	pdfximage.h \
+	pngimage.h \
+	pst.h \
+	pst_obj.h \
+	sfnt.h \
+	subfont.h \
+	t1_char.h \
+	t1_load.h \
+	truetype.h \
+	tt_aux.h \
+	tt_cmap.h \
+	tt_glyf.h \
+	tt_gsub.h \
+	tt_post.h \
+	tt_table.h \
+	type0.h \
+	type1.h \
+	type1c.h \
+	unicode.h \
+	pkfont.h \
+	tfm.h
+
 libtexpdf_la_LIBADD = $(FREETYPE_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBPAPER_LIBS)
