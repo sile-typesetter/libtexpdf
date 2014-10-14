@@ -2250,12 +2250,6 @@ texpdf_open_document (const char *filename,
   texpdf_init_images();
 
   pdf_doc_init_docinfo(p);
-  if (p->doccreator) {
-    texpdf_add_dict(p->info,
-                 texpdf_new_name("Creator"),
-                 texpdf_new_string(p->doccreator, strlen(p->doccreator)));
-    RELEASE(p->doccreator); p->doccreator = NULL;
-  }
 
   pdf_doc_init_bookmarks(p, bookmark_open_depth);
   pdf_doc_init_articles (p);
@@ -2296,8 +2290,9 @@ texpdf_doc_set_creator (pdf_doc *p, const char *creator)
       creator[0] == '\0')
     return;
 
-  p->doccreator = NEW(strlen(creator)+1, char);
-  strcpy(p->doccreator, creator); /* Ugh */
+  texpdf_add_dict(p->info,
+               texpdf_new_name("Creator"),
+               texpdf_new_string(creator, strlen(creator)));
 }
 
 
