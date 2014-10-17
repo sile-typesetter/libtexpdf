@@ -2217,6 +2217,7 @@ texpdf_doc_add_page_content (pdf_doc *p, const char *buffer, unsigned length)
 
 static void pdf_init(pdf_doc *p)
 {
+  bzero(p, sizeof(pdf_doc));
   p->bgcolor.num_components = 1;
   p->bgcolor.values[0] = 1.0;
 }
