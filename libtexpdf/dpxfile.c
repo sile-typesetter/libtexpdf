@@ -312,6 +312,18 @@ is_absolute_path(const char *filename)
 }
 #endif
 
+static int
+has_suffix(const char *str, const char *suffix)
+{
+  if (!str || !suffix)
+      return 0;
+  size_t lenstr = strlen(str);
+  size_t lensuffix = strlen(suffix);
+  if (lensuffix >  lenstr)
+      return 0;
+  return strncasecmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
 static const char *
 dpx_get_tmpdir (void)
 {
@@ -462,6 +474,10 @@ FILE *
 dpx_open_file (const char *filename, dpx_res_type type)
 {
   FILE  *fp   = NULL;
+
+  if (type == DPX_RES_TYPE_DFONT && !has_suffix(filename, ".dfont"))
+    return fp;
+
   if (qcheck_filetype(filename, type)) {
     fp = MFOPEN(filename, FOPEN_RBIN_MODE);
   }
