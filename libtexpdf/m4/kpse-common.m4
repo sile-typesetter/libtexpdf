@@ -224,8 +224,6 @@ if test "x$kb_cv_c_prototypes" = xno; then
   AC_MSG_ERROR([Sorry, your compiler does not understand prototypes.])
 fi
 dnl
-dnl Enable flags for compiler warnings
-KPSE_COMPILER_WARNINGS
 ]) # KPSE_BASIC
 
 # KPSE_COMMON(PACKAGE-NAME, [MORE-AUTOMAKE-OPTIONS])
