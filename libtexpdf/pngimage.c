@@ -20,8 +20,6 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#include "libtexpdf.h"
-
 /*
  * PNG SUPPORT
  *
@@ -62,6 +60,8 @@
 #endif
 
 #include <png.h>
+#include "libtexpdf.h"
+
 #include "pngimage.h"
 
 #include "pdfximage.h"
