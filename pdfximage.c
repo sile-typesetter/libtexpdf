@@ -344,7 +344,7 @@ load_image (const char *ident, const char *fullname, int format, FILE  *fp,
 }
 
 
-#define dpx_find_file(n,d,s) (char*)n /* De-kpathsea */
+#define dpx_find_file(n,d,s) strdup((char*)n) /* De-kpathsea */
 #define dpx_fopen(n,m) (MFOPEN((n),(m)))
 #define dpx_fclose(f)  (MFCLOSE((f)))
 
