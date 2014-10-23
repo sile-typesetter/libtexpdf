@@ -22,6 +22,27 @@
 /**
 @file
 @brief PDF Color handling functions
+
+`libtexpdf` provides functionality for setting various colors within the
+generated PDF. Most typically when generating PDFs, you will want to create
+a color object using one of the initializing functions like so:
+
+    pdf_color white, black, grey;
+    texpdf_color_rgbcolor(&white, 1.0, 1.0, 1.0);
+    texpdf_color_rgbcolor(&black, 0,   0,   0);
+    texpdf_color_rgbcolor(&grey,  0.5, 0.5, 0.5)
+
+You will then probably want to either set the drawing pens for
+stroke and fill to your chosen color permanently:
+
+    texpdf_color_set(pdf, black, grey); // Black stroke, grey fill
+
+Or temporarily:
+
+    texpdf_color_push(pdf, black, grey);
+    ... Do some work here ...
+    texpdf_color_pop(pdf);
+
 */
 
 #ifndef _PDF_COLOR_H_
