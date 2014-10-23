@@ -19,8 +19,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
+#define XETEX 1 /* We are all xetex now */
 
-#include "libtexpdf.h"
+#ifdef BUILDING_LIBTEXPDF
+#include <libtexpdf/config.h>
+#endif
 
 /*
  * PNG SUPPORT
@@ -63,6 +66,8 @@
 
 #include <png.h>
 #include "pngimage.h"
+
+#include "libtexpdf.h"
 
 #include "pdfximage.h"
 
