@@ -22,6 +22,8 @@
 
 #include "libtexpdf.h"
 
+int compat_mode = 0;
+
 static int verbose = 0;
 
 void
