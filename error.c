@@ -40,7 +40,7 @@
 static int _mesg_type = DPX_MESG;
 #define WANT_NEWLINE() (_mesg_type != DPX_MESG_WARN && _mesg_type != DPX_MESG_ERROR)
 
-static int  really_quiet = 0;
+static int  really_quiet = 2;
 static char* my_name = "libtexpdf";
 
 void
