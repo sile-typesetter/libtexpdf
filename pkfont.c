@@ -411,7 +411,7 @@ create_pk_CharProc_stream (struct pk_header_ *pkh,
    * consistent with write_number() in pdfobj.c.
    */
   len = pdf_sprint_number(work_buffer, chrwid);
-  len += sprintf (work_buffer + len, " 0 %ld %ld %ld %ld d1\n", llx, lly, urx, ury);
+  len += sprintf (work_buffer + len, " 0 %d %d %d %d d1\n", llx, lly, urx, ury);
   texpdf_add_stream(stream, work_buffer, len);
   /*
    * Acrobat dislike transformation [0 0 0 0 dx dy].
@@ -424,9 +424,9 @@ create_pk_CharProc_stream (struct pk_header_ *pkh,
    */
   if (pkh->bm_wd != 0 && pkh->bm_ht != 0 && pkt_len > 0) {
     /* Scale and translate origin to lower left corner for raster data */
-    len = sprintf (work_buffer, "q\n%lu 0 0 %lu %ld %ld cm\n", pkh->bm_wd, pkh->bm_ht, llx, lly);
+    len = sprintf (work_buffer, "q\n%u 0 0 %u %d %d cm\n", pkh->bm_wd, pkh->bm_ht, llx, lly);
     texpdf_add_stream(stream, work_buffer, len);
-    len = sprintf (work_buffer, "BI\n/W %lu\n/H %lu\n/IM true\n/BPC 1\nID ", pkh->bm_wd, pkh->bm_ht);
+    len = sprintf (work_buffer, "BI\n/W %u\n/H %u\n/IM true\n/BPC 1\nID ", pkh->bm_wd, pkh->bm_ht);
     texpdf_add_stream(stream, work_buffer, len);
     /* Add bitmap data */
     if (pkh->dyn_f == 14) /* bitmap */
