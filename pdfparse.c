@@ -222,7 +222,7 @@ texpdf_parse_pdf_number (const char **pp, const char *endptr)
   p = *pp;
   texpdf_skip_white(&p, endptr);
   if (p >= endptr ||
-      (!isdigit(p[0]) && p[0] != '.' &&
+      (!isdigit((unsigned char)p[0]) && p[0] != '.' &&
        p[0] != '+' && p[0] != '-')) {
     WARN("Could not find a numeric object.");
     return NULL;
@@ -252,7 +252,7 @@ texpdf_parse_pdf_number (const char **pp, const char *endptr)
       } else {
         has_dot = 1;
       }
-    } else if (isdigit(p[0])) {
+    } else if (isdigit((unsigned char)p[0])) {
       if (has_dot) {
         v += (p[0] - '0') / pow(10, nddigits + 1);
         nddigits++;
