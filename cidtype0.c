@@ -1849,12 +1849,13 @@ CIDFont_type0_t1dofont (CIDFont *font)
       ERROR("Unexpected error: Font not actually used???");
 
     tounicode = create_ToUnicode_stream(cffont, font->fontname, used_chars);
-
-    if (hparent)
-      Type0Font_set_ToUnicode(hparent, texpdf_ref_obj(tounicode));
-    if (vparent)
-      Type0Font_set_ToUnicode(vparent, texpdf_ref_obj(tounicode));
-    texpdf_release_obj(tounicode);
+    if (tounicode) { /* If no fonts are used, tounicode is NULL */
+       if (hparent)
+          Type0Font_set_ToUnicode(hparent, texpdf_ref_obj(tounicode));
+       if (vparent)
+          Type0Font_set_ToUnicode(vparent, texpdf_ref_obj(tounicode));
+       texpdf_release_obj(tounicode);
+    }
   }
 
   cff_set_name(cffont, font->fontname);
