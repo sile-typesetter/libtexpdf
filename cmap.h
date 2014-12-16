@@ -104,7 +104,7 @@ extern int  CMap_add_codespacerange (CMap *cmap,
 				     const unsigned char *codelo, const unsigned char *codehi, int dim);
 extern int  CMap_match_codespace    (CMap *cmap, const unsigned char *c, int dim);
 
-extern void texpdf_CMap_decode_char (CMap *cmap,
+extern void CMap_decode_char (CMap *cmap,
 			      const unsigned char **inbuf, long *inbytesleft,
 			      unsigned char **outbuf, long *outbytesleft);
 

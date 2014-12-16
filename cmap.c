@@ -252,7 +252,7 @@ handle_undefined (CMap *cmap,
 }
 
 void
-texpdf_CMap_decode_char (CMap *cmap,
+CMap_decode_char (CMap *cmap,
 		  const unsigned char **inbuf, long *inbytesleft,
 		  unsigned char **outbuf, long *outbytesleft)
 {
@@ -278,7 +278,7 @@ texpdf_CMap_decode_char (CMap *cmap,
     return;
   } else if (!cmap->mapTbl) {
     if (cmap->useCMap) {
-      texpdf_CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
+      CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
       return;
     } else {
       /* no mapping available in this CMap */
@@ -301,7 +301,7 @@ texpdf_CMap_decode_char (CMap *cmap,
     ERROR("%s: Premature end of input string.", CMAP_DEBUG_STR);
   else if (!MAP_DEFINED(t[c].flag)) {
     if (cmap->useCMap) {
-      texpdf_CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
+      CMap_decode_char(cmap->useCMap, inbuf, inbytesleft, outbuf, outbytesleft);
       return;
     } else {
       /* no mapping available in this CMap */
@@ -359,7 +359,7 @@ texpdf_CMap_decode (CMap *cmap,
   ASSERT(cmap && inbuf && outbuf);
   ASSERT(inbytesleft && outbytesleft);
   for (count = 0;*inbytesleft > 0 && *outbytesleft > 0; count++)
-    texpdf_CMap_decode_char(cmap, inbuf, inbytesleft, outbuf, outbytesleft);
+    CMap_decode_char(cmap, inbuf, inbytesleft, outbuf, outbytesleft);
 
   return count;
 }

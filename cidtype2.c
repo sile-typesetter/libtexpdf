@@ -466,7 +466,7 @@ cid_to_code (CMap *cmap, CID cid)
   inbuf[1] = cid & 0xff;
   p = inbuf; q = outbuf;
 
-  texpdf_CMap_decode_char(cmap, &p, &inbytesleft, &q, &outbytesleft);
+  CMap_decode_char(cmap, &p, &inbytesleft, &q, &outbytesleft);
 
   if (inbytesleft != 0)
     return 0;
