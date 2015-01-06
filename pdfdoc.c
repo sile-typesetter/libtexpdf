@@ -2443,7 +2443,7 @@ texpdf_doc_begin_grabbing (pdf_doc *p, const char *ident,
    * Make sure the object is self-contained by adding the
    * current font and color to the object stream.
    */
-  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_fonts(1);
   texpdf_dev_reset_color(p, 1);  /* force color operators to be added to stream */
 
   return xobj_id;
@@ -2488,7 +2488,7 @@ texpdf_doc_end_grabbing (pdf_doc *p, pdf_obj *attrib)
 
   texpdf_dev_pop_gstate();
 
-  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_fonts(1);
   texpdf_dev_reset_color(p, 0);
 
   RELEASE(fnode);

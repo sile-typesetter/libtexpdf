@@ -1120,7 +1120,7 @@ texpdf_dev_grestore (pdf_doc *p)
 
   texpdf_doc_add_page_content(p, " Q", 2);  /* op: Q */
 
-  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_fonts(0);
 
   return  0;
 }
@@ -1185,7 +1185,7 @@ texpdf_dev_grestore_to (pdf_doc *p, int depth)
     clear_a_gstate(gs);
     RELEASE(gs);
   }
-  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_fonts(0);
 
   return;
 }

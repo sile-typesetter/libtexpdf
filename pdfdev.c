@@ -1305,7 +1305,7 @@ texpdf_close_device (void)
  * as the font stuff.
  */
 void
-texpdf_dev_reset_fonts (void)
+texpdf_dev_reset_fonts (int newpage)
 {
   int  i;
 
@@ -1319,7 +1319,8 @@ texpdf_dev_reset_fonts (void)
   text_state.matrix.extend = 1.0;
   text_state.matrix.rotate = TEXT_WMODE_HH;
 
-  text_state.bold_param    = 0.0;
+  if (newpage)
+    text_state.bold_param  = 0.0;
 
   text_state.is_mb         = 0;
 }
@@ -1361,7 +1362,7 @@ texpdf_dev_bop (pdf_doc *p, const pdf_tmatrix *M)
   texpdf_dev_gsave(p);
   texpdf_dev_concat(p, M);
 
-  texpdf_dev_reset_fonts();
+  texpdf_dev_reset_fonts(1);
   texpdf_dev_reset_color(p, 0);
 }
 
