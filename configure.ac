@@ -11,6 +11,7 @@ AC_PREREQ([2.65])
 AC_CONFIG_SRCDIR([pdfdoc.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
+LT_INIT()
 
 KPSE_COMMON([libtexpdf])
 
