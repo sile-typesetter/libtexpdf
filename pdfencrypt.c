@@ -86,8 +86,8 @@ void texpdf_enc_compute_id_string (char *dviname, char *pdfname)
   texpdf_MD5_write(&md5_ctx, (unsigned char *)date_string, strlen(date_string));
   RELEASE (date_string);
 
-  producer = NEW (strlen(PRODUCER)+strlen(my_name)+strlen(VERSION), char);
-  sprintf(producer, PRODUCER, my_name, VERSION);
+  producer = NEW (strlen(PRODUCER)+strlen(my_name)+strlen(PACKAGE_VERSION), char);
+  sprintf(producer, PRODUCER, my_name, PACKAGE_VERSION);
   texpdf_MD5_write(&md5_ctx, (unsigned char *)producer, strlen(producer));
   RELEASE (producer);
 
