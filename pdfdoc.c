@@ -399,8 +399,8 @@ pdf_doc_close_docinfo (pdf_doc *p)
   if (!texpdf_lookup_dict(docinfo, "Producer")) {
     char *banner;
 
-    banner = NEW(strlen(my_name)+strlen(VERSION)+4, char);
-    sprintf(banner, "%s (%s)", my_name, VERSION);
+    banner = NEW(strlen(my_name)+strlen(PACKAGE_VERSION)+4, char);
+    sprintf(banner, "%s (%s)", my_name, PACKAGE_VERSION);
     texpdf_add_dict(docinfo,
                  texpdf_new_name("Producer"),
                  texpdf_new_string(banner, strlen(banner)));
