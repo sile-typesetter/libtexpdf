@@ -24,6 +24,8 @@
 #include <config.h>
 #endif
 
+#include <string.h>
+
 #include "mem.h"
 #include "error.h"
 
@@ -33,11 +35,6 @@
 #include "subfont.h"
 
 #include "fontmap.h"
-
-#ifdef XETEX
-#include "ft2build.h"
-#include FT_FREETYPE_H
-#endif
 
 static int verbose = 0;
 void
@@ -82,10 +79,6 @@ texpdf_init_fontmap_record (fontmap_rec *mrec)
   mrec->opt.charcoll  = NULL;
   mrec->opt.style     = FONTMAP_STYLE_NONE;
   mrec->opt.stemv     = -1; /* not given explicitly by an option */
-
-#ifdef XETEX
-  mrec->opt.ft_face   = NULL;
-#endif
 
   mrec->opt.cff_charsets = NULL;
 }
@@ -153,10 +146,6 @@ texpdf_copy_fontmap_record (fontmap_rec *dst, const fontmap_rec *src)
   dst->opt.charcoll  = mstrdup(src->opt.charcoll);
   dst->opt.style     = src->opt.style;
   dst->opt.stemv     = src->opt.stemv;
-
-#ifdef XETEX
-  dst->opt.ft_face   = src->opt.ft_face;
-#endif
 
   dst->opt.cff_charsets = src->opt.cff_charsets;
 }
@@ -348,13 +337,13 @@ texpdf_insert_fontmap_record (fontmap_t* map, const char *kp, const fontmap_rec 
 
 #ifdef XETEX
 static int
-texpdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
+texpdf_insert_native_fontmap_record (const char *path, int index,
                                   int layout_dir, int extend, int slant, int embolden)
 {
   char        *fontmap_key;
   fontmap_rec *mrec;
 
-  ASSERT(path || face);
+  ASSERT(path);
 
   fontmap_key = malloc(strlen(path) + 40);	// CHECK
   sprintf(fontmap_key, "%s/%d/%c/%d/%d/%d", path, index, layout_dir == 0 ? 'H' : 'V', extend, slant, embolden);
@@ -369,7 +358,6 @@ texpdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
   mrec->enc_name  = mstrdup(layout_dir == 0 ? "Identity-H" : "Identity-V");
   mrec->font_name = (path != NULL) ? mstrdup(path) : NULL;
   mrec->opt.index = index;
-  mrec->opt.ft_face = face;
   if (layout_dir != 0)
     mrec->opt.flags |= FONTMAP_OPT_VERT;
 
@@ -389,27 +377,12 @@ texpdf_insert_native_fontmap_record (const char *path, int index, FT_Face face,
   return 0;
 }
 
-static FT_Library ftLib;
-
 int
 texpdf_load_native_font (const char *filename, unsigned long index,
                       int layout_dir, int extend, int slant, int embolden)
 {
-  FT_Face face = NULL;
-  int  error = -1;
-
-  if (FT_Init_FreeType(&ftLib) != 0) {
-    ERROR("FreeType initialization failed.");
-    return error;
-  }
-
-  /* try loading the filename directly */
-  error = FT_New_Face(ftLib, filename, index, &face);
-
-  if (error == 0)
-    error = texpdf_insert_native_fontmap_record(filename, index, face,
-                                           layout_dir, extend, slant, embolden);
-  return error;
+  return texpdf_insert_native_fontmap_record(filename, index,
+                                          layout_dir, extend, slant, embolden);
 }
 #endif /* XETEX */
 
