@@ -336,8 +336,8 @@ texpdf_insert_fontmap_record (fontmap_t* map, const char *kp, const fontmap_rec 
 }
 
 #ifdef XETEX
-static int
-texpdf_insert_native_fontmap_record (const char *path, int index,
+int
+texpdf_insert_native_fontmap_record (const char *path, uint32_t index,
                                   int layout_dir, int extend, int slant, int embolden)
 {
   char        *fontmap_key;

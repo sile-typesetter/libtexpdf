@@ -96,8 +96,8 @@ extern char *       texpdf_chop_sfd_name (const char *tex_name, char **sfd_name)
 
 #ifdef XETEX
 extern fontmap_t *native_fontmap;
-extern int          texpdf_load_native_font      (const char *filename, unsigned long index,
-                                               int layout_dir, int extend, int slant, int embolden);
+extern int          texpdf_insert_native_fontmap_record (const char *filename, uint32_t index,
+                                                      int layout_dir, int extend, int slant, int embolden);
 #endif
 
 #endif /* _FONTMAP_H_ */
