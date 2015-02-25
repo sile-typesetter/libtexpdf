@@ -94,10 +94,8 @@ extern fontmap_rec *texpdf_lookup_fontmap_record (fontmap_t* map, const char  *k
 extern char *       texpdf_make_subfont_name (const char *map_name, const char *sfd_name, const char *sub_id);
 extern char *       texpdf_chop_sfd_name (const char *tex_name, char **sfd_name);
 
-#ifdef XETEX
 extern fontmap_t *native_fontmap;
 extern int          texpdf_insert_native_fontmap_record (const char *filename, uint32_t index,
                                                       int layout_dir, int extend, int slant, int embolden);
-#endif
 
 #endif /* _FONTMAP_H_ */
