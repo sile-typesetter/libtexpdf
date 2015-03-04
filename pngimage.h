@@ -24,8 +24,6 @@
 #ifndef _PNGIMAGE_H_
 #define _PNGIMAGE_H_
 
-#ifdef HAVE_LIBPNG
-
 #include "mfileio.h"
 #include "pdfximage.h"
 
@@ -35,5 +33,3 @@ extern int texpdf_png_get_bbox (FILE *fp, uint32_t *width, uint32_t *height,
 			 double *xdensity, double *ydensity);
 
 #endif
-
-#endif /* _PNGIMAGE_H_ */

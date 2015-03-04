@@ -51,8 +51,6 @@
 #define PNG_DEBUG_STR "PNG"
 #define PNG_DEBUG     3
 
-#ifdef HAVE_LIBPNG
-
 /*
  * Write, MNG, Progressive not required.
  */
@@ -1065,5 +1063,3 @@ texpdf_png_get_bbox (FILE *png_file, uint32_t *width, uint32_t *height,
 
   return 0;
 }
-
-#endif /* HAVE_LIBPNG */
