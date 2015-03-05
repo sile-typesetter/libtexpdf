@@ -27,7 +27,7 @@
 
 extern void texpdf_tfm_set_verbose (void);
 
-extern int  texpdf_tfm_open (const char * tex_name, int must_exist);
+extern int  texpdf_tfm_open (const char *path, const char * tex_name, int must_exist);
 extern void texpdf_tfm_close_all (void);
 
 extern double texpdf_tfm_get_width  (int font_id, int32_t ch);

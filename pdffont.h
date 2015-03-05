@@ -77,6 +77,7 @@ extern char    *pdf_font_get_ident      (pdf_font *font);
 extern char    *pdf_font_get_mapname    (pdf_font *font);
 extern char    *pdf_font_get_fontname   (pdf_font *font); /* without unique tag */
 extern char    *pdf_font_get_uniqueTag  (pdf_font *font);
+extern char    *pdf_font_get_tfm_path   (pdf_font *font);
 
 extern pdf_obj *pdf_font_get_resource   (pdf_font *font);
 extern pdf_obj *pdf_font_get_descriptor (pdf_font *font);

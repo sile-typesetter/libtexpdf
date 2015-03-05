@@ -53,7 +53,7 @@ truedpi (const char *ident, double point_size, unsigned bdpi)
   double    design_size;
   int       tfm_id;
 
-  tfm_id = texpdf_tfm_open(ident, 0);
+  tfm_id = texpdf_tfm_open(NULL, ident, 0);
   if (tfm_id < 0)
     return  dpi;
 

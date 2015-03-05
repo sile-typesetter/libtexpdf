@@ -213,7 +213,7 @@ do_widths (pdf_font *font, double *widths)
     texpdf_release_obj(tmparray);
     return;
   }
-  tfm_id = texpdf_tfm_open(pdf_font_get_mapname(font), 0);
+  tfm_id = texpdf_tfm_open(pdf_font_get_tfm_path(font), pdf_font_get_mapname(font), 0);
   for (code = firstchar; code <= lastchar; code++) {
     if (usedchars[code]) {
       double width;

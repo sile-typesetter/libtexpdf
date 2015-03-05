@@ -814,27 +814,27 @@ read_tfm (struct font_metric *fm, FILE *tfm_file, off_t tfm_file_size)
  */
 
 int
-texpdf_tfm_open (const char *tfm_name, int must_exist)
+texpdf_tfm_open (const char *path, const char *tex_name, int must_exist)
 {
   FILE *tfm_file;
   int i, format = TFM_FORMAT;
   off_t tfm_file_size;
 
   for (i = 0; i < numfms; i++) {
-    if (!strcmp(tfm_name, fms[i].tex_name))
+    if (!strcmp(tex_name, fms[i].tex_name))
       return i;
   }
 
-  tfm_file = MFOPEN(tfm_name, FOPEN_RBIN_MODE);
+  tfm_file = MFOPEN(path, FOPEN_RBIN_MODE);
   if (!tfm_file) {
-    ERROR("Could not open specified TFM/OFM file \"%s\".", tfm_name);
+    ERROR("Could not open specified TFM/OFM file \"%s\".", path);
   }
 
   if (verbose) {
     if (format == TFM_FORMAT)
-      MESG("(TFM:%s", tfm_name);
+      MESG("(TFM:%s", path);
     else if (format == OFM_FORMAT)
-      MESG("(OFM:%s", tfm_name);
+      MESG("(OFM:%s", path);
   }
 
   tfm_file_size = xfile_size (tfm_file, "TFM/OFM");
@@ -858,8 +858,8 @@ texpdf_tfm_open (const char *tfm_name, int must_exist)
 
   MFCLOSE(tfm_file);
 
-  fms[numfms].tex_name = NEW(strlen(tfm_name)+1, char);
-  strcpy(fms[numfms].tex_name, tfm_name);
+  fms[numfms].tex_name = NEW(strlen(tex_name)+1, char);
+  strcpy(fms[numfms].tex_name, tex_name);
 
   if (verbose) 
     MESG(")");

@@ -108,6 +108,7 @@ struct pdf_font
   int      flags;
 
   /* PK font */
+  char    *tfm_path;  
   double   point_size;
   double   design_size;
 
@@ -133,6 +134,7 @@ texpdf_init_font_struct (pdf_font *font)
   font->resource    = NULL;
   font->descriptor  = NULL;
 
+  font->tfm_path    = NULL;
   font->point_size  = 0;
   font->design_size = 0;
 
@@ -206,6 +208,8 @@ pdf_clean_font_struct (pdf_font *font)
       RELEASE(font->ident);
     if (font->map_name)
       RELEASE(font->map_name);
+    if (font->tfm_path)
+      RELEASE(font->tfm_path);
     if (font->fontname)
       RELEASE(font->fontname);
     if (font->usedchars)
@@ -221,6 +225,7 @@ pdf_clean_font_struct (pdf_font *font)
     font->ident     = NULL;
     font->map_name  = NULL;
     font->fontname  = NULL;
+    font->tfm_path  = NULL;
     font->usedchars = NULL;
   }
 
@@ -784,6 +789,14 @@ pdf_font_get_mapname (pdf_font *font)
   ASSERT(font);
 
   return font->map_name;
+}
+
+char *
+pdf_font_get_tfm_path (pdf_font *font)
+{
+  ASSERT(font);
+
+  return font->tfm_path;
 }
 
 char *
