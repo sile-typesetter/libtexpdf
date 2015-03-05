@@ -47,6 +47,7 @@ extern void   texpdf_transform_info_clear (transform_info *info);
 
 /** Increase verbosity */
 extern void   texpdf_dev_set_verbose (void);
+extern const char*  texpdf_library_version (void);
 
 /* Not in spt_t. */
 extern int    texpdf_sprint_matrix (char *buf, const pdf_tmatrix *p);

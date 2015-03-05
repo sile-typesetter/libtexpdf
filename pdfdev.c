@@ -32,6 +32,12 @@ texpdf_dev_set_verbose (void)
   verbose++;
 }
 
+const char*
+texpdf_library_version(void)
+{
+  return PACKAGE_VERSION;
+}
+
 /* Not working yet... */
 double
 texpdf_dev_scale (void)
