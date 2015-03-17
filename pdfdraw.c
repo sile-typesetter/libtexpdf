@@ -1259,7 +1259,7 @@ texpdf_dev_set_color (pdf_doc *p, const pdf_color *color, char mask, int force)
     return;
 
   texpdf_graphics_mode(p);
-  len = texpdf_color_to_string(color, fmt_buf);
+  len = texpdf_color_to_string(color, fmt_buf, mask);
   fmt_buf[len++] = ' ';
   switch (texpdf_color_type(color)) {
   case  PDF_COLORSPACE_TYPE_RGB:
@@ -1275,7 +1275,7 @@ texpdf_dev_set_color (pdf_doc *p, const pdf_color *color, char mask, int force)
   default: /* already verified the given color */
     break;
   }
-  texpdf_doc_add_page_content(p, fmt_buf, len);  /* op: RG K G rg k g */
+  texpdf_doc_add_page_content(p, fmt_buf, len);  /* op: RG K G rg k g etc. */
 
   texpdf_color_copycolor(current, color);
 }

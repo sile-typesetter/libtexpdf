@@ -23,6 +23,7 @@ typedef struct pdf_coord
 typedef struct
 {
   int    num_components;
+  char*  spot_color_name;
   double values[PDF_COLOR_COMPONENT_MAX];
 } pdf_color;
 

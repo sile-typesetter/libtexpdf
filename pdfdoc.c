@@ -2219,6 +2219,7 @@ static void pdf_init(pdf_doc *p)
 {
   bzero(p, sizeof(pdf_doc));
   p->bgcolor.num_components = 1;
+  p->bgcolor.spot_color_name = NULL;
   p->bgcolor.values[0] = 1.0;
 }
 

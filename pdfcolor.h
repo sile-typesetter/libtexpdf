@@ -53,6 +53,7 @@ Or temporarily:
 
 #define PDF_COLORSPACE_TYPE_DEVICECMYK -4
 #define PDF_COLORSPACE_TYPE_DEVICERGB  -3
+#define PDF_COLORSPACE_TYPE_SPOT       -2
 #define PDF_COLORSPACE_TYPE_DEVICEGRAY -1
 #define PDF_COLORSPACE_TYPE_INVALID     0
 #define PDF_COLORSPACE_TYPE_CALGRAY     1
@@ -83,6 +84,9 @@ extern int        texpdf_color_cmykcolor     (pdf_color *color,
 /** Initialize a gray.
 Initialize a color from a single gray value. Caller provides allocated struct. */
 extern int        texpdf_color_graycolor     (pdf_color *color, double g);
+/** Initialize a spot color.
+*/
+extern int        texpdf_color_spotcolor     (pdf_color *color, char* color_name, double c);
 /** Copy color objects.
 Copies color information from source to destination, assuming both structs are allocated. */
 extern void       texpdf_color_copycolor     (pdf_color *color1, const pdf_color *color2);
@@ -97,7 +101,8 @@ Increases the luminosity of the color value by `f`, where 0 means no change and 
 extern void       texpdf_color_brighten_color (pdf_color *dst, const pdf_color *src, double f);
 
 /** Return type of color.
-Returns either `PDF_COLORSPACE_TYPE_GRAY`, `PDF_COLORSPACE_TYPE_RGB` or `PDF_COLORSPACE_TYPE_CMYK`. */
+Returns either `PDF_COLORSPACE_TYPE_GRAY`, `PDF_COLORSPACE_TYPE_RGB`,
+`PDF_COLORSPACE_TYPE_SPOT` or `PDF_COLORSPACE_TYPE_CMYK`. */
 extern int        texpdf_color_type          (const pdf_color *color);
 /** Compares two colors (badly).
 Returns -1 if two colors differ, 0 if they have the same color space and values.
@@ -105,9 +110,10 @@ Note that checking for same color space means that CMYK red (0,1,1,0) and
 RGB red (1,0,0) will not compare as equal.*/
 extern int        texpdf_color_compare       (const pdf_color *color1, const pdf_color *color2);
 /** Convert color to a (PDF) color string.
-In practice this means rounding each component and joining them together with spaces.
+In practice this means rounding each component and joining them together
+with spaces, except in spot colors where the color name is returned.
 Caller is responsible for providing a long-enough buffer. */
-extern int        texpdf_color_to_string     (const pdf_color *color, char *buffer);
+extern int        texpdf_color_to_string     (const pdf_color *color, char *buffer, char mask);
 /** Compares colors against white, in whatever color space. */
 extern int        texpdf_color_is_white      (const pdf_color *color);
 /** Checks all color values are within the range 0-1. */
