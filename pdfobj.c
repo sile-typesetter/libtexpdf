@@ -2940,8 +2940,11 @@ texpdf_parse_xrefstm_subsec (pdf_file *pf,
     type = (unsigned char) texpdf_parse_xrefstm_field(p, W[0], 1);
     if (type > 2)
       WARN("Unknown cross-reference stream entry type.");
+#if 0
+    /* Not sure */
     else if (!W[1] || (type != 1 && !W[2]))
       return -1;
+#endif
 
     field2 = (unsigned long)  texpdf_parse_xrefstm_field(p, W[1], 0);
     field3 = (unsigned short) texpdf_parse_xrefstm_field(p, W[2], 0);
