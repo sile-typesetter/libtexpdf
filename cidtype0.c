@@ -748,7 +748,10 @@ CIDFont_type0_open (CIDFont *font, const char *name,
   if ((sfont->type != SFNT_TYPE_TTC && sfont->type != SFNT_TYPE_POSTSCRIPT) ||
       sfnt_read_table_directory(sfont, offset) < 0 ||
       (offset = sfnt_find_table_pos(sfont, "CFF ")) == 0) {
-    ERROR("Not a CFF/OpenType font (4)?");
+    sfnt_close(sfont);
+    if (fp)
+      DPXFCLOSE(fp);
+    return -1;
   }
 
   cffont = cff_open(sfont->stream, offset, opt->index);
@@ -1180,7 +1183,10 @@ CIDFont_type0_t1copen (CIDFont *font, const char *name,
   if ((sfont->type != SFNT_TYPE_TTC && sfont->type != SFNT_TYPE_POSTSCRIPT) ||
       sfnt_read_table_directory(sfont, offset) < 0 ||
       (offset = sfnt_find_table_pos(sfont, "CFF ")) == 0) {
-    ERROR("Not a CFF/OpenType font (8)?");
+    sfnt_close(sfont);
+    if (fp)
+      DPXFCLOSE(fp);
+    return -1;
   }
 
   cffont = cff_open(fp, offset, opt->index);
