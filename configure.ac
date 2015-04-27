@@ -55,7 +55,6 @@ AC_SEARCH_LIBS([pow], [m])
 
 KPSE_ZLIB_FLAGS
 AC_CHECK_LIB([png],[png_get_image_width],[],[AC_MSG_FAILURE([Suitable libpng not found])])
-PKG_CHECK_MODULES(FREETYPE, freetype2,[],[AC_MSG_FAILURE([Freetype2 not found])])
 
 if test "x$enable_build" != xno || test -f config.force; then
 
