@@ -24,9 +24,7 @@
  *  Adobe Technical Note #5176 "The Compact Font Format Specification"
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 #include <math.h>
 #include <stdlib.h>
