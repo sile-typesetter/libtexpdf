@@ -24,9 +24,7 @@
  *  See also, cidtype0, and cidtype2
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "libtexpdf.h"
 
 #include <string.h>
 
