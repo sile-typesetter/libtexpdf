@@ -346,7 +346,7 @@ png_include_image (pdf_ximage *ximage, FILE *png_file)
    * flag of iTxt chunks.
    */
 #if PNG_LIBPNG_VER >= 10614
-  if (pdf_get_version() >= 4) {
+  if (texpdf_get_version() >= 4) {
     png_textp text_ptr;
     pdf_obj  *XMP_stream, *XMP_stream_dict;
     int       i, num_text;
@@ -368,16 +368,16 @@ png_include_image (pdf_ximage *ximage, FILE *png_file)
            * application programs that only want PDF document global XMP metadata
            * and scan for that.
            */
-          XMP_stream = pdf_new_stream(STREAM_COMPRESS);
-          XMP_stream_dict = pdf_stream_dict(XMP_stream);
-          pdf_add_dict(XMP_stream_dict,
-                       pdf_new_name("Type"), pdf_new_name("Metadata"));
-          pdf_add_dict(XMP_stream_dict,
-                       pdf_new_name("Subtype"), pdf_new_name("XML"));
-          pdf_add_stream(XMP_stream, text_ptr[i].text, text_ptr[i].itxt_length);
-          pdf_add_dict(stream_dict,
-                       pdf_new_name("Metadata"), pdf_ref_obj(XMP_stream));
-          pdf_release_obj(XMP_stream);
+          XMP_stream = texpdf_new_stream(STREAM_COMPRESS);
+          XMP_stream_dict = texpdf_stream_dict(XMP_stream);
+          texpdf_add_dict(XMP_stream_dict,
+                       texpdf_new_name("Type"), texpdf_new_name("Metadata"));
+          texpdf_add_dict(XMP_stream_dict,
+                       texpdf_new_name("Subtype"), texpdf_new_name("XML"));
+          texpdf_add_stream(XMP_stream, text_ptr[i].text, text_ptr[i].itxt_length);
+          texpdf_add_dict(stream_dict,
+                       texpdf_new_name("Metadata"), texpdf_ref_obj(XMP_stream));
+          texpdf_release_obj(XMP_stream);
           have_XMP = 1;
         }
       }
