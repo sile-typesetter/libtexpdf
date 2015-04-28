@@ -526,7 +526,7 @@ CIDFont_type0_dofont (CIDFont *font)
   if (offset == 0)
     ERROR("Not a CFF/OpenType font (2)?");
 
-  cffont = cff_open(fp, offset, font->options->index);
+  cffont = cff_open(fp, offset, 0);
   if (!cffont)
     ERROR("Could not open CFF font.");
   if (!(cffont->flag & FONTTYPE_CIDFONT))
@@ -752,7 +752,7 @@ CIDFont_type0_open (CIDFont *font, const char *name,
     return -1;
   }
 
-  cffont = cff_open(sfont->stream, offset, opt->index);
+  cffont = cff_open(sfont->stream, offset, 0);
   if (!cffont) {
     ERROR("Cannot read CFF font data");
   }
@@ -931,7 +931,7 @@ CIDFont_type0_t1cdofont (CIDFont *font)
   if (offset == 0)
     ERROR("Not a CFF/OpenType font (6)?");
 
-  cffont = cff_open(fp, offset, font->options->index);
+  cffont = cff_open(fp, offset, 0);
   if (!cffont)
     ERROR("Could not open CFF font.");
   if (cffont->flag & FONTTYPE_CIDFONT)
@@ -1187,7 +1187,7 @@ CIDFont_type0_t1copen (CIDFont *font, const char *name,
     return -1;
   }
 
-  cffont = cff_open(fp, offset, opt->index);
+  cffont = cff_open(fp, offset, 0);
   if (!cffont) {
     ERROR("Cannot read CFF font data");
   }
