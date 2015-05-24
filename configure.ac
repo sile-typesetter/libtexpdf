@@ -54,7 +54,9 @@ AC_CHECK_SIZEOF([long])
 AC_SEARCH_LIBS([pow], [m])
 
 KPSE_ZLIB_FLAGS
-AC_CHECK_LIB([png],[png_get_image_width],[],[AC_MSG_FAILURE([Suitable libpng not found])])
+PKG_CHECK_MODULES(LIBPNG, libpng,[],[AC_MSG_FAILURE([libpng not available or not configured with pkg-config])])
+
+AC_CHECK_LIB([png],[png_get_image_width],[],[AC_MSG_FAILURE([Suitable libpng not found])],[$LIBPNG_LIBS])
 
 if test "x$enable_build" != xno || test -f config.force; then
 
