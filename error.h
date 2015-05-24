@@ -23,7 +23,7 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 #  undef ERROR
 #  undef NO_ERROR
 #  undef RGB

@@ -38,7 +38,7 @@
 #define MAX_KEY_LEN 16
 
 #include <string.h>
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 #include <io.h>
 #include <process.h>
 #include <wchar.h>
@@ -220,7 +220,7 @@ static int exec_spawn (char *cmd)
       }
     }
     *pp = '\0';
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
     if (strchr (buf, ' ') || strchr (buf, '\t'))
       *qv = concat3 ("\"", buf, "\"");
     else
@@ -233,7 +233,7 @@ static int exec_spawn (char *cmd)
       p++;
     qv++;
   }
-#ifdef WIN32
+#if defined WIN32 && !defined(__MINGW32__)
   cmdvw = xcalloc (i + 2, sizeof (wchar_t *));
   qv = cmdv;
   qvw = cmdvw;
