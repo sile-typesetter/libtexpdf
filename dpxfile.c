@@ -20,6 +20,11 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
+#if defined(__MINGW32__)
+#include <stringapiset.h>
+#include <wchar.h>
+#endif
+
 #include "libtexpdf/libtexpdf.h"
 
 #include <time.h>
@@ -70,6 +75,27 @@ dpx_file_set_verbose (void)
 
 /* Kpathsea library does not check file type. */
 static int qcheck_filetype (const char *fqpn, dpx_res_type type);
+
+#if defined(__MINGW32__)
+wchar_t *
+get_wstring_from_mbstring(int cp, const char *mbstr, wchar_t *wstr)
+{
+  int len;
+
+  len = MultiByteToWideChar(cp, 0, mbstr, -1, wstr, 0);
+  if (len==0) {
+    ERROR("cannot convert string to wide string");
+  }
+  if (wstr==NULL) {
+    wstr = malloc(sizeof(wchar_t)*(len+1));
+  }
+  len = MultiByteToWideChar(cp, 0, mbstr, -1, wstr, len+1);
+  if (len==0) {
+    ERROR("cannot convert multibyte string to wide string");
+  }
+  return wstr;
+}
+#endif
 
 /* For testing MIKTEX enabled compilation */
 #if defined(TESTCOMPILE) && !defined(MIKTEX)
@@ -233,12 +259,16 @@ static int exec_spawn (char *cmd)
       p++;
     qv++;
   }
-#if defined WIN32 && !defined(__MINGW32__)
+#ifdef WIN32
   cmdvw = xcalloc (i + 2, sizeof (wchar_t *));
   qv = cmdv;
   qvw = cmdvw;
   while (*qv) {
+#ifdef __MINGW32__ /* Hack */
+    get_wstring_from_mbstring(CP_UTF8,*qv,*qvw=NULL);
+#else    
     *qvw = get_wstring_from_fsyscp(*qv, *qvw=NULL);
+#endif
     qv++;
     qvw++;
   }
@@ -386,7 +416,7 @@ dpx_create_temp_file (void)
   }
 #else /* use _tempnam or tmpnam */
   {
-#  ifdef WIN32
+#  if defined(WIN32) && !defined(__MINGW32__)
     const char *_tmpd;
     char *p;
     _tmpd = dpx_get_tmpdir();
@@ -442,7 +472,7 @@ dpx_create_fix_temp_file (const char *filename)
       sprintf(s, "%02x", digest[i]);
       s += 2;
   }
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
   for (p = ret; *p; p++) {
     if (IS_KANJI (p))
       p++;
