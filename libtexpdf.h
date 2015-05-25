@@ -100,4 +100,10 @@ extern int compat_mode;
 #include "type1.h"
 #include "type1c.h"
 #include "unicode.h"
+#ifdef __MINGW32__
+#define off_t off64_t
+#define ftello ftello64
+#define fseeko fseeko64
+#endif
+
 #endif
