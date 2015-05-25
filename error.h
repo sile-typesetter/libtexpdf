@@ -23,7 +23,10 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(WIN32) 
+#  if defined(__MINGW32__)
+#    define CDECL
+#  endif
 #  undef ERROR
 #  undef NO_ERROR
 #  undef RGB

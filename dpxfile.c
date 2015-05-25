@@ -21,7 +21,7 @@
 */
 
 #if defined(__MINGW32__)
-#include <stringapiset.h>
+#include <windows.h>
 #include <wchar.h>
 #endif
 
