@@ -600,11 +600,11 @@ CIDFont_type0_add_CIDSet(CIDFont *font, char *used_chars, card16 last_cid) {
    */
   pdf_obj *cidset;
 
-  cidset = pdf_new_stream(STREAM_COMPRESS);
-  pdf_add_stream(cidset, used_chars, (last_cid / 8) + 1);
-  pdf_add_dict(font->descriptor,
-               pdf_new_name("CIDSet"), pdf_ref_obj(cidset));
-  pdf_release_obj(cidset);
+  cidset = texpdf_new_stream(STREAM_COMPRESS);
+  texpdf_add_stream(cidset, used_chars, (last_cid / 8) + 1);
+  texpdf_add_dict(font->descriptor,
+               texpdf_new_name("CIDSet"), texpdf_ref_obj(cidset));
+  texpdf_release_obj(cidset);
 }
 
 void
