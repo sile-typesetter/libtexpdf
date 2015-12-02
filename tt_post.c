@@ -162,7 +162,7 @@ tt_lookup_post_table (struct tt_post_table *post, const char *glyphname)
 char*
 tt_get_glyphname (struct tt_post_table *post, USHORT gid)
 {
-  if (gid < post->count)
+  if (gid < post->count && post->glyphNamePtr[gid])
     return strdup(post->glyphNamePtr[gid]); /* XXX was xstrdup - why? */
   return NULL;
 }
