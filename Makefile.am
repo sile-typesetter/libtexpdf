@@ -97,7 +97,6 @@ libtexpdf_la_SOURCES = \
 	sfnt.h \
 	subfont.c \
 	subfont.h \
-	system.h \
 	t1_char.c \
 	t1_char.h \
 	t1_load.c \
