@@ -17,6 +17,7 @@ KPSE_COMMON([libtexpdf])
 
 AC_CONFIG_HEADERS([config.h])
 
+AM_SILENT_RULES([yes])
 
 dnl We're not using kpse, but just using its m4 system to aid
 dnl integration into the TL tree
