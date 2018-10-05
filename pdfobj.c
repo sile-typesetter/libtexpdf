@@ -455,6 +455,8 @@ pdf_out_flush (void)
     MESG("%ld bytes written", pdf_output_file_position);
 
     MFCLOSE(pdf_output_file);
+    pdf_output_file_position = 0;
+    pdf_output_line_position = 0;
   }
 }
 
