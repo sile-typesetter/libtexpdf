@@ -49,6 +49,10 @@ extern int compat_mode;
 #define fseeko fseeko64
 #endif
 
+#if defined(__APPLE__)
+#define off64_t off_t
+#endif
+
 #include "agl.h"
 #include "bmpimage.h"
 #include "cff.h"
