@@ -40,13 +40,13 @@
 static int _mesg_type = DPX_MESG;
 #define WANT_NEWLINE() (_mesg_type != DPX_MESG_WARN && _mesg_type != DPX_MESG_ERROR)
 
-static int  really_quiet = 2;
+static int  debug_level = 2;
 static char* my_name = "libtexpdf";
 
 void
-shut_up (int quietness)
+texpdf_debug_level (int quietness)
 {
-  really_quiet = quietness;
+  debug_level = quietness;
 }
 
 void
@@ -54,7 +54,7 @@ MESG (const char *fmt, ...)
 {
   va_list argp;
 
-  if (really_quiet < 1) {
+  if (debug_level < 1) {
     va_start(argp, fmt);
     vfprintf(stderr, fmt, argp);
     va_end(argp);
@@ -67,7 +67,7 @@ WARN (const char *fmt, ...)
 {
   va_list argp;
 
-  if (really_quiet < 2) {
+  if (debug_level < 2) {
     if (WANT_NEWLINE())
       fprintf(stderr, "\n");
     fprintf(stderr, "%s:warning: ", my_name);
@@ -85,7 +85,7 @@ ERROR (const char *fmt, ...)
 {
   va_list argp;
 
-  if (really_quiet < 3) {
+  if (debug_level < 3) {
     if (WANT_NEWLINE())
       fprintf(stderr, "\n");
     fprintf(stderr, "%s:fatal: ", my_name);

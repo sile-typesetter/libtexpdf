@@ -50,7 +50,7 @@ extern void error_cleanup (void);
 #include <assert.h>
 #include <stdio.h>
 
-extern void shut_up (int quietness);
+extern void texpdf_debug_level (int quietness);
 
 extern void ERROR (const char *fmt, ...);
 extern void MESG  (const char *fmt, ...);
