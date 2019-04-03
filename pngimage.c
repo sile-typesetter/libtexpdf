@@ -22,7 +22,7 @@
 #define XETEX 1 /* We are all xetex now */
 
 #ifdef BUILDING_LIBTEXPDF
-#include <libtexpdf/config.h>
+#include <config.h>
 #endif
 
 /*

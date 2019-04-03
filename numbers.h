@@ -23,6 +23,10 @@
 #ifndef _NUMBERS_H_
 #define _NUMBERS_H_
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
 #include <math.h>
 #ifdef HAVE_INTTYPES_H

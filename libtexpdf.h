@@ -3,7 +3,7 @@
 #define XETEX 1 /* We are all xetex now */
 
 #ifdef BUILDING_LIBTEXPDF
-#include <libtexpdf/config.h>
+#include <config.h>
 #endif
 
 #ifdef HAVE_STRING_H
@@ -38,6 +38,16 @@ extern int compat_mode;
 #ifndef FOPEN_WBIN_MODE
 #define FOPEN_WBIN_MODE "wb"
 #endif /* not FOPEN_WBIN_MODE */
+
+#if defined(WIN32) && !defined(__MINGW32__)
+#define off64_t int64_t
+#define ftello _ftelli64
+#define fseeko _fseeki64
+#include "win32/win32.h"
+#elif defined(__MINGW32__)
+#define ftello ftello64
+#define fseeko fseeko64
+#endif
 
 #include "agl.h"
 #include "bmpimage.h"
@@ -100,10 +110,5 @@ extern int compat_mode;
 #include "type1.h"
 #include "type1c.h"
 #include "unicode.h"
-#ifdef __MINGW32__
-#define off_t off64_t
-#define ftello ftello64
-#define fseeko fseeko64
-#endif
 
 #endif
