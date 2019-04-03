@@ -343,7 +343,7 @@ fread_uquads (uint32_t *quads, int32_t nmemb, FILE *fp)
  * TFM and JFM
  */
 static void
-tfm_check_size (struct tfm_font *tfm, off_t tfm_file_size)
+tfm_check_size (struct tfm_font *tfm, off64_t tfm_file_size)
 {
   uint32_t expected_size = 6;
 
@@ -390,7 +390,7 @@ tfm_check_size (struct tfm_font *tfm, off_t tfm_file_size)
 }
 
 static void
-texpdf_tfm_get_sizes (FILE *tfm_file, off_t tfm_file_size, struct tfm_font *tfm)
+texpdf_tfm_get_sizes (FILE *tfm_file, off64_t tfm_file_size, struct tfm_font *tfm)
 {
 #ifndef WITHOUT_ASCII_PTEX
   {
@@ -569,7 +569,7 @@ tfm_unpack_header (struct font_metric *fm, struct tfm_font *tfm)
 #ifndef WITHOUT_OMEGA
 
 static void
-ofm_check_size_one (struct tfm_font *tfm, off_t ofm_file_size)
+ofm_check_size_one (struct tfm_font *tfm, off64_t ofm_file_size)
 {
   uint32_t ofm_size = 14;
 
@@ -590,7 +590,7 @@ ofm_check_size_one (struct tfm_font *tfm, off_t ofm_file_size)
 }
 
 static void
-ofm_get_sizes (FILE *ofm_file, off_t ofm_file_size, struct tfm_font *tfm)
+ofm_get_sizes (FILE *ofm_file, off64_t ofm_file_size, struct tfm_font *tfm)
 {
   tfm->level = get_signed_quad(ofm_file);
 
@@ -619,7 +619,7 @@ ofm_get_sizes (FILE *ofm_file, off_t ofm_file_size, struct tfm_font *tfm)
     tfm->nco = get_positive_quad(ofm_file, "OFM", "nco");
     tfm->ncw = get_positive_quad(ofm_file, "OFM", "nco");
     tfm->npc = get_positive_quad(ofm_file, "OFM", "npc");
-    xseek_absolute(ofm_file, 4*(off_t)(tfm->nco - tfm->wlenheader), "OFM");
+    xseek_absolute(ofm_file, 4*(off64_t)(tfm->nco - tfm->wlenheader), "OFM");
   } else {
     ERROR("Can't handle OFM files with level > 1");
   }
@@ -716,7 +716,7 @@ ofm_unpack_arrays (struct font_metric *fm,
 }
 
 static void
-read_ofm (struct font_metric *fm, FILE *ofm_file, off_t ofm_file_size)
+read_ofm (struct font_metric *fm, FILE *ofm_file, off64_t ofm_file_size)
 {
   struct tfm_font tfm;
 
@@ -762,7 +762,7 @@ read_ofm (struct font_metric *fm, FILE *ofm_file, off_t ofm_file_size)
 #endif /* !WITHOUT_OMEGA */
 
 static void
-read_tfm (struct font_metric *fm, FILE *tfm_file, off_t tfm_file_size)
+read_tfm (struct font_metric *fm, FILE *tfm_file, off64_t tfm_file_size)
 {
   struct tfm_font tfm;
 
@@ -818,7 +818,7 @@ texpdf_tfm_open (const char *path, const char *tex_name, int must_exist)
 {
   FILE *tfm_file;
   int i, format = TFM_FORMAT;
-  off_t tfm_file_size;
+  off64_t tfm_file_size;
 
   for (i = 0; i < numfms; i++) {
     if (!strcmp(tex_name, fms[i].tex_name))

@@ -20,12 +20,17 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 */
 
-#if defined(__MINGW32__)
-#include <windows.h>
-#include <wchar.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
 
-#include "libtexpdf/libtexpdf.h"
+#if defined(WIN32)
+#include <windows.h>
+#include <wchar.h>
+#define PATH_MAX 2048 // do not use MAX_PATH as it's too small
+#endif
+
+#include "libtexpdf.h"
 
 #include <time.h>
 #include <unistd.h>
@@ -76,7 +81,7 @@ dpx_file_set_verbose (void)
 /* Kpathsea library does not check file type. */
 static int qcheck_filetype (const char *fqpn, dpx_res_type type);
 
-#if defined(__MINGW32__)
+#if defined(WIN32)
 wchar_t *
 get_wstring_from_mbstring(int cp, const char *mbstr, wchar_t *wstr)
 {
@@ -247,9 +252,13 @@ static int exec_spawn (char *cmd)
     }
     *pp = '\0';
 #if defined(WIN32) && !defined(__MINGW32__)
-    if (strchr (buf, ' ') || strchr (buf, '\t'))
-      *qv = concat3 ("\"", buf, "\"");
-    else
+    if (strchr (buf, ' ') || strchr (buf, '\t')) {
+      *qv = xcalloc (strlen(buf) + 3, sizeof (char));
+      **qv = '\0';
+      strcat(*qv, "\"");
+      strcat(*qv, buf);
+      strcat(*qv, "\"");
+    } else
 #endif
       *qv = xstrdup (buf);
 /*
@@ -264,11 +273,11 @@ static int exec_spawn (char *cmd)
   qv = cmdv;
   qvw = cmdvw;
   while (*qv) {
-#ifdef __MINGW32__ /* Hack */
+// #ifdef __MINGW32__ /* Hack */
     get_wstring_from_mbstring(CP_UTF8,*qv,*qvw=NULL);
-#else    
-    *qvw = get_wstring_from_fsyscp(*qv, *qvw=NULL);
-#endif
+// #else
+//     *qvw = get_wstring_from_fsyscp(*qv, *qvw=NULL);
+// #endif
     qv++;
     qvw++;
   }
@@ -422,9 +431,9 @@ dpx_create_temp_file (void)
     _tmpd = dpx_get_tmpdir();
     tmp = _tempnam (_tmpd, "dvipdfmx.");
     for (p = tmp; *p; p++) {
-      if (IS_KANJI (p))
+      /*if (IS_KANJI (p))
         p++;
-      else if (*p == '\\')
+      else*/ if (*p == '\\')
         *p = '/';
     }
 #  else /* WIN32 */
@@ -474,9 +483,9 @@ dpx_create_fix_temp_file (const char *filename)
   }
 #if defined(WIN32) && !defined(__MINGW32__)
   for (p = ret; *p; p++) {
-    if (IS_KANJI (p))
+    /*if (IS_KANJI (p))
       p++;
-    else if (*p == '\\')
+    else*/ if (*p == '\\')
       *p = '/';
   }
 #endif

@@ -58,9 +58,4 @@ extern void WARN  (const char *fmt, ...);
 
 #define ASSERT(e) assert(e)
 
-#if defined(WIN32) && !defined(__MINGW32__)
-#undef vfprintf
-#define vfprintf win32_vfprintf
-#endif
-
 #endif /* _ERROR_H_ */

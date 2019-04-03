@@ -22,6 +22,10 @@
 
 #include "libtexpdf.h"
 
+#ifdef WIN32
+#include <fcntl.h>
+#endif
+
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif /* HAVE_ZLIB */
@@ -2152,8 +2156,8 @@ pdf_concat_stream (pdf_obj *dst, pdf_obj *src)
       }
     } else
       ERROR("Broken PDF file?");
-#endif /* HAVE_ZLIB */
   }
+#endif /* HAVE_ZLIB */
 
   return error;
 }

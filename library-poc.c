@@ -8,7 +8,7 @@ gcc -g -o library-poc  -I.. ./.libs/libtexpdf.a library-poc.c -lpng -lz `pkg-con
 */
 
 #include <stdint.h>
-#include "libtexpdf/libtexpdf.h"
+#include "libtexpdf.h"
 
 int load_font (char* filename) {
   char fontmap_key[1024];

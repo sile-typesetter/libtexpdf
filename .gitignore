@@ -68,3 +68,5 @@ libtexpdf_la-type1c.lo
 libtexpdf_la-unicode.lo
 libtool
 stamp-h1
+build/ 
+.vscode/ 
