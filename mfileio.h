@@ -49,12 +49,12 @@ extern long tell_position (FILE *file);
 
 extern long file_size (FILE *file);
 
-#define xseek_absolute(file, pos, name) fseeko (file, (off64_t)(pos), SEEK_SET)
-#define xseek_relative(file, pos, name) fseeko (file, (off64_t)(pos), SEEK_CUR)
-#define xseek_end(file, name) fseeko (file, (off64_t)0, SEEK_END)
+#define xseek_absolute(file, pos, name) fseeko (file, (off_t)(pos), SEEK_SET)
+#define xseek_relative(file, pos, name) fseeko (file, (off_t)(pos), SEEK_CUR)
+#define xseek_end(file, name) fseeko (file, (off_t)0, SEEK_END)
 #define xtell_position(file, name) ftello (file)
 
-extern off64_t xfile_size (FILE *file, const char *name);
+extern off_t xfile_size (FILE *file, const char *name);
 
 extern char *mfgets (char *buffer, int length, FILE *file);
 

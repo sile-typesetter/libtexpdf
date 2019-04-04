@@ -104,9 +104,9 @@ long file_size (FILE *file)
   return (size);
 }
 
-off64_t xfile_size (FILE *file, const char *name)
+off_t xfile_size (FILE *file, const char *name)
 {
-  off64_t size;
+  off_t size;
   xseek_end (file, name);
   size = xtell_position (file, name);
   rewind (file);
