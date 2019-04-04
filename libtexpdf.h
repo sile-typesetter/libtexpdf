@@ -14,6 +14,8 @@
 #include <stdint.h>
 #endif
 
+#include <sys/types.h>
+
 extern int compat_mode;
 
 /* Stolen from kpathsea, to avoid depending on it */
