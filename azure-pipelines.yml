@@ -12,11 +12,3 @@ jobs:
 
     - script: cmake --build $(Build.BinariesDirectory) --config Release
       displayName: Build solution
-
-    - script: cmake --build $(Build.BinariesDirectory) --config Release --target Install
-      displayName: Install solution
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: libtexpdf
