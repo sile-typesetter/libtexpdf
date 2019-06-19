@@ -36,7 +36,7 @@ if (WIN32)
 	ExternalProject_Add(libpng
 		DEPENDS zlib
 		GIT_REPOSITORY https://github.com/glennrp/libpng
-		GIT_TAG v1.6.36
+		GIT_TAG v1.6.37
 		CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>" "-DZLIB_ROOT=${TMP_INSTALL_DIR}"
 		INSTALL_DIR "${TMP_INSTALL_DIR}")
 
