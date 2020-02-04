@@ -13,4 +13,6 @@ before_install:
  - export PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig:$PKG_CONFIG_PATH
  - export PATH=.travis:$PATH
 script:
- - sh -c 'autoreconf -I m4 && ./configure && make'
+ - autoreconf --install -W none
+ - ./configure
+ - make
