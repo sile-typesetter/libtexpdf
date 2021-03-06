@@ -964,7 +964,7 @@ create_soft_mask (png_structp png_ptr, png_infop info_ptr,
   smask = texpdf_new_stream(STREAM_COMPRESS);
   dict  = texpdf_stream_dict(smask);
   smask_data_ptr = (png_bytep) NEW(width*height, png_byte);
-  texpdf_add_dict(dict, texpdf_new_name("Type"),    texpdf_new_name("XObjcect"));
+  texpdf_add_dict(dict, texpdf_new_name("Type"),    texpdf_new_name("XObject"));
   texpdf_add_dict(dict, texpdf_new_name("Subtype"), texpdf_new_name("Image"));
   texpdf_add_dict(dict, texpdf_new_name("Width"),      texpdf_new_number(width));
   texpdf_add_dict(dict, texpdf_new_name("Height"),     texpdf_new_number(height));
@@ -1008,7 +1008,7 @@ strip_soft_mask (png_structp png_ptr, png_infop info_ptr,
 
   smask = texpdf_new_stream(STREAM_COMPRESS);
   dict  = texpdf_stream_dict(smask);
-  texpdf_add_dict(dict, texpdf_new_name("Type"),    texpdf_new_name("XObjcect"));
+  texpdf_add_dict(dict, texpdf_new_name("Type"),    texpdf_new_name("XObject"));
   texpdf_add_dict(dict, texpdf_new_name("Subtype"), texpdf_new_name("Image"));
   texpdf_add_dict(dict, texpdf_new_name("Width"),      texpdf_new_number(width));
   texpdf_add_dict(dict, texpdf_new_name("Height"),     texpdf_new_number(height));
