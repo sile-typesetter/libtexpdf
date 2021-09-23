@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 function(get_version_from_ac var file_name)
     file(STRINGS "${file_name}" ac_init_string REGEX "^AC_INIT")
-    string(REGEX REPLACE "^AC_INIT\\(\\[.*\\], \\[([0-9]+)\\], \\[.*\\]\\)" "\\1" ac_version ${ac_init_string})
+    string(REGEX REPLACE "^AC_INIT\\(\\[.*\\], *\\[([0-9]+)\\], *\\[.*\\]\\)" "\\1" ac_version ${ac_init_string})
     set(${var} ${ac_version} PARENT_SCOPE)
 endfunction()
 
