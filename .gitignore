@@ -8,7 +8,7 @@ autom4te.cache/
 build-aux/compile
 build-aux/config.guess
 build-aux/config.sub
-build-aux/decomp
+build-aux/depcomp
 build-aux/install-sh
 build-aux/libtool.m4
 build-aux/ltmain.sh
@@ -31,4 +31,5 @@ stamp-h1
 build/
 .vscode/
 config.log
+*~
 tags
