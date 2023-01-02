@@ -16,3 +16,23 @@ jobs:
       - name: Make
         run: |
           make
+
+  build_meson:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Python Setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Setup packages
+        run: |
+          sudo apt-get install -y ninja-build
+          pip3 install meson
+      - name: Setup
+        run: |
+          meson setup .build
+      - name: Build
+        run: |
+          ninja dist -C .build
