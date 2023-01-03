@@ -180,6 +180,8 @@ libtexpdf_dep = declare_dependency(
     link_with : libtexpdf,
 )
 
+subdir('tests')
+
 pkg.generate(libtexpdf,
     filebase : 'libtexpdf',
     name : 'libtexpdf',

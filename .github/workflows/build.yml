@@ -33,6 +33,9 @@ jobs:
       - name: Setup
         run: |
           meson setup .build
-      - name: Build
+      - name: Dist Check
         run: |
           ninja dist -C .build
+      - name: Unit Tests
+        run: |
+          ninja test -C .build
