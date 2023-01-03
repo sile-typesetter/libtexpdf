@@ -172,6 +172,7 @@ install_headers(
     'unicode.h',
     'pkfont.h',
     'tfm.h',
+    subdir : 'libtexpdf'
 )
 
 libtexpdf_dep = declare_dependency(
