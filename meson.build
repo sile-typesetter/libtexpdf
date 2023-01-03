@@ -7,7 +7,7 @@ compiler = meson.get_compiler('c')
 conf = configuration_data()
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 
-check_headers = ['dlfcn.h', 'inttypes.h', 'stdint.h', 'stdlib.h', 'string.h', 'sys/stat.h', 'sys/types.h', 'sys/wait.h', 'unistd.h']
+check_headers = ['inttypes.h', 'stdint.h', 'stdbool.h', 'stdlib.h', 'string.h', 'sys/stat.h', 'sys/types.h', 'sys/wait.h']
 foreach header_name : check_headers
     if compiler.has_header(header_name)
         conf.set('HAVE_' + header_name.underscorify().to_upper(), 1)
