@@ -189,3 +189,5 @@ pkg.generate(libtexpdf,
     url : 'https://github.com/sile-typesetter/libtexpdf',
 )
 
+install_data('LICENSE', install_dir : 'share/libtexpdf')
+
