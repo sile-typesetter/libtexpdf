@@ -37,6 +37,10 @@ libm = compiler.find_library('m', required : false)
 zlib_dep = dependency('zlib')
 libpng_dep = dependency('libpng')
 
+if not compiler.has_function('compress2', prefix : '#include <zlib.h>', dependencies: zlib_dep)
+	  error('zlib with compress2 is required')
+endif
+
 libtexpdf_deps = [libpng_dep, zlib_dep, libm]
 
 libtexpdf_cargs = ['-DXETEX', '-DBUILDING_LIBTEXPDF', '-DHAVE_CONFIG_H', '-DHAVE_ZLIB', '-DHAVE_ZLIB_COMPRESS2', '-DHAVE_LIBPNG']
