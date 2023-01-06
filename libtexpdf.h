@@ -41,14 +41,8 @@ extern int compat_mode;
 #define FOPEN_WBIN_MODE "wb"
 #endif /* not FOPEN_WBIN_MODE */
 
-#if defined(WIN32) && !defined(__MINGW32__)
-#define off64_t int64_t
-#define ftello _ftelli64
-#define fseeko _fseeki64
+#if defined(WIN32)
 #include "win32/win32.h"
-#elif defined(__MINGW32__)
-#define ftello ftello64
-#define fseeko fseeko64
 #endif
 
 #include "agl.h"

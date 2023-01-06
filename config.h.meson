@@ -11,8 +11,3 @@
 #mesondefine HAVE_TIMEZONE
 #mesondefine HAVE_GETENV
 #mesondefine HAVE_MKSTEMP
-
-#ifdef _WIN32
-#define WIN32
-#endif
-
