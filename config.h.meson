@@ -1,0 +1,13 @@
+#mesondefine PACKAGE_VERSION
+#mesondefine HAVE_INTTYPES_H
+#mesondefine HAVE_STDINT_H
+#mesondefine HAVE_STDBOOL_H
+#mesondefine HAVE_STDLIB_H
+#mesondefine HAVE_STRING_H
+#mesondefine HAVE_SYS_STAT_H
+#mesondefine HAVE_SYS_TYPES_H
+#mesondefine HAVE_SYS_WAIT_H
+#mesondefine HAVE_TM_GMTOFF
+#mesondefine HAVE_TIMEZONE
+#mesondefine HAVE_GETENV
+#mesondefine HAVE_MKSTEMP

@@ -23,8 +23,10 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#if defined(WIN32) 
-#  if defined(__MINGW32__)
+#if defined(WIN32)
+#  if defined(_MSC_VER)
+#    pragma warning(disable : 4101 4018)
+#  else
 #    define CDECL
 #  endif
 #  undef ERROR
@@ -34,7 +36,6 @@
 #  undef SETLINECAP
 #  undef SETLINEJOIN
 #  undef SETMITERLIMIT
-#  pragma warning(disable : 4101 4018)
 #else
 #  ifndef __cdecl
 #  define __cdecl
