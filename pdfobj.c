@@ -302,7 +302,7 @@ pdf_out_init (const char *filename, int do_encryption)
   output_stream = NULL;
 
   if (filename == NULL) { /* no filename: writing to stdout */
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(WIN32) && defined(_MSC_VER)
     setmode(fileno(stdout), _O_BINARY);
 #endif
     pdf_output_file = stdout;

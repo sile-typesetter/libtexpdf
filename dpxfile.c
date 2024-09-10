@@ -27,7 +27,9 @@
 #if defined(WIN32)
 #include <windows.h>
 #include <wchar.h>
+#ifndef PATH_MAX
 #define PATH_MAX 2048 // do not use MAX_PATH as it's too small
+#endif
 #endif
 
 #include "libtexpdf.h"
@@ -48,7 +50,7 @@
 #define MAX_KEY_LEN 16
 
 #include <string.h>
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(WIN32) && defined(_MSC_VER)
 #include <io.h>
 #include <process.h>
 #include <wchar.h>
@@ -251,7 +253,7 @@ static int exec_spawn (char *cmd)
       }
     }
     *pp = '\0';
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(WIN32) && defined(_MSC_VER)
     if (strchr (buf, ' ') || strchr (buf, '\t')) {
       *qv = xcalloc (strlen(buf) + 3, sizeof (char));
       **qv = '\0';
@@ -425,7 +427,7 @@ dpx_create_temp_file (void)
   }
 #else /* use _tempnam or tmpnam */
   {
-#  if defined(WIN32) && !defined(__MINGW32__)
+#  if defined(WIN32) && defined(_MSC_VER)
     const char *_tmpd;
     char *p;
     _tmpd = dpx_get_tmpdir();
@@ -481,7 +483,7 @@ dpx_create_fix_temp_file (const char *filename)
       sprintf(s, "%02x", digest[i]);
       s += 2;
   }
-#if defined(WIN32) && !defined(__MINGW32__)
+#if defined(WIN32) && defined(_MSC_VER)
   for (p = ret; *p; p++) {
     /*if (IS_KANJI (p))
       p++;
